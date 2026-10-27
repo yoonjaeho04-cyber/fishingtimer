@@ -65,6 +65,7 @@ canvas.scene{display:block;width:100%;aspect-ratio:3/2;max-width:100%;image-rend
 .icon{width:28px;height:26px;display:grid;place-items:center;background:var(--panel2);border:2px solid var(--bronze3);box-shadow:inset 0 2px 0 #3a3044,inset 0 -2px 0 #0f0c13;color:var(--bronze2);flex:none}
 .icon svg{width:14px;height:14px;fill:currentColor}
 select,input[type=number],input[type=text]{font-family:inherit;font-size:13px;color:var(--fg);background:var(--ink);border:2px solid var(--bronze3);padding:4px 7px}
+textarea.code{font-family:inherit;font-size:12px;color:var(--fg);background:var(--ink);border:2px solid var(--bronze3);padding:6px 8px;width:100%;min-height:96px;resize:vertical;word-break:break-all;line-height:1.4}
 input[type=number]{width:64px;font-family:var(--display)}
 .hint{color:var(--muted);font-size:11px}
 .pill{font:12px var(--display);padding:4px 9px;border:2px solid #3a3146;color:var(--muted);background:#0f0c13;letter-spacing:.5px}
@@ -533,8 +534,9 @@ function renderPane(){
     const vol=document.createElement('input');vol.type='range';vol.id='vol';vol.min=0;vol.max=1;vol.step=0.05;vol.value=S.vol;vol.style.width='110px';vol.oninput=()=>{S.vol=+vol.value;audio.setVol();save()};
     const ch=document.createElement('button');ch.className='btn small';ch.textContent=(S.char?charOf().name:'없음')+' 바꾸기';ch.disabled=!!S.run;ch.onclick=showCharSelect;
     const cp=document.createElement('button');cp.className='btn small';cp.textContent='낚시 화면만 보기';cp.onclick=()=>{S.compact=true;save();renderAll()};
-    p.append(mk('목표 시간 (분)','0이면 자유 모드. 채우면 완주 보너스',goal),mk('휴식 타이머 (분)','0이면 끄기. 끝나면 종이 울려요',brk),mk('음량','',vol),mk('견습 어부','',ch),mk('페이지 안 축소 모드','PiP가 안 되는 브라우저용',cp));
-    const t=document.createElement('div');t.className='hint';t.textContent='기록은 이 브라우저와 계정에 저장돼요.';p.append(t);
+    const sc=document.createElement('div');sc.className='row';const scC=document.createElement('button');scC.className='btn small';scC.textContent='복사';scC.onclick=showSaveCode;const scP=document.createElement('button');scP.className='btn small';scP.textContent='붙여넣기';scP.disabled=!!S.run;scP.title=S.run?'귀항한 뒤에 불러올 수 있어요':'';scP.onclick=showSaveLoad;sc.append(scC,scP);
+    p.append(mk('목표 시간 (분)','0이면 자유 모드. 채우면 완주 보너스',goal),mk('휴식 타이머 (분)','0이면 끄기. 끝나면 종이 울려요',brk),mk('음량','',vol),mk('견습 어부','',ch),mk('페이지 안 축소 모드','PiP가 안 되는 브라우저용',cp),mk('저장 코드','다른 브라우저나 기기로 기록 옮기기',sc));
+    const t=document.createElement('div');t.className='hint';t.textContent='기록은 이 브라우저와 계정에 저장돼요. 다른 곳으로 옮기려면 저장 코드를 쓰세요.';p.append(t);
   }
 }
 let gearPick=null;
@@ -565,6 +567,43 @@ function showCharSelect(){
   let pick=S.char||CHARS[0].id;const list=o.querySelector('#chars');
   CHARS.forEach(c=>{const b=document.createElement('button');b.setAttribute('aria-pressed',c.id===pick);const cv=document.createElement('canvas');cv.width=32;cv.height=64;cv.style.cssText='width:64px;height:128px';drawSprite(cv.getContext('2d'),heroSprite(c.id),0,0);b.append(cv);const d=document.createElement('div');d.innerHTML=`<div class="n">${c.name}</div><div class="d">${c.desc}</div>`;b.append(d);b.onclick=()=>{pick=c.id;list.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b))};list.append(b)});
   o.querySelector('#charOk').onclick=()=>{S.char=pick;save();o.remove();renderAll();audio.unlock()};
+}
+// ---------- save code (copy / paste) ----------
+const CODE_TAG='MLK2';
+function codeHash(t){let h=5381;for(let i=0;i<t.length;i++)h=(h*33^t.charCodeAt(i))>>>0;return h.toString(16).padStart(8,'0')}
+function b64enc(str){const u=new TextEncoder().encode(str);let b='';for(let i=0;i<u.length;i+=0x8000)b+=String.fromCharCode.apply(null,u.subarray(i,i+0x8000));return btoa(b).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')}
+function b64dec(b){b=b.replace(/-/g,'+').replace(/_/g,'/');while(b.length%4)b+='=';const s=atob(b);const u=new Uint8Array(s.length);for(let i=0;i<s.length;i++)u[i]=s.charCodeAt(i);return new TextDecoder().decode(u)}
+function makeSaveCode(){const body=b64enc(JSON.stringify(S));return CODE_TAG+'.'+body+'.'+codeHash(body)}
+function parseSaveCode(text){
+  const t=(text||'').replace(/\s+/g,'');const m=t.match(/^MLK2\.([A-Za-z0-9_-]+)\.([0-9a-f]{8})$/);
+  if(!m)return{err:'저장 코드 형식이 아니에요. 처음부터 끝까지 빠짐없이 붙여넣어 주세요'};
+  if(codeHash(m[1])!==m[2])return{err:'저장 코드가 손상됐어요. 다시 복사해 주세요'};
+  let d;try{d=JSON.parse(b64dec(m[1]))}catch(e){return{err:'저장 코드를 읽을 수 없어요'}}
+  if(!d||typeof d!=='object'||d.v!==2||typeof d.own!=='object'||typeof d.eq!=='object'||!Array.isArray(d.maps))return{err:'이 게임의 저장 코드가 아니에요'};
+  return{data:d};
+}
+function applySaveData(d){S=Object.assign(fresh(),d);if(S.tank&&!S.tanks)S.tanks=[S.tank];if(!S.tanks||!S.tanks.length)S.tanks=[[]];S.tankSel=Math.min(S.tankSel||0,S.tanks.length-1);if(!S.maps.includes(S.spot))S.spot=S.maps[0]||0;codexSel=null;save();audio.setVol();renderAll()}
+async function copyText(text,ta){try{await navigator.clipboard.writeText(text);return true}catch(e){}try{ta.focus();ta.select();ta.setSelectionRange(0,text.length);return document.execCommand('copy')}catch(e){return false}}
+function showSaveCode(){
+  const code=makeSaveCode();
+  const o=overlay(`<h2>저장 코드 복사</h2><div class="hint">이 코드를 다른 브라우저의 설정 → 저장 코드 → 붙여넣기에 넣으면 기록이 그대로 옮겨져요. 코드 안에 기록 전체가 들어 있으니 아무 데나 올리진 마세요.</div><textarea class="code" id="saveCodeOut" readonly spellcheck="false" aria-label="저장 코드"></textarea><div class="row" style="justify-content:flex-end"><button class="btn" id="saveCodeClose">닫기</button><button class="btn primary" id="saveCodeCopy">복사</button></div>`);
+  const ta=o.querySelector('#saveCodeOut');ta.value=code;ta.onclick=()=>ta.select();
+  o.querySelector('#saveCodeCopy').onclick=async()=>{const ok=await copyText(code,ta);toast(ok?'저장 코드를 복사했어요':'복사가 막혔어요. 코드를 직접 선택해서 복사해 주세요')};
+  o.querySelector('#saveCodeClose').onclick=()=>o.remove();
+  setTimeout(()=>ta.select(),0);
+}
+function showSaveLoad(){
+  if(S.run){toast('귀항한 뒤에 불러올 수 있어요');return}
+  const o=overlay(`<h2>저장 코드 붙여넣기</h2><div class="hint">복사해 둔 저장 코드를 아래에 붙여넣으세요. 지금 이 브라우저의 기록은 그 코드의 기록으로 바뀌어요.</div><textarea class="code" id="saveCodeIn" spellcheck="false" placeholder="MLK2.…" aria-label="저장 코드 입력"></textarea><div class="hint" id="saveCodeMsg"></div><div class="row" style="justify-content:flex-end"><button class="btn" id="saveCodeCancel">취소</button><button class="btn primary" id="saveCodeOk" disabled>이 기록으로 바꾸기</button></div>`);
+  const ta=o.querySelector('#saveCodeIn'),ok=o.querySelector('#saveCodeOk'),msg=o.querySelector('#saveCodeMsg');let parsed=null;
+  const check=()=>{const t=ta.value.trim();if(!t){parsed=null;ok.disabled=true;msg.textContent='';return}const r=parseSaveCode(t);parsed=r.data||null;ok.disabled=!parsed;
+    if(r.err){msg.textContent=r.err;msg.style.color='var(--warn)';return}
+    const d=r.data,fish=Object.keys(d.codex||{}).length,when=d.savedAt?new Date(d.savedAt).toLocaleString():'기록 시각 없음';
+    msg.style.color='';msg.textContent=`${(d.gold||0).toLocaleString()} G · 도감 ${fish}종 · 총 ${fmtH(d.totalSec||0)} · ${when}`};
+  ta.oninput=check;ta.onpaste=()=>setTimeout(check,0);
+  ok.onclick=()=>{if(!parsed)return;applySaveData(parsed);o.remove();toast('저장 코드를 불러왔어요')};
+  o.querySelector('#saveCodeCancel').onclick=()=>o.remove();
+  setTimeout(()=>ta.focus(),0);
 }
 function showHaul(haul,bonusRate,sec,done,newIds,recs){
   const o=overlay(`<h2>귀항</h2><div class="hint">${fmtH(sec)} 동안 낚시했어요${haul.length?'. 물고기를 누르면 어항에 넣어요 (어항 '+curTank().length+'/'+tankCap()+')':'. 이번엔 빈 어망이에요'}</div><div class="haul" id="haulList"></div><div class="total"><span>판매</span><span class="gold" id="haulGold"></span></div>${done?`<div class="total" style="border:0;padding:0;color:var(--good)"><span>완주 보너스</span><span class="gold" id="haulBonus"></span></div>`:''}<div class="row" style="justify-content:flex-end"><button class="btn primary" id="haulOk">어망 비우기</button></div>`);
