@@ -1,0 +1,1369 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body><title>안개호수 낚시꾼</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Gowun+Dodum&display=swap">
+<style>
+/* Layout: a dark medieval game screen. Scene + command panel on top, tabbed windows below, shop as a modal window. Widget mode floats the scene in a PiP window. Single dark look by choice. */
+:root{
+  --bg:#0a0910; --fg:#d8ccb0; --muted:#8f8268; --dim:#5a5044;
+  --panel:#15121b; --panel2:#1d1924; --panel3:#262030; --ink:#07060a;
+  --bronze:#6f5431; --bronze2:#b08c4a; --bronze3:#3b2c18; --gold:#d9b05a;
+  --accent:#a8702a; --accent-fg:#fff1d0; --good:#7cbf86; --warn:#d9674f;
+  --r0:#a9a497; --r1:#5aa6dc; --r2:#b07fe0; --r3:#e0b24e; --r4:#e8637f;
+  --display:"DotGothic16","Gowun Dodum",monospace; --body:"Gowun Dodum","Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+  color-scheme:dark;
+}
+html,body{height:100%}
+body{margin:0;background:var(--bg);background-image:radial-gradient(ellipse at 50% 0%,#141020 0%,var(--bg) 70%);color:var(--fg);font-family:var(--body);font-size:13px;line-height:1.45;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:14px;box-sizing:border-box;display:flex;justify-content:center;align-items:flex-start}
+*{box-sizing:border-box}
+button{font-family:inherit;font-size:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.frame{background:var(--panel);border:2px solid var(--bronze);box-shadow:0 0 0 2px var(--ink),0 0 0 3px var(--bronze3),0 0 0 5px var(--ink)}
+.game{position:relative;width:100%;max-width:880px;display:flex;flex-direction:column;gap:10px}
+.game.compact{max-width:292px}
+.game.compact .cmd,.game.compact .windows,.game.compact .topbar{display:none}
+.game.compact .main{grid-template-columns:1fr}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:7px 12px;flex-wrap:wrap}
+.topbar h1{font:16px/1 var(--display);margin:0;color:var(--gold);text-shadow:2px 2px 0 #000;letter-spacing:1px}
+.topbar .meta{display:flex;gap:14px;font:12px var(--display);color:var(--muted);text-shadow:1px 1px 0 #000;flex-wrap:wrap}
+.topbar .meta b{color:var(--fg);font-weight:400}
+.main{display:grid;grid-template-columns:minmax(0,1fr) 250px;gap:10px;align-items:start}
+@media (max-width:640px){.main{grid-template-columns:1fr}}
+.sceneBox{position:relative;background:#000;padding:0;max-width:580px}
+canvas.scene{display:block;width:100%;aspect-ratio:3/2;max-width:100%;image-rendering:pixelated;image-rendering:crisp-edges}
+.hud{position:absolute;inset:0;pointer-events:none;padding:5px 7px}
+.clock{font:20px/1 var(--display);font-variant-numeric:tabular-nums;color:#efe3c2;letter-spacing:1px;text-shadow:2px 2px 0 #000,-1px 1px 0 #000,1px -1px 0 #000,-1px -1px 0 #000}
+.game:not(.compact) .clock{font-size:26px}
+.clock small{font-size:.55em;color:#bfae88}
+.clock.done,.cmd .big.done{color:var(--gold);text-shadow:2px 2px 0 #000,0 0 10px rgba(217,176,90,.6)}
+.bar{width:140px;height:8px}
+.status{position:absolute;left:7px;bottom:5px;font:10px var(--display);color:#d8ccb0;text-shadow:1px 1px 0 #000,-1px 1px 0 #000,1px -1px 0 #000,-1px -1px 0 #000}
+.tod{position:absolute;right:7px;top:6px;font:10px var(--display);color:#bfae88;text-shadow:1px 1px 0 #000,-1px 1px 0 #000,1px -1px 0 #000,-1px -1px 0 #000}
+.catchPop{position:absolute;left:59.7%;top:38%;width:39%;display:flex;flex-direction:column;align-items:center;gap:1px;font:10px var(--display);text-shadow:1px 1px 0 #000,-1px 1px 0 #000,1px -1px 0 #000,-1px -1px 0 #000;line-height:1.2}
+.game:not(.compact) .catchPop{font-size:12px}
+.catchPop b{font-weight:400}.catchPop span{color:#bfae88}
+.bubble{position:absolute;left:3%;top:16%;max-width:38%;background:#efe6cf;color:#1a140f;border:2px solid #0b0a0e;box-shadow:2px 2px 0 #000;padding:4px 7px;font-size:11px;line-height:1.35;font-family:var(--body)}
+.bubble::after{content:"";position:absolute;right:-9px;top:40%;border:5px solid transparent;border-left-color:#0b0a0e;border-right:0}
+.game:not(.compact) .bubble{font-size:13px}
+.bar{width:96px;height:6px;border:1px solid #000;background:#1a1420;box-shadow:0 0 0 1px var(--bronze3);overflow:hidden;margin-top:3px}
+.bar i{display:block;height:100%;background:#d9b05a;width:0;transition:width .5s linear}
+.bar.rest i{background:#5a9ac2}
+.compactCtrl{position:absolute;right:5px;bottom:4px;gap:4px}
+.game:not(.compact) .compactCtrl{display:none}
+.sceneBox.inpip .compactCtrl{display:flex}
+.sceneBox.inpip{border:0;box-shadow:none}
+.cmd{display:flex;flex-direction:column;gap:8px;padding:10px 12px}
+.cmd .big{font:34px/1 var(--display);font-variant-numeric:tabular-nums;text-align:center;color:#fff3d6;text-shadow:3px 3px 0 #000}
+.cmd .big small{font-size:14px;color:var(--muted)}
+.row{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.row.center{justify-content:center}
+.btn{padding:6px 12px;background:var(--panel3);border:2px solid var(--bronze3);box-shadow:inset 0 2px 0 #3a3044,inset 0 -2px 0 #0f0c13,2px 2px 0 #000;font-size:13px;line-height:1.2;color:var(--fg)}
+.btn:active{transform:translate(1px,1px)}
+.btn.primary{background:#8e5f22;border-color:#4e3310;box-shadow:inset 0 2px 0 #c58a3c,inset 0 -2px 0 #4e3310,2px 2px 0 #000;color:var(--accent-fg);font-family:var(--display);font-size:15px;letter-spacing:1px;padding:8px 18px}
+.btn.small{padding:3px 8px;font-size:12px}
+.btn:disabled{opacity:.45;cursor:default;transform:none}
+.icon{width:28px;height:26px;display:grid;place-items:center;background:var(--panel2);border:2px solid var(--bronze3);box-shadow:inset 0 2px 0 #3a3044,inset 0 -2px 0 #0f0c13;color:var(--bronze2);flex:none}
+.icon svg{width:14px;height:14px;fill:currentColor}
+select,input[type=number],input[type=text]{font-family:inherit;font-size:13px;color:var(--fg);background:var(--ink);border:2px solid var(--bronze3);padding:4px 7px}
+input[type=number]{width:64px;font-family:var(--display)}
+.hint{color:var(--muted);font-size:11px}
+.pill{font:12px var(--display);padding:4px 9px;border:2px solid #3a3146;color:var(--muted);background:#0f0c13;letter-spacing:.5px}
+.pill.on{color:var(--gold);border-color:var(--bronze2);text-shadow:0 0 6px rgba(217,176,90,.5)}
+.windows{display:flex;flex-direction:column}
+.tabs{display:flex;background:#0a080e;border-bottom:2px solid var(--bronze3);padding:6px 6px 0;gap:4px;overflow-x:auto}
+.tabs button{display:flex;align-items:center;gap:9px;padding:9px 16px 11px;font:16px var(--display);color:var(--muted);text-shadow:1px 1px 0 #000;background:linear-gradient(#1a1520,#100d14);border:2px solid #2a2130;border-bottom:0;box-shadow:inset 0 1px 0 #35293d;position:relative;top:2px;white-space:nowrap}
+.tabs button canvas{width:32px;height:32px;image-rendering:pixelated;filter:saturate(.6) brightness(.8)}
+.tabs button[aria-selected=true]{color:var(--gold);background:linear-gradient(#2a2232,var(--panel));border-color:var(--bronze);box-shadow:inset 0 2px 0 #5a4630,0 2px 0 var(--panel);top:0;padding-bottom:11px}
+.tabs button[aria-selected=true] canvas{filter:none}
+.tabs .shopBtn{color:var(--gold);border-color:#5a4322}
+.tabs .spacer{flex:1}
+.tabs .shopBtn{color:var(--gold);border-left:2px solid var(--bronze3);border-right:0}
+.pane{padding:14px;display:flex;flex-direction:column;gap:14px;min-height:260px;font-size:14px}
+.sec{font-size:14px}
+.gold{font:15px var(--display);color:var(--gold);font-variant-numeric:tabular-nums;text-shadow:1px 1px 0 #000}
+/* slots */
+.grid{display:flex;flex-wrap:wrap;gap:4px}
+.slot{width:64px;height:64px;background:#0d0b12;border:2px solid #2b2434;box-shadow:inset 2px 2px 0 #3a3146,inset -2px -2px 0 #000;display:grid;place-items:center;position:relative;flex:none}
+.slot canvas{width:52px;height:52px;image-rendering:pixelated;object-fit:contain}
+.slot canvas[width="24"]{width:60px;height:40px}
+.slot[aria-pressed=true]{border-color:var(--gold)}
+.slot.eq::before{content:"E";position:absolute;left:3px;top:1px;font:11px var(--display);color:var(--gold);text-shadow:1px 1px 0 #000}
+.slot .cnt{position:absolute;right:3px;bottom:1px;font:11px var(--display);color:#fff;text-shadow:1px 1px 0 #000}
+.slot.unk canvas{opacity:0}
+.slot.unk::after{content:"?";position:absolute;font:22px var(--display);color:#4a4254}
+.slot.lock::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(45deg,rgba(0,0,0,.5) 0 3px,transparent 3px 6px)}
+.slot.r0{box-shadow:inset 1px 1px 0 #3a3146,inset -1px -1px 0 #000}
+.slot.r1{border-color:#2b4d66}.slot.r2{border-color:#4a3466}.slot.r3{border-color:#6a5420}.slot.r4{border-color:#6a2a3a}
+.r0{color:var(--r0)}.r1{color:var(--r1)}.r2{color:var(--r2)}.r3{color:var(--r3)}.r4{color:var(--r4)}
+/* detail card */
+.card{display:grid;grid-template-columns:104px 1fr;gap:12px;background:#0f0c13;border:2px solid var(--bronze3);box-shadow:inset 0 0 0 1px #000;padding:12px}
+.card .art{width:104px;height:104px;background:#07060a;border:2px solid #2b2434;display:grid;place-items:center}
+.card .art canvas{width:96px;height:96px;image-rendering:pixelated}
+.card h3{margin:0;font:18px var(--display);text-shadow:1px 1px 0 #000}
+.card .kv{display:grid;grid-template-columns:auto 1fr;gap:3px 12px;font-size:13px;margin-top:6px}
+.card .kv span:nth-child(odd){color:var(--muted)}
+.card .desc{grid-column:1/3;font-size:12px;color:#c4b797;border-top:1px solid #2b2434;padding-top:6px;margin-top:4px;line-height:1.5}
+.card .act{grid-column:1/3;display:flex;justify-content:flex-end;gap:6px}
+.sec{font:12px var(--display);color:var(--bronze2);letter-spacing:1px;text-shadow:1px 1px 0 #000;display:flex;align-items:center;gap:8px}
+.sec::after{content:"";flex:1;height:1px;background:var(--bronze3)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.stat{background:var(--panel2);border:2px solid #0f0c13;box-shadow:inset 0 0 0 1px #3a3146;padding:5px 8px}
+.stat .k{font-size:11px;color:var(--muted)}
+.stat .v{font:17px var(--display);color:#fff3d6;font-variant-numeric:tabular-nums}
+.cal{display:grid;grid-auto-flow:column;grid-template-rows:repeat(7,10px);gap:2px;justify-content:start;overflow-x:auto;padding-bottom:2px}
+.cal i{width:10px;height:10px;background:#0f0c13;box-shadow:inset 0 0 0 1px #2a2232;display:block}
+.cal i.l1{background:#4e3a1c}.cal i.l2{background:#7a5a22}.cal i.l3{background:#b5852c}.cal i.l4{background:var(--gold)}
+.taglist{display:flex;flex-direction:column;gap:3px;font-size:12px}
+.taglist div{display:flex;justify-content:space-between}
+.taglist b{font:12px var(--display);color:#fff3d6}
+.setting{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:13px}
+.setting .hint{display:block}
+.eqrow{display:grid;grid-template-columns:48px 1fr;gap:10px;align-items:center;background:var(--panel2);border:2px solid #0f0c13;box-shadow:inset 0 0 0 1px #3a3146;padding:6px 8px}
+.eqrow .k{font:11px var(--display);color:var(--muted)}
+.eqrow .n{font-weight:700}
+.eqrow .e{font-size:11px;color:#c4b797}
+/* modal windows */
+.overlay{position:absolute;inset:0;background:rgba(4,3,8,.78);display:flex;align-items:center;justify-content:center;padding:12px;z-index:5}
+.win{background:#0c0a10;border:2px solid var(--bronze);box-shadow:0 0 0 2px var(--ink),0 0 0 3px #4a3a22,0 0 0 5px var(--ink),0 12px 30px #000;width:100%;max-width:560px;max-height:100%;display:flex;flex-direction:column}
+.win .title{display:flex;align-items:center;justify-content:space-between;padding:6px 10px;background:linear-gradient(#241d2b,#15111b);border-bottom:2px solid var(--bronze3);font:14px var(--display);color:var(--gold);text-shadow:1px 1px 0 #000}
+.win .title button{color:var(--warn);font:16px var(--display);width:22px;height:22px;border:2px solid var(--bronze3);background:#0f0c13}
+.win .body{padding:10px;display:flex;flex-direction:column;gap:10px;overflow:auto}
+.win h2{font:18px var(--display);margin:0;color:var(--gold);text-shadow:2px 2px 0 #000}
+.cats{display:flex;gap:4px;flex-wrap:wrap}
+.cats button{padding:4px 9px;font:12px var(--display);border:2px solid var(--bronze3);background:#15121b;color:var(--muted);box-shadow:1px 1px 0 #000}
+.cats button[aria-selected=true]{color:var(--gold);border-color:var(--bronze2)}
+.shopGrid{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:12px;align-items:start}
+@media (max-width:640px){.shopGrid{grid-template-columns:1fr}}
+.cats button{font-size:14px;padding:6px 12px}
+.chars{display:flex;flex-direction:column;gap:6px}
+.chars button{display:grid;grid-template-columns:72px 1fr;gap:10px;align-items:center;text-align:left;padding:6px 9px;border:2px solid var(--bronze3);background:var(--panel2);box-shadow:1px 1px 0 #000}
+.chars button[aria-pressed=true]{border-color:var(--bronze2);background:var(--panel3)}
+.chars canvas{width:32px;height:48px;image-rendering:pixelated}
+.chars .n{font-weight:700}.chars .d{font-size:12px;color:var(--muted)}
+.haul{display:flex;flex-direction:column;gap:4px;max-height:240px;overflow:auto}
+.haul .f{display:grid;grid-template-columns:48px 1fr auto auto;gap:8px;align-items:center;padding:3px 8px;background:var(--panel2);font-size:13px;opacity:0;transform:translateY(4px);transition:opacity .3s,transform .3s}
+.haul .f canvas{width:48px;height:32px;image-rendering:pixelated}
+.haul .f.in{opacity:1;transform:none}
+.haul .f{border:2px solid transparent;text-align:left;color:var(--fg)}
+.haul .f.tanked{border-color:#3a6a8a;background:#14202c}
+.haul .f .tag{font:10px var(--display);color:var(--gold)}
+.total{display:flex;justify-content:space-between;font-size:14px;padding-top:6px;border-top:2px solid var(--bronze3)}
+.toast{position:absolute;left:50%;top:10px;transform:translateX(-50%);background:var(--ink);border:2px solid var(--bronze);padding:5px 10px;font-size:12px;z-index:6;pointer-events:none;opacity:0;transition:opacity .3s;white-space:nowrap}
+.toast.show{opacity:1}
+#pipVideo{position:absolute;left:0;top:0;width:4px;height:3px;opacity:.02;pointer-events:none}
+@media (prefers-reduced-motion:reduce){.haul .f{transition:none}.bar i{transition:none}}
+</style>
+
+<div class="game" id="game">
+  <div class="topbar frame">
+    <h1>안개호수 낚시꾼</h1>
+    <div class="meta"><span id="mClass"></span><span>골드 <b id="mGold">0</b></span><span>누적 <b id="mTotal">0분</b></span><span id="mTod"></span></div>
+  </div>
+  <div class="main">
+    <div class="sceneBox frame">
+      <canvas class="scene" id="scene" width="288" height="192"></canvas>
+      <div class="hud">
+        <div class="clock" id="clock">00:00<small>:00</small></div>
+        <div class="bar" id="bar" hidden><i id="barFill"></i></div>
+        <div class="tod" id="tod"></div>
+        <div class="status" id="status">출항 준비 중</div>
+        <div class="catchPop" id="catchPop" hidden></div>
+        <div class="bubble" id="bubble" hidden></div>
+      </div>
+      <div class="compactCtrl row" id="compactCtrl"></div>
+    </div>
+    <div class="cmd frame">
+      <div class="big" id="bigClock">00:00<small>:00</small></div>
+      <div class="row center" id="ctrl"></div>
+      <div class="row center" style="margin-top:4px">
+        <button class="btn small" id="shopBtn2">상점</button>
+        <button class="btn small" id="pipBtn" title="낚시 화면만 작은 창으로 띄워 다른 창 위에 고정">위젯 모드</button>
+        <button class="icon" id="muteBtn" aria-label="소리 끄기/켜기" title="소리"></button>
+      </div>
+      <div class="hint" id="pipHint" style="text-align:center"></div>
+    </div>
+  </div>
+  <div class="windows frame">
+    <div class="tabs" role="tablist" id="tabs">
+      <button role="tab" data-tab="gear" data-icon="bag" aria-selected="true">장비</button>
+      <button role="tab" data-tab="tank" data-icon="tank" aria-selected="false">어항</button>
+      <button role="tab" data-tab="codex" data-icon="book" aria-selected="false">도감</button>
+      <button role="tab" data-tab="log" data-icon="quill" aria-selected="false">일지</button>
+      <button class="shopBtn" id="shopBtn" data-icon="coins">상점</button>
+      <span class="spacer"></span>
+      <button role="tab" data-tab="set" data-icon="gear" aria-selected="false">설정</button>
+    </div>
+    <div class="pane" id="pane"></div>
+  </div>
+  <div class="toast" id="toast"></div>
+  <video id="pipVideo" muted playsinline autoplay></video>
+</div>
+
+<script>
+'use strict';
+// ---------- data ----------
+const RAR=['흔함','희귀','영웅','전설','신화'];
+const TIMES={dawn:'새벽',day:'낮',dusk:'노을',night:'밤'};
+const TIER=['#9a9488','#6aa36a','#5aa6dc','#b07fe0','#e0b24e','#e8637f'];
+// [name, rarity, price, time|null, minCm, maxCm, lore, shape]
+// shapes: 0 small fish, 1 round fish, 2 eel, 3 jelly, 4 seahorse, 5 ray, 6 big fish, 7 orb, 8 octopus, 9 crab, 10 turtle, 11 shrimp, 12 skull fish, 13 serpent, 14 starfish
+const SPOTS=[
+ {name:'안개 호수',price:0,fish:[
+  ['이끼송어',0,12,null,18,34,'돌 틈의 이끼를 먹고 자란다. 등이 푸르스름하다.',0],
+  ['안개피라미',0,8,null,6,12,'새벽 안개와 함께 떼로 올라온다. 값은 싸지만 늘 걸린다.',0],
+  ['갈대새우',0,10,null,5,9,'갈대 뿌리 사이에 산다. 어부들은 미끼로도 쓴다.',11],
+  ['안개게',0,14,'dawn',8,14,'새벽에 돌 위로 올라온다. 집게가 잿빛이다.',9],
+  ['은빛잉어',1,30,null,30,55,'비늘이 거울처럼 빛난다. 옛 성의 연못에서 흘러나왔다는 말이 있다.',1],
+  ['유령잉어',1,36,'night',28,50,'밤에만 수면 가까이 올라온다. 몸이 반투명해 랜턴 빛이 통과한다.',1],
+  ['늪거북',1,40,null,25,45,'등딱지에 이끼가 자란다. 느리지만 낚싯줄을 끊는 힘이 세다.',10],
+  ['검은 메기',1,34,'night',40,70,'밤이면 부두 밑에서 우는 소리가 난다고 한다.',6],
+  ['달그림자 뱀장어',2,90,'night',60,120,'달이 비치는 곳에만 머문다. 그림자를 먹는다고 어부들은 믿는다.',2],
+  ['익사자의 반지',2,110,'night',20,30,'비늘 사이에 반지가 박혀 있다. 누구 것인지 아무도 모른다.',12],
+  ['호수의 주인',3,260,null,80,140,'호수에서 가장 오래 산 잉어. 낚이면 그 해의 안개가 옅어진다고 한다.',6],
+  ['안개의 심장',4,900,'dawn',10,14,'새벽 안개가 뭉쳐 물고기 모양이 된 것. 손에 쥐면 서늘하고, 해가 뜨면 녹는다.',7]]},
+ {name:'요정의 샘',price:2500,fish:[
+  ['꽃잎송사리',0,18,null,4,8,'지느러미가 꽃잎처럼 갈라져 있다. 샘물에 떠다니는 꽃잎과 구분하기 어렵다.',0],
+  ['이슬구피',0,15,null,3,6,'몸 안에 이슬 한 방울이 들어 있다. 말려도 마르지 않는다.',0],
+  ['수정새우',0,20,null,4,8,'몸이 투명해 뛰는 심장이 보인다.',11],
+  ['마나 해마',1,48,null,8,15,'마법사들이 지팡이 끝에 매단다. 살아 있는 동안 희미하게 빛난다.',4],
+  ['반딧불 열목어',1,52,'night',20,36,'반딧불을 따라다니며 사냥한다. 배가 노랗게 빛난다.',0],
+  ['꽃게요정',1,60,'day',6,10,'낮에만 꽃 사이를 돌아다닌다. 집게로 꽃잎을 자른다.',9],
+  ['별꽃불가사리',1,58,null,8,14,'다섯 팔 끝이 밤에 빛난다. 샘 바닥에 별자리처럼 흩어져 있다.',14],
+  ['이끼거북',1,55,null,20,35,'등에 작은 꽃이 핀다. 요정들이 그 위에서 쉰다.',10],
+  ['세계수 뿌리잉어',2,130,null,40,70,'세계수의 뿌리 사이에서 산다. 비늘에 나이테 같은 무늬가 있다.',1],
+  ['샘의 뱀',2,150,'dusk',70,110,'노을이 지면 샘을 한 바퀴 돌고 사라진다.',13],
+  ['샘의 수호자',3,380,null,90,150,'샘을 더럽히는 자를 물속으로 끌어들인다. 낚시꾼에겐 너그럽다.',6],
+  ['요정여왕의 눈물',4,1300,null,5,9,'눈물 모양의 작은 물고기. 요정들은 이것을 잡은 자를 평생 기억한다.',7]]},
+ {name:'잉걸불 협곡',price:9000,fish:[
+  ['재송어',0,26,null,20,38,'잿빛 물에서 산다. 살이 훈제한 것처럼 향긋하다.',0],
+  ['숯빛 메기',0,22,null,30,60,'협곡 바닥의 숯을 뒤적인다. 수염이 늘 그을려 있다.',6],
+  ['잿더미게',0,28,null,10,16,'재를 뒤집어쓰고 산다. 건드리면 재가 피어오른다.',9],
+  ['용암 복어',1,70,null,15,25,'화가 나면 몸이 붉게 달아오른다. 맨손으로 만지면 화상을 입는다.',1],
+  ['용암새우',1,75,null,6,12,'껍질이 식은 용암처럼 검고 갈라져 있다.',11],
+  ['불씨해파리',1,80,'night',15,30,'밤의 협곡을 떠다니는 불씨. 물속인데도 뜨겁다.',3],
+  ['흑요석 창꼬치',2,180,null,70,110,'이빨이 흑요석처럼 날카롭다. 낚싯줄을 세 번은 끊어야 잡힌다.',2],
+  ['불꽃 장어',2,200,'dusk',80,130,'노을이 질 때만 떠오른다. 몸 전체가 잉걸불처럼 깜빡인다.',2],
+  ['화산거북',2,190,null,50,80,'등딱지가 현무암이다. 낚아 올리면 김이 난다.',10],
+  ['해골창꼬치',2,210,'night',60,100,'머리가 뼈로 드러나 있다. 밤에만 사냥한다.',12],
+  ['잠든 용의 새끼',3,560,null,40,60,'용의 알에서 깨어났지만 물을 떠나지 못한다. 잡으면 가만히 잠들어 있다.',13],
+  ['심장불 살라만더',4,1900,null,25,35,'협곡의 열원이라 불린다. 이것이 사라지면 협곡이 식는다고 한다.',13]]},
+ {name:'별이 진 바다',price:30000,fish:[
+  ['별모래 정어리',0,36,null,10,18,'비늘에 별모래가 붙어 있다. 밤바다를 떼로 헤엄치면 은하수처럼 보인다.',0],
+  ['별게',0,40,null,8,14,'등에 별자리 점이 있다. 점을 이으면 다른 별자리가 된다.',9],
+  ['은하새우',1,105,null,5,10,'튀어오르면 작은 은하수를 그린다.',11],
+  ['성운 해파리',1,95,null,20,40,'몸 안에서 색이 느리게 돈다. 바라보면 시간 감각이 흐려진다.',3],
+  ['유성 날치',1,100,'night',25,40,'밤에 수면 위로 튀어 오르며 꼬리에 빛을 남긴다.',0],
+  ['은하 문어',2,250,null,60,100,'다리마다 다른 별자리 무늬가 있다. 먹물이 밤하늘 색이다.',8],
+  ['달빛 가오리',2,260,'night',90,160,'달빛을 등에 받아 수면을 미끄러진다. 날개 밑은 칠흑이다.',5],
+  ['달거북',2,270,'night',60,100,'달이 차면 등딱지가 환해진다.',10],
+  ['바다불가사리',1,110,null,10,18,'떨어진 별 조각이 굳은 것이라 한다.',14],
+  ['유령선원',3,850,'night',40,60,'물고기 꼴을 한 익사한 선원. 낚이면 뱃노래를 부른다.',12],
+  ['별고래',3,800,null,300,500,'바다에 떨어진 별을 삼켜 몸속에서 빛난다. 낚이면 바다가 잠시 밝아진다.',6],
+  ['떨어진 첫 번째 별',4,2800,null,8,12,'세상에서 가장 먼저 떨어진 별이 물고기가 된 것. 손바닥에 올리면 따뜻하다.',7]]},
+ {name:'심연의 우물',price:100000,fish:[
+  ['눈 없는 아귀',0,50,null,30,50,'빛이 없는 곳에서 눈이 퇴화했다. 소리로 미끼를 찾는다.',1],
+  ['장님게',0,55,null,12,20,'눈이 없고 집게가 유난히 길다. 벽을 더듬어 다닌다.',9],
+  ['뼈새우',1,150,null,8,14,'살이 없고 껍질만 남았는데 움직인다.',11],
+  ['침묵의 뱀장어',1,130,null,100,180,'이것이 지나가면 물소리가 멎는다. 어부들은 그 침묵으로 알아챈다.',2],
+  ['검은 물 해파리',1,140,null,30,60,'우물물보다 검다. 랜턴을 비춰도 윤곽만 보인다.',3],
+  ['심연의 눈',2,340,null,20,30,'둥근 몸에 커다란 눈 하나. 낚이면 한동안 낚시꾼을 바라본다.',7],
+  ['우물거북',2,360,null,80,120,'우물 벽을 기어오른다. 등딱지에 긁힌 자국이 가득하다.',10],
+  ['심연의 해골',3,1250,null,30,50,'낚시꾼을 보고 웃는다. 이가 전부 남아 있다.',12],
+  ['우물지기',3,1100,null,150,250,'우물 바닥에 사는 거대한 메기. 누가 떨어뜨린 동전을 다 기억한다.',6],
+  ['잊힌 이름',3,1200,'dawn',40,60,'이름을 잃은 자들이 변한 것이라 한다. 새벽에만 수면으로 올라와 이름을 찾는다.',3],
+  ['밑바닥의 뱀',4,4500,'night',600,900,'리바이어던의 그림자라고도 한다. 밤에 우물 벽을 타고 오른다.',13],
+  ['리바이어던',4,4200,null,800,1200,'우물이 바다와 이어져 있다는 증거. 꼬리만 낚여도 전설이 된다.',6]]},
+];
+SPOTS.forEach((s,si)=>s.fish=s.fish.map((f,fi)=>({id:si+'-'+fi,spot:si,name:f[0],r:f[1],price:f[2]*2,time:f[3],min:f[4],max:f[5],lore:f[6],shape:f[7],hue:(si*71+fi*53+20)%360})));
+const allFish=()=>SPOTS.flatMap(s=>s.fish);
+const fishById=id=>allFish().find(f=>f.id===id);
+const CHARS=[
+ {id:'rogue',name:'도적',desc:'판매가 +5%, 가끔 두 배로 팔림'},
+ {id:'mage',name:'마법사',desc:'희귀 이상 확률 +8%'},
+ {id:'knight',name:'기사',desc:'완주 보너스 +15%'},
+ {id:'bard',name:'음유시인',desc:'낚는 속도 +5%'},
+ {id:'druid',name:'드루이드',desc:'새벽과 밤의 어종 확률 +10%'},
+];
+// shop items. cat: rod/net/contract/charm/lantern (equip), bait (consumable, 20 per pack), map (unlock), tank (capacity)
+const ITEMS=[
+ {id:'rod0',cat:'rod',tier:0,name:'낡은 낚싯대',price:0,v:0,desc:'할아버지가 쓰던 것. 휘지만 아직 부러지진 않았다.'},
+ {id:'rod1',cat:'rod',tier:1,name:'참나무 낚싯대',price:240,v:0.12,desc:'단단한 참나무를 깎았다.'},
+ {id:'rod2',cat:'rod',tier:2,name:'은사 낚싯대',price:900,v:0.25,desc:'손잡이에 은실을 감았다. 손이 시리지 않다.'},
+ {id:'rod3',cat:'rod',tier:3,name:'룬 낚싯대',price:3200,v:0.40,desc:'룬이 새겨져 줄이 스스로 감긴다.'},
+ {id:'rod4',cat:'rod',tier:3,name:'드워프 강철 낚싯대',price:7000,v:0.52,desc:'산 아래 대장간에서 벼렸다. 무겁지만 휘지 않는다.'},
+ {id:'rod5',cat:'rod',tier:4,name:'별빛 낚싯대',price:14000,v:0.65,desc:'별이 진 바다의 유목으로 만들었다.'},
+ {id:'rod6',cat:'rod',tier:5,name:'심연의 낚싯대',price:40000,v:0.85,desc:'우물 바닥에서 건져 올린 것. 누가 만들었는지 모른다.'},
+ {id:'rod7',cat:'rod',tier:5,name:'세계수 가지',price:90000,v:1.1,desc:'세계수에서 떨어진 가지. 줄을 던지면 물이 먼저 알아챈다.'},
+ {id:'net0',cat:'net',tier:0,name:'그물 없음',price:0,v:0,desc:''},
+ {id:'net1',cat:'net',tier:1,name:'삼베 그물',price:350,v:0.06,desc:'마을 아낙들이 짠 거친 그물.'},
+ {id:'net2',cat:'net',tier:2,name:'인어실 그물',price:1400,v:0.13,desc:'인어의 머리카락으로 짰다. 물에 젖지 않는다.'},
+ {id:'net3',cat:'net',tier:3,name:'은빛 그물',price:5000,v:0.22,desc:'달빛을 받으면 빛난다.'},
+ {id:'net4',cat:'net',tier:4,name:'용비늘 그물',price:16000,v:0.32,desc:'용의 비늘을 엮었다. 불에도 타지 않는다.'},
+ {id:'net5',cat:'net',tier:5,name:'유령실 그물',price:45000,v:0.42,desc:'보이지 않는 실로 짜였다. 물고기도 보지 못한다.'},
+ {id:'con0',cat:'contract',tier:0,name:'계약 없음',price:0,v:0,desc:''},
+ {id:'con1',cat:'contract',tier:1,name:'마을 상인 계약',price:400,v:0.10,desc:'마을 장터에 생선을 댄다.'},
+ {id:'con2',cat:'contract',tier:2,name:'고블린 상인 계약',price:1800,v:0.22,desc:'셈이 빠르고 손이 더럽다.'},
+ {id:'con3',cat:'contract',tier:3,name:'요정 상단 계약',price:6500,v:0.38,desc:'대금을 꽃잎으로 주려 한다. 거절하면 금화로 준다.'},
+ {id:'con4',cat:'contract',tier:4,name:'왕실 어시장 계약',price:22000,v:0.60,desc:'왕의 식탁에 오른다. 인장이 찍혀 있다.'},
+ {id:'con5',cat:'contract',tier:5,name:'대성당 공납 계약',price:70000,v:0.85,desc:'성자의 축일에 쓰일 물고기를 댄다. 값을 묻지 않는다.'},
+ {id:'bait1',cat:'bait',tier:1,name:'지렁이',price:80,v:0.05,desc:'20마리 묶음. 부두 밑 흙에서 판다.'},
+ {id:'bait2',cat:'bait',tier:1,name:'달빛 나방',price:150,v:0.08,desc:'20마리 묶음. 밤 물고기가 좋아한다.'},
+ {id:'bait3',cat:'bait',tier:2,name:'반딧불 미끼',price:300,v:0.12,desc:'20개 묶음. 어둠 속에서 깜빡인다.'},
+ {id:'bait4',cat:'bait',tier:2,name:'용암 지렁이',price:600,v:0.17,desc:'20마리 묶음. 협곡에서만 잡히며 만지면 뜨겁다.'},
+ {id:'bait5',cat:'bait',tier:3,name:'마나 구슬',price:1000,v:0.22,desc:'20개 묶음. 마법사 탑에서 흘러나온 것.'},
+ {id:'bait6',cat:'bait',tier:3,name:'심연의 이끼',price:2000,v:0.28,desc:'20덩이 묶음. 빛이 없는 곳에서만 자란다.'},
+ {id:'bait7',cat:'bait',tier:4,name:'별가루',price:3200,v:0.35,desc:'20자루 묶음. 떨어진 별을 갈아 만들었다.'},
+ {id:'bait8',cat:'bait',tier:5,name:'별의 눈물',price:8000,v:0.45,desc:'20방울 묶음. 어떤 물고기도 거절하지 못한다.'},
+ {id:'ch1',cat:'charm',tier:1,name:'낡은 동전 부적',price:500,v:{gold:0.05},desc:'구멍 뚫린 옛 동전. 장사꾼들이 목에 건다.'},
+ {id:'ch2',cat:'charm',tier:2,name:'까마귀 깃털',price:1500,v:{speed:0.08},desc:'부두 까마귀의 꽁지깃. 던질 때 바람을 탄다.'},
+ {id:'ch3',cat:'charm',tier:2,name:'달빛 조각',price:2000,v:{nightluck:0.15},desc:'달이 물에 떨어뜨린 조각. 밤과 새벽에 빛난다.'},
+ {id:'ch4',cat:'charm',tier:3,name:'어부의 매듭',price:4500,v:{luck:0.10},desc:'늙은 어부가 평생 묶던 매듭. 운을 붙잡는다.'},
+ {id:'ch5',cat:'charm',tier:3,name:'은 십자가',price:6000,v:{bonus:0.15},desc:'끝까지 버틴 자에게 복을 내린다. 완주 보너스가 늘어난다.'},
+ {id:'ch6',cat:'charm',tier:4,name:'용의 눈 반지',price:15000,v:{gold:0.15},desc:'붉은 보석이 박힌 반지. 상인들이 값을 더 쳐준다.'},
+ {id:'ch7',cat:'charm',tier:4,name:'세이렌의 비늘',price:20000,v:{luck:0.20},desc:'세이렌이 떨군 비늘. 물고기가 노래를 듣고 온다.'},
+ {id:'ch8',cat:'charm',tier:5,name:'왕의 인장',price:55000,v:{gold:0.25,speed:0.10},desc:'옛 왕의 인장 반지. 모든 문이 열린다.'},
+ {id:'ln1',cat:'lantern',tier:1,name:'기름 등불',price:600,v:0.08,desc:'부두의 쇠 등불에 기름을 더 넣었다. 밤과 새벽 어종이 잘 보인다.'},
+ {id:'ln2',cat:'lantern',tier:3,name:'푸른 불꽃 등불',price:3000,v:0.18,desc:'마녀에게 산 푸른 불. 물속까지 비춘다.'},
+ {id:'ln3',cat:'lantern',tier:4,name:'달빛 랜턴',price:12000,v:0.30,desc:'달빛을 가두어 둔 랜턴. 밤 물고기가 스스로 올라온다.'},
+ {id:'tk1',cat:'tank',tier:1,name:'나무 어항',price:800,v:4,desc:'물통을 개조했다. 어항 자리 +4'},
+ {id:'tk2',cat:'tank',tier:2,name:'석조 수조',price:3500,v:6,desc:'돌을 깎아 만든 수조. 어항 자리 +6'},
+ {id:'tk3',cat:'tank',tier:3,name:'유리 수조',price:12000,v:8,desc:'유리장이가 만든 수조. 어항 자리 +8'},
+ {id:'tk4',cat:'tank',tier:5,name:'마법 수조',price:40000,v:12,desc:'안이 밖보다 넓다. 어항 자리 +12'},
+ {id:'nt1',cat:'tank',tier:2,name:'두 번째 어항',price:5000,v:0,newTank:true,desc:'선착장 창고에 어항을 하나 더 둔다. 새 어항이 생긴다.'},
+ {id:'nt2',cat:'tank',tier:3,name:'세 번째 어항',price:20000,v:0,newTank:true,desc:'여관 벽에 어항을 들인다. 새 어항이 생긴다.'},
+ {id:'nt3',cat:'tank',tier:4,name:'네 번째 어항',price:60000,v:0,newTank:true,desc:'성의 연회장에 어항을 둔다. 새 어항이 생긴다.'},
+ {id:'nt4',cat:'tank',tier:5,name:'다섯 번째 어항',price:150000,v:0,newTank:true,desc:'대성당 지하 저수조. 새 어항이 생긴다.'},
+ {id:'map1',cat:'map',tier:2,name:'요정의 샘 지도',price:2500,v:1,desc:'숲 깊은 곳의 샘으로 가는 길.'},
+ {id:'map2',cat:'map',tier:3,name:'잉걸불 협곡 지도',price:9000,v:2,desc:'화산 협곡의 뜨거운 물길.'},
+ {id:'map3',cat:'map',tier:4,name:'별이 진 바다 해도',price:30000,v:3,desc:'별이 떨어진 바다의 해도.'},
+ {id:'map4',cat:'map',tier:5,name:'심연의 우물 지도',price:100000,v:4,desc:'아무도 바닥을 본 적 없는 우물.'},
+];
+const item=id=>ITEMS.find(i=>i.id===id);
+const CATS={all:'전체',rod:'낚싯대',net:'그물',bait:'미끼',contract:'계약',charm:'장신구',lantern:'등불',tank:'어항',map:'지도'};
+const EQ_SLOTS=[['rod','낚싯대'],['net','그물'],['contract','계약'],['bait','미끼'],['charm','장신구'],['lantern','등불']];
+
+// ---------- state ----------
+const KEY='mistlake.v2';
+let S=null;
+const fresh=()=>({v:2,savedAt:0,char:null,gold:0,own:{rod0:1,net0:1,con0:1},eq:{rod:'rod0',net:'net0',contract:'con0',bait:null,charm:null,lantern:null},bait:{},maps:[0],tanks:[[]],tankSel:0,codex:{},totalSec:0,days:{},tags:['공부','작업'],lastTag:'공부',spot:0,muted:false,vol:0.5,goalMin:0,breakMin:0,run:null,brk:null,sessions:0,compact:false});
+function loadLocal(){try{const j=localStorage.getItem(KEY);return j?JSON.parse(j):null}catch(e){return null}}
+S=Object.assign(fresh(),loadLocal()||{});
+if(S.tank&&!S.tanks)S.tanks=[S.tank];if(!S.tanks||!S.tanks.length)S.tanks=[[]];S.tankSel=Math.min(S.tankSel||0,S.tanks.length-1);
+const curTank=()=>S.tanks[S.tankSel]||S.tanks[0];
+let db=null,uid=null,saveT=null,lastRemote=0,remoteBusy=false;
+function save(){S.savedAt=Date.now();try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}clearTimeout(saveT);saveT=setTimeout(saveRemote,2500)}
+async function saveRemote(){if(!db||!uid||remoteBusy)return;remoteBusy=true;try{await db.doc('data/users/'+uid+'/save').set(JSON.parse(JSON.stringify(S)));lastRemote=S.savedAt}catch(e){}remoteBusy=false;if(lastRemote!==S.savedAt){clearTimeout(saveT);saveT=setTimeout(saveRemote,3000)}}
+(async()=>{try{const u=await claude.use('user');db=await claude.use('db');if(!u||!db)return;uid=await u.id();if(!uid){db=null;return}
+  const snap=await db.doc('data/users/'+uid+'/save').get();const d=snap.exists?snap.data():null;
+  if(d&&d.v===2&&d.savedAt>(S.savedAt||0)&&!(S.run&&!d.run)){S=Object.assign(fresh(),d);try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}renderAll();toast('저장된 기록을 불러왔어요')}
+  else if(S.savedAt)saveRemote();}catch(e){}})();
+
+// ---------- helpers ----------
+const $=id=>document.getElementById(id);
+const pad=n=>String(n).padStart(2,'0');
+const dayKey=d=>{d=d||new Date();return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())};
+function timeOfDay(h){h=h??new Date().getHours();return h>=5&&h<7?'dawn':h<17?'day':h<19?'dusk':'night'}
+const fmtH=s=>{const h=Math.floor(s/3600),m=Math.floor(s%3600/60);return h?`${h}시간 ${m}분`:`${m}분`};
+const fmtClock=s=>`${pad(Math.floor(s/3600))}:${pad(Math.floor(s%3600/60))}<small>:${pad(Math.floor(s%60))}</small>`;
+const charOf=()=>CHARS.find(c=>c.id===S.char)||CHARS[0];
+let toastT;function toast(m){const t=$('toast');t.textContent=m;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2200)}
+const rand=(a,b)=>a+Math.random()*(b-a);
+const eqv=cat=>{const v=item(S.eq[cat])?.v;return typeof v==='number'?v:0};
+const charm=k=>{const v=item(S.eq.charm)?.v;return v&&typeof v==='object'?(v[k]||0):0};
+const baitLuck=()=>{const b=S.eq.bait;return b&&S.bait[b]>0?item(b).v:0};
+const tankCap=()=>8+ITEMS.filter(i=>i.cat==='tank'&&S.own[i.id]).reduce((a,i)=>a+i.v,0);
+
+// ---------- fishing ----------
+function catchInterval(){let s=600/(1+eqv('rod')+charm('speed'));if(S.char==='bard')s*=0.95;return s*rand(0.7,1.3)}
+function rollFish(spot,elapsedSec,at){
+  const tod=timeOfDay(new Date(at).getHours());
+  const pool=spot.fish.filter(f=>!f.time||f.time===tod);
+  let luck=baitLuck()+charm('luck')+Math.min(elapsedSec/7200,1)*0.3;if(S.char==='mage')luck+=0.08;
+  if(tod==='night'||tod==='dawn')luck+=eqv('lantern')+charm('nightluck');
+  const w=[70,20,7,2.5,0.5].map((x,i)=>i?x*(1+luck):x);
+  let r=Math.random()*w.reduce((a,b)=>a+b),ri=0;for(;ri<5;ri++){r-=w[ri];if(r<0)break}
+  let cands=pool.filter(f=>f.r===ri);while(!cands.length&&ri>0){ri--;cands=pool.filter(f=>f.r===ri)}
+  let f=cands[Math.floor(Math.random()*cands.length)];
+  if(S.char==='druid'&&(tod==='night'||tod==='dawn')&&Math.random()<0.1){const sp=pool.filter(x=>x.time);if(sp.length)f=sp[Math.floor(Math.random()*sp.length)]}
+  const cm=Math.round(f.min+Math.pow(Math.random(),1.6)*(f.max-f.min));
+  if(S.eq.bait&&S.bait[S.eq.bait]>0)S.bait[S.eq.bait]--;
+  return {id:f.id,cm};
+}
+let bite=0,bitePop=null;
+function tickFishing(now){
+  const R=S.run;if(!R)return;const spot=SPOTS[R.spot];let changed=false;
+  while(R.nextAt<=now){
+    const c=rollFish(spot,(R.nextAt-R.startAt)/1000,R.nextAt);R.catches.push(c);
+    if(Math.random()<eqv('net'))R.catches.push(rollFish(spot,(R.nextAt-R.startAt)/1000,R.nextAt));
+    R.lastCatchAt=R.nextAt;R.nextAt+=catchInterval()*1000;changed=true;
+    if(now-R.lastCatchAt<3000){bite=performance.now();bitePop=c;const r=fishById(c.id).r;audio.chime(r);if(r>=2)setTimeout(()=>say('rare'),900);else if(Math.random()<0.35)setTimeout(()=>say('catch'),900)}
+  }
+  if(changed)save();
+}
+function startRun(){const now=Date.now();S.run={startAt:now,tag:S.lastTag,spot:S.spot,catches:[],nextAt:now+catchInterval()*1000,lastCatchAt:0};S.brk=null;save();renderAll();say('start');nextIdleSay=Date.now()+rand(150,300)*1000}
+function endRun(){say('end');
+  const R=S.run;if(!R)return;const now=Date.now();tickFishing(now);
+  const sec=Math.max(0,Math.floor((now-R.startAt)/1000));
+  const dk=dayKey(new Date(R.startAt));const d=S.days[dk]||(S.days[dk]={sec:0,tags:{}});
+  d.sec+=sec;d.tags[R.tag]=(d.tags[R.tag]||0)+sec;S.totalSec+=sec;S.sessions++;
+  const done=S.goalMin>0&&sec>=S.goalMin*60;
+  if(done){const sp=SPOTS[R.spot];let c=rollFish(sp,5400,now);if(fishById(c.id).r===0){const f=sp.fish.find(x=>x.r===1);c={id:f.id,cm:Math.round(rand(f.min,f.max))}}R.catches.push(c)}
+  const newIds=[];const recs=[];
+  const haul=R.catches.map(c=>{const f=fishById(c.id);let p=f.price*(1+eqv('contract')+charm('gold'))*(1+Object.keys(S.codex).length*0.01)*(1+(c.cm-f.min)/(f.max-f.min)*0.3);
+    if(S.char==='rogue'){p*=1.05;if(Math.random()<0.05)p*=2}
+    const e=S.codex[c.id];if(!e){S.codex[c.id]={n:1,best:c.cm};newIds.push(c.id)}else{e.n++;if(c.cm>e.best){e.best=c.cm;recs.push(c.id)}}
+    return {id:c.id,cm:c.cm,price:Math.round(p),tank:false}});
+  const bonusRate=done?(S.char==='knight'?0.40:0.25)+charm('bonus'):0;
+  S.run=null;if(S.breakMin>0)S.brk={endAt:now+S.breakMin*60000,rang:false};
+  save();renderAll();showHaul(haul,bonusRate,sec,done,newIds,recs);
+}
+
+// ---------- render ----------
+let tab='gear',codexSel=null,shopCat='all',shopSel=null;
+function renderAll(){renderTop();renderTimer();renderPane();$('game').classList.toggle('compact',!!S.compact)}
+function renderTop(){const t=timeOfDay();$('tod').textContent=TIMES[t];$('mTod').textContent=TIMES[t];$('mClass').textContent=S.char?charOf().name:'';$('mGold').textContent=S.gold.toLocaleString()+' G';$('mTotal').textContent=fmtH(S.totalSec);
+  $('muteBtn').innerHTML=S.muted?'<svg viewBox="0 0 16 16"><path d="M2 6h3l4-3v10l-4-3H2z"/><path d="M11 5l4 6M15 5l-4 6" stroke="currentColor" stroke-width="1.6" fill="none"/></svg>':'<svg viewBox="0 0 16 16"><path d="M2 6h3l4-3v10l-4-3H2z"/><path d="M11 5a4 4 0 010 6M13 3a7 7 0 010 10" stroke="currentColor" stroke-width="1.6" fill="none"/></svg>'}
+function statusText(){const R=S.run;if(R)return `${SPOTS[R.spot].name} · ${R.tag} · ${R.catches.length}마리`+(S.goalMin?` · 목표 ${S.goalMin}분`:'');if(S.brk&&S.brk.endAt>Date.now())return '휴식 중';return S.brk&&S.brk.rang?'다시 출항할 시간':'출항 준비 중'}
+function renderTimer(){
+  const c=$('ctrl');c.innerHTML='';const cc=$('compactCtrl');cc.innerHTML='';const R=S.run;$('status').textContent=statusText();
+  if(R){if(S.goalMin){const g=document.createElement('span');g.className='pill'+(R.goalDone?' on':'');g.textContent=R.goalDone?'완주 달성함':'완주 미달성';c.append(g)}
+    const b=document.createElement('button');b.className='btn primary';b.textContent='귀항';b.onclick=()=>{audio.unlock();endRun()};c.append(b);
+    const b2=document.createElement('button');b2.className='btn small';b2.textContent='귀항';b2.onclick=()=>{audio.unlock();S.compact=false;endRun()};cc.append(b2);
+  }else{
+    const sel=document.createElement('select');sel.id='tagSel';S.tags.forEach(t=>{const o=document.createElement('option');o.value=t;o.textContent=t;if(t===S.lastTag)o.selected=true;sel.append(o)});
+    const o=document.createElement('option');o.value='__new';o.textContent='+ 새 태그';sel.append(o);
+    sel.onchange=()=>{if(sel.value==='__new'){const inp=document.createElement('input');inp.type='text';inp.placeholder='태그 이름';inp.id='newTag';inp.style.width='90px';sel.replaceWith(inp);inp.focus();inp.onkeydown=e=>{if(e.key==='Enter'){const v=inp.value.trim();if(v&&!S.tags.includes(v))S.tags.push(v);if(v)S.lastTag=v;save();renderTimer()}if(e.key==='Escape')renderTimer()};inp.onblur=()=>{if(document.body.contains(inp))renderTimer()}}else{S.lastTag=sel.value;save()}};
+    const sp=document.createElement('select');sp.id='spotSel';SPOTS.forEach((s,i)=>{if(!S.maps.includes(i))return;const o=document.createElement('option');o.value=i;o.textContent=s.name;if(S.spot===i)o.selected=true;sp.append(o)});sp.onchange=()=>{S.spot=+sp.value;save()};
+    const b=document.createElement('button');b.className='btn primary';b.textContent='출항';b.onclick=()=>{audio.unlock();if(!S.char){showCharSelect();return}startRun()};
+    c.append(sp,sel,b);
+    const b2=document.createElement('button');b2.className='btn small';b2.textContent='출항';b2.onclick=()=>{audio.unlock();if(!S.char){S.compact=false;renderAll();showCharSelect();return}startRun()};cc.append(b2);
+  }
+  const ex=document.createElement('button');ex.className='btn small';ex.textContent='펼치기';ex.onclick=()=>{S.compact=false;save();renderAll()};cc.append(ex);
+}
+function slotEl(opts){const s=document.createElement('button');s.className='slot'+(opts.cls?' '+opts.cls:'');s.setAttribute('aria-pressed',!!opts.sel);const cv=document.createElement('canvas');cv.width=opts.fish?24:16;cv.height=16;opts.draw(cv.getContext('2d'));s.append(cv);if(opts.cnt!=null){const c=document.createElement('span');c.className='cnt';c.textContent=opts.cnt;s.append(c)}if(opts.title)s.title=opts.title;s.onclick=opts.onclick;return s}
+function itemDesc(it){const pc=v=>Math.round(v*100)+'%';
+  if(it.cat==='rod')return `던지는 속도 +${pc(it.v)}`;if(it.cat==='net')return `두 마리 확률 ${pc(it.v)}`;if(it.cat==='contract')return `판매가 +${pc(it.v)}`;if(it.cat==='bait')return `희귀 확률 +${pc(it.v)} · 한 마리당 1개`;
+  if(it.cat==='lantern')return `밤·새벽 희귀 확률 +${pc(it.v)}`;if(it.cat==='tank')return it.newTank?'새 어항 1개':`어항 자리 +${it.v}`;
+  if(it.cat==='charm'){const n={gold:'판매가',speed:'던지는 속도',luck:'희귀 확률',nightluck:'밤·새벽 희귀 확률',bonus:'완주 보너스'};return Object.entries(it.v).map(([k,v])=>`${n[k]} +${pc(v)}`).join(' · ')}
+  return '낚시터 개방'}
+function itemCard(it,mode){
+  const c=document.createElement('div');c.className='card';
+  const art=document.createElement('div');art.className='art';const cv=document.createElement('canvas');cv.width=16;cv.height=16;drawItem(cv.getContext('2d'),it,0,0);art.append(cv);
+  const info=document.createElement('div');
+  const owned=!!S.own[it.id],eq=S.eq[it.cat]===it.id,cnt=S.bait[it.id]||0;
+  info.innerHTML=`<h3 style="color:${TIER[it.tier]}">${it.name}</h3><div class="kv"><span>종류</span><span>${CATS[it.cat]}</span><span>효과</span><span>${itemDesc(it)}</span>${it.cat==='bait'?`<span>보유</span><span>${cnt}개</span>`:''}<span>가격</span><span class="gold">${it.price?it.price.toLocaleString()+' G':'-'}</span></div>`;
+  const desc=document.createElement('div');desc.className='desc';desc.textContent=it.desc||'';
+  const act=document.createElement('div');act.className='act';
+  if(mode==='shop'){
+    if(it.cat==='map'){const has=S.maps.includes(it.v);const b=document.createElement('button');b.className='btn primary';b.textContent=has?'개방됨':'구매';b.disabled=has||S.gold<it.price;b.onclick=()=>{if(S.gold>=it.price){S.gold-=it.price;S.maps.push(it.v);save();toast(SPOTS[it.v].name+' 개방!');audio.rare();renderShop();renderTop();renderTimer()}};act.append(b)}
+    else if(it.cat==='tank'){const b=document.createElement('button');b.className='btn primary';b.textContent=owned?'설치됨':'구매';b.disabled=owned||S.gold<it.price;b.onclick=()=>{if(S.gold>=it.price){S.gold-=it.price;S.own[it.id]=1;if(it.newTank){S.tanks.push([]);S.tankSel=S.tanks.length-1;toast(`${S.tanks.length}번째 어항이 생겼어요`)}else toast(`어항 자리 ${tankCap()}칸`);save();renderShop();renderTop()}};act.append(b)}
+    else if(it.cat==='bait'){const b=document.createElement('button');b.className='btn primary';b.textContent='20개 구매';b.disabled=S.gold<it.price;b.onclick=()=>{if(S.gold>=it.price){S.gold-=it.price;S.bait[it.id]=(S.bait[it.id]||0)+20;if(!S.eq.bait)S.eq.bait=it.id;save();toast(it.name+' 20개');renderShop();renderTop()}};act.append(b)}
+    else{const b=document.createElement('button');b.className='btn primary';b.textContent=owned?(eq?'장착됨':'장착'):'구매';b.disabled=(!owned&&S.gold<it.price)||eq;b.onclick=()=>{if(!owned){if(S.gold<it.price)return;S.gold-=it.price;S.own[it.id]=1;toast(it.name+' 구매!')}S.eq[it.cat]=it.id;save();renderShop();renderTop();renderPane()};act.append(b)}
+  }else{
+    if(it.cat==='bait'){const b=document.createElement('button');b.className='btn';b.textContent=eq?'사용 중':'사용';b.disabled=eq||cnt<=0;b.onclick=()=>{S.eq.bait=it.id;save();renderPane()};act.append(b)}
+    else{const b=document.createElement('button');b.className='btn';b.textContent=eq?'장착됨':'장착';b.disabled=eq;b.onclick=()=>{S.eq[it.cat]=it.id;save();renderPane()};act.append(b)}
+  }
+  c.append(art,info,desc,act);return c;
+}
+let gearSel=null;
+function renderPane(){
+  const p=$('pane');p.innerHTML='';
+  document.querySelectorAll('#tabs [role=tab]').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===tab));
+  if(tab==='gear'){
+    const sec=document.createElement('div');sec.className='sec';sec.textContent='장착 중';p.append(sec);
+    const g=document.createElement('div');g.className='grid';
+    EQ_SLOTS.forEach(([cat,lab])=>{const id=S.eq[cat];const it=id?item(id):null;
+      g.append(slotEl({cls:it?'eq':'',sel:gearSel===cat,title:lab+(it?' · '+it.name:''),cnt:cat==='bait'&&it?(S.bait[id]||0):null,draw:ctx=>{if(it)drawItem(ctx,it,0,0)},onclick:()=>{gearSel=cat;renderPane()}}))});
+    p.append(g);
+    const cat=gearSel||'rod';const sec2=document.createElement('div');sec2.className='sec';sec2.textContent='보유 '+CATS[cat];p.append(sec2);
+    const g2=document.createElement('div');g2.className='grid';const owned=ITEMS.filter(i=>i.cat===cat&&(cat==='bait'?(S.bait[i.id]||0)>0:S.own[i.id]));
+    let sel=owned.find(i=>i.id===S.eq[cat])||owned[0];
+    if(!owned.length){const e=document.createElement('div');e.className='hint';e.textContent='아직 없어요. 상점에서 살 수 있어요.';p.append(e)}
+    owned.forEach(i=>g2.append(slotEl({cls:'r'+Math.min(4,i.tier)+(S.eq[cat]===i.id?' eq':''),sel:sel&&sel.id===i.id,cnt:cat==='bait'?S.bait[i.id]:null,draw:ctx=>drawItem(ctx,i,0,0),onclick:()=>{gearSel=cat;gearPick=i.id;renderPane()}})));
+    if(gearPick&&owned.find(i=>i.id===gearPick))sel=item(gearPick);
+    p.append(g2);if(sel)p.append(itemCard(sel,'gear'));
+  }else if(tab==='tank'){
+    const sec=document.createElement('div');sec.className='sec';sec.textContent=`${S.tankSel+1}번 어항 ${curTank().length} / ${tankCap()}`;p.append(sec);
+    if(S.tanks.length>1){const sw=document.createElement('div');sw.className='cats';S.tanks.forEach((t,i)=>{const b=document.createElement('button');b.textContent=`${i+1}번 어항 · ${t.length}`;b.setAttribute('aria-selected',i===S.tankSel);b.onclick=()=>{S.tankSel=i;save();renderPane()};sw.append(b)});p.append(sw)}
+    const tc=document.createElement('canvas');tc.id='tankCanvas';tc.width=144;tc.height=56;tc.style.cssText='width:100%;max-width:432px;aspect-ratio:144/56;image-rendering:pixelated;border:2px solid var(--bronze3);background:#0a1a26;display:block';p.append(tc);
+    if(!curTank().length){const e=document.createElement('div');e.className='hint';e.textContent='귀항할 때 물고기를 눌러 어항에 넣을 수 있어요. 어항 속 물고기는 팔리지 않고 여기서 헤엄쳐요.';p.append(e)}
+    const list=document.createElement('div');list.className='haul';
+    curTank().forEach((c,i)=>{const f=fishById(c.id);const d=document.createElement('div');d.className='f in';const cv=document.createElement('canvas');cv.width=24;cv.height=16;drawFish(cv.getContext('2d'),f,0,0,1);
+      const n=document.createElement('span');n.className='r'+f.r;n.textContent=f.name;const cm=document.createElement('span');cm.className='hint';cm.textContent=c.cm+'cm · '+new Date(c.at).toLocaleDateString('ko-KR',{month:'numeric',day:'numeric'});
+      const b=document.createElement('button');b.className='btn small';b.textContent='풀어주기';b.onclick=()=>{curTank().splice(i,1);save();renderPane()};d.append(cv,n,cm,b);list.append(d)});
+    p.append(list);
+  }else if(tab==='codex'){
+    const n=Object.keys(S.codex).length,tot=allFish().length;
+    const h=document.createElement('div');h.className='sec';h.textContent=`도감 ${n} / ${tot} · 판매가 +${n}%`;p.append(h);
+    const wrap=document.createElement('div');wrap.className='shopGrid';const left=document.createElement('div');left.style.cssText='display:flex;flex-direction:column;gap:8px';
+    SPOTS.forEach((s,si)=>{const open=S.maps.includes(si);const t=document.createElement('div');t.className='hint';t.style.cssText='font-family:var(--display);color:var(--bronze2)';t.textContent=s.name+(open?'':' · 미개방');left.append(t);
+      const g=document.createElement('div');g.className='grid';
+      s.fish.forEach(f=>{const got=S.codex[f.id];g.append(slotEl({fish:true,cls:'r'+f.r+(got?'':' unk'),sel:codexSel===f.id,draw:ctx=>drawFish(ctx,f,0,0,1),title:got?f.name:'???',onclick:()=>{codexSel=f.id;renderPane()}}))});left.append(g)});
+    wrap.append(left);
+    const f=codexSel?fishById(codexSel):allFish().find(x=>S.codex[x.id]);
+    const right=document.createElement('div');
+    if(f){const got=S.codex[f.id];const c=document.createElement('div');c.className='card';c.style.gridTemplateColumns='144px 1fr';
+      const art=document.createElement('div');art.className='art';art.style.cssText='width:144px;height:108px';const cv=document.createElement('canvas');cv.width=32;cv.height=24;cv.style.cssText='width:144px;height:108px';if(got)drawFish(cv.getContext('2d'),f,4,4,1);else{const x=cv.getContext('2d');x.fillStyle='#2a2434';x.font='16px DotGothic16, monospace';x.textAlign='center';x.fillText('?',16,17)}art.append(cv);
+      const info=document.createElement('div');
+      info.innerHTML=got?`<h3 class="r${f.r}">${f.name}</h3><div class="kv"><span>등급</span><span class="r${f.r}">${RAR[f.r]}</span><span>서식지</span><span>${SPOTS[f.spot].name}</span><span>시간대</span><span>${f.time?TIMES[f.time]+'에만':'언제나'}</span><span>크기</span><span>${f.min}~${f.max}cm</span><span>기본가</span><span class="gold">${f.price} G</span><span>잡은 수</span><span>${got.n}마리</span><span>최고 기록</span><span>${got.best}cm${got.best>=f.max-Math.round((f.max-f.min)*0.1)?' ★':''}</span></div>`
+        :`<h3 class="r${f.r}">???</h3><div class="kv"><span>등급</span><span class="r${f.r}">${RAR[f.r]}</span><span>서식지</span><span>${SPOTS[f.spot].name}</span><span>시간대</span><span>${f.time?TIMES[f.time]+'에만':'언제나'}</span></div>`;
+      const d=document.createElement('div');d.className='desc';d.textContent=got?f.lore:'아직 낚아본 적 없는 물고기.';c.append(art,info,d);right.append(c)}
+    else{right.innerHTML='<div class="hint">첫 물고기를 낚으면 여기에 카드가 생겨요.</div>'}
+    wrap.append(right);p.append(wrap);
+  }else if(tab==='log'){
+    const today=S.days[dayKey()]?.sec||0;
+    let week=0;for(let i=0;i<7;i++){const d=new Date();d.setDate(d.getDate()-i);week+=S.days[dayKey(d)]?.sec||0}
+    let streak=0;{const d=new Date();if(!(S.days[dayKey(d)]?.sec))d.setDate(d.getDate()-1);while(S.days[dayKey(d)]?.sec>0){streak++;d.setDate(d.getDate()-1)}}
+    const caught=Object.values(S.codex).reduce((a,e)=>a+e.n,0);
+    const st=document.createElement('div');st.className='stats';
+    st.innerHTML=[['오늘',fmtH(today)],['이번 주',fmtH(week)],['전체',fmtH(S.totalSec)],['연속',streak+'일'],['출항',S.sessions+'회'],['총 어획',caught+'마리']].map(([k,v])=>`<div class="stat"><div class="k">${k}</div><div class="v">${v}</div></div>`).join('');p.append(st);
+    const s1=document.createElement('div');s1.className='sec';s1.textContent='최근 12주';p.append(s1);
+    const cal=document.createElement('div');cal.className='cal';cal.setAttribute('aria-label','최근 12주 집중 기록');
+    const end=new Date();const start=new Date();start.setDate(end.getDate()-83-end.getDay());
+    for(let d=new Date(start);d<=end;d.setDate(d.getDate()+1)){const s=S.days[dayKey(d)]?.sec||0;const i=document.createElement('i');i.className=s>=4*3600?'l4':s>=2*3600?'l3':s>=3600?'l2':s>0?'l1':'';i.title=`${dayKey(d)} · ${fmtH(s)}`;cal.append(i)}
+    p.append(cal);
+    const s2=document.createElement('div');s2.className='sec';s2.textContent='태그별';p.append(s2);
+    const tags={};Object.values(S.days).forEach(d=>Object.entries(d.tags).forEach(([t,s])=>tags[t]=(tags[t]||0)+s));
+    const tl=document.createElement('div');tl.className='taglist';Object.entries(tags).sort((a,b)=>b[1]-a[1]).forEach(([t,s])=>{const r=document.createElement('div');r.innerHTML=`<span>${t}</span><b>${fmtH(s)}</b>`;tl.append(r)});
+    if(!Object.keys(tags).length)tl.innerHTML='<div class="hint">첫 출항을 기다리고 있어요</div>';p.append(tl);
+  }else{
+    const mk=(label,hint,ctrl)=>{const d=document.createElement('div');d.className='setting';const l=document.createElement('div');l.innerHTML=label+(hint?`<span class="hint">${hint}</span>`:'');d.append(l,ctrl);return d};
+    const goal=document.createElement('input');goal.type='number';goal.id='goalMin';goal.min=0;goal.max=600;goal.value=S.goalMin;goal.onchange=()=>{S.goalMin=Math.max(0,+goal.value||0);save()};
+    const brk=document.createElement('input');brk.type='number';brk.id='breakMin';brk.min=0;brk.max=120;brk.value=S.breakMin;brk.onchange=()=>{S.breakMin=Math.max(0,+brk.value||0);save()};
+    const vol=document.createElement('input');vol.type='range';vol.id='vol';vol.min=0;vol.max=1;vol.step=0.05;vol.value=S.vol;vol.style.width='110px';vol.oninput=()=>{S.vol=+vol.value;audio.setVol();save()};
+    const ch=document.createElement('button');ch.className='btn small';ch.textContent=(S.char?charOf().name:'없음')+' 바꾸기';ch.disabled=!!S.run;ch.onclick=showCharSelect;
+    const cp=document.createElement('button');cp.className='btn small';cp.textContent='낚시 화면만 보기';cp.onclick=()=>{S.compact=true;save();renderAll()};
+    p.append(mk('목표 시간 (분)','0이면 자유 모드. 채우면 완주 보너스',goal),mk('휴식 타이머 (분)','0이면 끄기. 끝나면 종이 울려요',brk),mk('음량','',vol),mk('견습 어부','',ch),mk('페이지 안 축소 모드','PiP가 안 되는 브라우저용',cp));
+    const t=document.createElement('div');t.className='hint';t.textContent='기록은 이 브라우저와 계정에 저장돼요.';p.append(t);
+  }
+}
+let gearPick=null;
+$('tabs').onclick=e=>{const b=e.target.closest('[role=tab]');if(b){tab=b.dataset.tab;renderPane()}};
+$('shopBtn').onclick=()=>openShop();$('shopBtn2').onclick=()=>openShop();
+$('muteBtn').onclick=()=>{S.muted=!S.muted;audio.unlock();audio.setVol();renderTop();save()};
+
+// ---------- shop window ----------
+let shopWin=null;
+function openShop(){if(shopWin)return;shopWin=overlay('',true);shopWin.querySelector('.win').style.maxWidth='760px';renderShop()}
+function renderShop(){
+  if(!shopWin)return;const w=shopWin.querySelector('.win');w.innerHTML='';
+  const tt=document.createElement('div');tt.className='title';tt.innerHTML=`<span>선착장 상점</span><span class="gold">${S.gold.toLocaleString()} G</span>`;const x=document.createElement('button');x.textContent='×';x.setAttribute('aria-label','닫기');x.onclick=()=>{shopWin.remove();shopWin=null;renderPane();renderTop()};tt.append(x);
+  const body=document.createElement('div');body.className='body';
+  const cats=document.createElement('div');cats.className='cats';Object.entries(CATS).forEach(([k,v])=>{const b=document.createElement('button');b.textContent=v;b.setAttribute('aria-selected',shopCat===k);b.onclick=()=>{shopCat=k;renderShop()};cats.append(b)});
+  const grid=document.createElement('div');grid.className='shopGrid';const left=document.createElement('div');left.className='grid';
+  const list=ITEMS.filter(i=>(shopCat==='all'||i.cat===shopCat)&&i.price>0);
+  if(!shopSel||!list.find(i=>i.id===shopSel))shopSel=list[0]?.id;
+  list.forEach(i=>{const owned=S.own[i.id]||(i.cat==='map'&&S.maps.includes(i.v));left.append(slotEl({cls:'r'+Math.min(4,i.tier)+(owned?' eq':''),sel:shopSel===i.id,title:i.name,cnt:i.cat==='bait'?(S.bait[i.id]||0)||null:null,draw:ctx=>drawItem(ctx,i,0,0),onclick:()=>{shopSel=i.id;renderShop()}}))});
+  const right=document.createElement('div');if(shopSel)right.append(itemCard(item(shopSel),'shop'));
+  grid.append(left,right);body.append(cats,grid);w.append(tt,body);
+}
+
+// ---------- overlays ----------
+function overlay(html,win){const o=document.createElement('div');o.className='overlay';o.innerHTML=win?`<div class="win"></div>`:`<div class="win"><div class="body">${html}</div></div>`;$('game').append(o);return o}
+function showCharSelect(){
+  const o=overlay(`<h2>견습 어부를 고르세요</h2><div class="chars" id="chars"></div><div class="row" style="justify-content:flex-end"><button class="btn primary" id="charOk">이 사람으로</button></div>`);
+  let pick=S.char||CHARS[0].id;const list=o.querySelector('#chars');
+  CHARS.forEach(c=>{const b=document.createElement('button');b.setAttribute('aria-pressed',c.id===pick);const cv=document.createElement('canvas');cv.width=32;cv.height=64;cv.style.cssText='width:64px;height:128px';drawSprite(cv.getContext('2d'),heroSprite(c.id),0,0);b.append(cv);const d=document.createElement('div');d.innerHTML=`<div class="n">${c.name}</div><div class="d">${c.desc}</div>`;b.append(d);b.onclick=()=>{pick=c.id;list.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b))};list.append(b)});
+  o.querySelector('#charOk').onclick=()=>{S.char=pick;save();o.remove();renderAll();audio.unlock()};
+}
+function showHaul(haul,bonusRate,sec,done,newIds,recs){
+  const o=overlay(`<h2>귀항</h2><div class="hint">${fmtH(sec)} 동안 낚시했어요${haul.length?'. 물고기를 누르면 어항에 넣어요 (어항 '+curTank().length+'/'+tankCap()+')':'. 이번엔 빈 어망이에요'}</div><div class="haul" id="haulList"></div><div class="total"><span>판매</span><span class="gold" id="haulGold"></span></div>${done?`<div class="total" style="border:0;padding:0;color:var(--good)"><span>완주 보너스</span><span class="gold" id="haulBonus"></span></div>`:''}<div class="row" style="justify-content:flex-end"><button class="btn primary" id="haulOk">어망 비우기</button></div>`);
+  const list=o.querySelector('#haulList');const sorted=[...haul].sort((a,b)=>fishById(b.id).r-fishById(a.id).r||b.price-a.price);
+  if(S.tanks.length>1&&haul.length){const ts=document.createElement('select');S.tanks.forEach((t,i)=>{const op=document.createElement('option');op.value=i;op.textContent=`${i+1}번 어항 (${t.length}/${tankCap()})`;if(i===S.tankSel)op.selected=true;ts.append(op)});ts.onchange=()=>{S.tankSel=+ts.value;save()};const wrapSel=document.createElement('div');wrapSel.className='row';wrapSel.innerHTML='<span class="hint">넣을 어항</span>';wrapSel.append(ts);list.before(wrapSel)}
+  const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;const seen=new Set();
+  const sum=()=>{const g=sorted.filter(c=>!c.tank).reduce((a,c)=>a+c.price,0);const b=Math.round(g*bonusRate);o.querySelector('#haulGold').textContent='+'+g.toLocaleString()+' G';const hb=o.querySelector('#haulBonus');if(hb)hb.textContent='+'+b.toLocaleString()+' G';return g+b};
+  sorted.forEach((c,i)=>{const f=fishById(c.id);const d=document.createElement('button');d.className='f';d.type='button';const cv=document.createElement('canvas');cv.width=24;cv.height=16;drawFish(cv.getContext('2d'),f,0,0,1);
+    const n=document.createElement('span');n.className='r'+f.r;n.style.textAlign='left';n.textContent=f.name;const cm=document.createElement('span');cm.className='hint';cm.textContent=c.cm+'cm · '+c.price+'G';const tg=document.createElement('span');tg.className='tag';const base=newIds.includes(c.id)&&!seen.has(c.id)?'NEW':(recs.includes(c.id)&&c.cm===S.codex[c.id].best&&!seen.has('r'+c.id)?'기록':'');seen.add(c.id);if(base==='기록')seen.add('r'+c.id);tg.textContent=base;
+    d.append(cv,n,cm,tg);d.onclick=()=>{if(!c.tank){const used=curTank().length+sorted.filter(x=>x.tank).length;if(used>=tankCap()){toast('어항이 가득 찼어요');return}}c.tank=!c.tank;d.classList.toggle('tanked',c.tank);tg.textContent=c.tank?'어항':base;sum()};
+    list.append(d);setTimeout(()=>{d.classList.add('in');if(f.r>=2)audio.rare()},reduced?0:120+i*200)});
+  sum();
+  o.querySelector('#haulOk').onclick=()=>{const total=sum();S.gold+=total;sorted.filter(c=>c.tank).forEach(c=>curTank().push({id:c.id,cm:c.cm,at:Date.now()}));save();renderTop();renderPane();o.remove()};
+}
+
+// ---------- pixel art ----------
+const OUT='#0b0a0e';
+function drawSprite(g,sp,x,y,scale=1){const{rows,pal}=sp;for(let j=0;j<rows.length;j++){const r=rows[j];for(let i=0;i<r.length;i++){const ch=r[i];if(ch==='.')continue;g.fillStyle=ch==='O'?OUT:(pal[ch]||'#f0f');g.fillRect(x+i*scale,y+j*scale,scale,scale)}}}
+// hero sprites 32x64: muted palette, dithered shading, light from the upper left. One full sprite per class.
+const HERO_PAL={
+ common:{S:'#a8866a',s:'#6e5540',E:'#0b0a0e',L:'#4a3424',l:'#2e2016',G:'#8a7232',g:'#5c4a1e',k:'#3a2f12','1':'#8e949c','2':'#6b7179','3':'#4c5159','4':'#33373d','5':'#1c1f24'},
+ knight:{R:'#5a211d',r:'#3d1613',q:'#26100e',h:'#6e2a25',B:'#223450',b:'#17243a',n:'#0f1828'},
+ mage:{A:'#2a2a52',a:'#1c1c3a',z:'#101024',R:'#3a2c5a',r:'#281e40',q:'#18122a',B:'#2f2550',b:'#201838',n:'#140f26',C:'#4f8a8a',W:'#8a857a',w:'#5a564e',V:'#6a6060'},
+ rogue:{A:'#2c3a34',a:'#1c2822',z:'#111a16',R:'#2c3a34',r:'#1c2822',q:'#111a16',B:'#4a3a2a',b:'#33281c',n:'#201812',M:'#6b7179',m:'#4c5159',N:'#4a8a4a'},
+ bard:{A:'#4a1f2a',a:'#32141c',z:'#1e0c11',R:'#4a1f2a',r:'#32141c',q:'#1e0c11',B:'#3a2f4a',b:'#281f34',n:'#181220',W:'#8a857a',H:'#6a3a24',T:'#5a3f2a',t:'#3a2819'},
+ druid:{A:'#2f3f24',a:'#1f2b18',z:'#12190e',R:'#2f3f24',r:'#1f2b18',q:'#12190e',B:'#5a4a32',b:'#3e3322',n:'#261f14',N:'#5a4030',m:'#3a2a1c',W:'#8a857a',w:'#5a564e',V:'#4a7a3a'},
+};
+const HERO_ROWS={
+knight:[
+'...............hR...............',
+'..............hRrr..............',
+'.............hRrqr..............',
+'.............Rrqr...............',
+'............ORrqO...............',
+'..........OO2323OO..............',
+'........OO12232334OO............',
+'.......O122323233444O...........',
+'.......O1232323344544O..........',
+'......O12323233445445O..........',
+'......O123232334454554O.........',
+'......O122OOOOOOOO4545O.........',
+'......O23O55555555O455O.........',
+'......O23O5E555E55O545O.........',
+'......O32O55555555O455O.........',
+'......O232OOOOOOOO4545O.........',
+'......O232323344545454O.........',
+'......O3232334445454544O........',
+'.......O23233444545455O.........',
+'.......O3334444545555O..........',
+'........OO34445455OO............',
+'..........OOOOOOOO..............',
+'.......OOOO34SSs3OOOO...........',
+'....OOO1232OOOOOO33434OO........',
+'...O12323232O1223O3434545O......',
+'..O123232323OBbBbO343454545O....',
+'..O232323234OBbGGbBO34545454O...',
+'..O232323434OBGGGGbO45454545O...',
+'..O323234344OBbGGbBO45454545O...',
+'..O323234344OBbBbBbO45454545O...',
+'..OO32343444OBbGBGbO45454545O...',
+'.ORqOO344454ObBbBbBO4545OOqRO...',
+'.ORrROOOOOOObGGGGbBOOOOOORrRO...',
+'.ORrRrO...ObBbBbBbO...OrRrRrO...',
+'.ORrRrO...OBbBbBbBO...OrRrRrO...',
+'.ORrRrO...ObBbBbBbO...OrRrRrO.SS',
+'.ORrRqO...OLlGGlLlO...OqRrRrOSSs',
+'.ORrRqO...OlLGgLlLO...OqRrRrOSsO',
+'.ORrqqO...ObBbBbBbO...OqqRrROOO.',
+'.ORrqqO...OBbBbBbBO...OqqRrRO...',
+'.ORrqqO...ObBbBbnbO...OqqRrRO...',
+'.ORqqqO...OBbBnbnBO...OqqqRrO...',
+'.ORqqqO...OnbnBnbnO...OqqqRrO...',
+'.ORqqqO...OOOOOOOO...OqqqqRO....',
+'.OrqqqO..O1232OO3234O.OqqqqrO...',
+'.OrqqqO..O2323O.O3234O.OqqqqrO..',
+'.OrqqqO..O23234O.O3245O.OqqqqrO.',
+'.OqqqqO..O32344O.O3345O.OqqqqqO.',
+'.OqqqqO..O32345O.O4345O.OqqqqqO.',
+'.OOOOOO..O33445O.O4455O.OOOOOOO.',
+'.........O34455O.O4555O.........',
+'.........O44555O.O5555O.........',
+'.........O5555O..O5555O.........',
+'.........O2323O..O3234O.........',
+'.........O3232O..O3334O.........',
+'.........O3234O..O3445O.........',
+'........O32344O..O34445O........',
+'........O33445O..O34455O........',
+'.......O334455O..O344555O.......',
+'.......O344555O..O445555O.......',
+'.......O455555O..O555555O.......',
+'.......OOOOOOOO..OOOOOOOO.......',
+'................................',
+'................................'],
+mage:[
+'..................OO............',
+'.................OAaO...........',
+'................OAAazO..........',
+'................OAaazO..........',
+'...............OAAaazO..........',
+'...............OAaaazO..........',
+'..............OAAaaazzO.........',
+'..............OAGGGaazO.........',
+'.............OAAGgGaazzO........',
+'.............OAAGGGaaazO........',
+'............OAAAaaaaazzO........',
+'............OAAaAaaazzzO........',
+'...........OAAAaaaaaazzzO.......',
+'....OOOOOOOAAAaAaaaazzzzOOOOOO..',
+'...OAAAAAAAAAAaaaaaaazzzzzzzzzO.',
+'..OAAaAAaAAaAaAaaaaaaazzzzzzzzzO',
+'..OGGgGGgGGgGgGgggggggkkkkkkkkkO',
+'...OOOOOOOOzzzSSSSSsOOOOOOOOOOO.',
+'..........OWzzSSSsEsVWO.........',
+'..........OWzSSSSsssVWO.........',
+'..........OWWSSSSssVWWO.........',
+'...........OWWWsSsWWWO..........',
+'...........OWWWWWWWwVO..........',
+'...........OWWWWWWwwVO..........',
+'...........OWwWWWwwVVO..........',
+'............OWWWwwVVO...........',
+'............OWwWwwVVO...........',
+'.............OWwwVVO............',
+'.............OWwVVO.............',
+'..........OOOOOwVOOOOO..........',
+'........OORRRROOOORRRRqOO.......',
+'.......ORRRrRROBbBORRrRRqqO.....',
+'......ORRrRRrOBbCbBORrRRrqqO....',
+'......ORRrRRrOBbBbBORrRRrqqO....',
+'.....ORRrRRrROBbBbBORrRRrqqqO...',
+'.....ORRrRRrROBbBbBORrRRrqqqO...',
+'.....ORRrRRrROBCbBbORrRRrqqqO.SS',
+'.....ORRrRrrROBbBbBORrRrrqqqOSSs',
+'.....ORRrRrrROGgGgGORrRrrqqqOSsO',
+'.....ORRrRrrROBbBbBORrRrrqqqOOO.',
+'.....ORrrRrrqOBbBbBOrrRrrqqqO...',
+'.....ORrrRrrqOBbCbBOrrRrrqqqO...',
+'.....ORrrrrrqOBbBbBOrrrrrqqqO...',
+'.....ORrrrrqqOBbBbBOrrrrqqqqO...',
+'.....ORrrrrqqOBbBbBOrrrrqqqqO...',
+'.....OrrrrqqqOBbBbBOrrrqqqqqO...',
+'.....OrrrqqqqOBCbBbOrrqqqqqqO...',
+'.....OrrrqqqqOBbBbBOrrqqqqqqO...',
+'.....OrrqqqqqOBbBbBOrqqqqqqqO...',
+'.....OrrqqqqqOBbBbnOrqqqqqqqO...',
+'.....OrqqqqqqOnbnbnOqqqqqqqqO...',
+'.....OrqqqqqqOnnnnnOqqqqqqqqO...',
+'.....OqqqqqqqOOOOOOOqqqqqqqqO...',
+'.....OqqqqqqqqqqqqqqqqqqqqqqO...',
+'.....OqqqqqqqqqqqqqqqqqqqqqqO...',
+'......OqqqqqqqqqqqqqqqqqqqqO....',
+'......OqqqqqqqqqqqqqqqqqqqqO....',
+'.......OOOOOLLLOOOLLLOOOOOO.....',
+'...........OLlLO.OLlLO..........',
+'...........OllLO.OllLO..........',
+'...........OOOOO.OOOOO..........',
+'................................',
+'................................',
+'................................'],
+rogue:[
+'.........OOOOOOOOO..............',
+'.......OOAAAAAAAAAOO............',
+'......OAAaAAAAAAAAaAO...........',
+'.....OAAaAAaaaaaAAAaAO..........',
+'.....OAaAaaaaaaaaaAAaAO.........',
+'....OAAaaaaaaazzaaaAAaAO........',
+'....OAaaaaaazzzzzaaaAAaAO.......',
+'....OAaaaaazzzzzzzaaAAaaAO......',
+'....OAaaaazzzzzzzzzaAAaaAAO.....',
+'....OAaaazzzzzzzzzzzAAaaaAAO....',
+'....OAaaazzzNzzzzNzzAAaaaAAAO...',
+'....OAaaazzzzzzzzzzzAAaaaAAAAO..',
+'....OAaaazzzzzzzzzzzaAaaaAAAAAO.',
+'....OAaaaazz444444zzaAaaaAAAAAO.',
+'....OAAaaazz4m4m44zzaAaaaAAAAO..',
+'.....OAaaaazz4444zzaAaaaAAAAO...',
+'.....OAAaaaazzzzzzaaAaaaAAAO....',
+'......OAAaaaaaaaaaaAaaaAAO......',
+'.......OAAAaaaaaaaaaaAAOO.......',
+'........OOAAAaaaaaaAOO..........',
+'..........OOOOSSsOOO............',
+'.............OSSsO..............',
+'........OOOOOOSSsOOOOOO.........',
+'.......OAAaAAOssssOAAaAAO.......',
+'......OAAaAAOBbBbBbOAAaAAAO.....',
+'.....OAAaAAOBbBbLbBbOAAaAAAO....',
+'.....OAAaAAOBbBLbBbBOAAaAAAO....',
+'....OAAaAAOBbBbBLbBbOAAaAAAAO...',
+'....OAAaAAOBbBbBbLbBOAAaAAAAO...',
+'....OAaaAAOBbBbBbBLbOAAaaAAAO...',
+'....OAaaAAOBbBbBbBbLOAAaaAAAO...',
+'....OAaaAAOLlLlLlLlLOAAaaAAAO...',
+'....OAaaaAOlLlGGlLlLOAAaaaAAO...',
+'....OAaaaAOBbOmmObBbOAAaaaAAO.SS',
+'....OAaaaAOBbOm1ObBbOAaaaaAAOSSs',
+'....OAaaaAOBbOOOObBbOAaaaaAAOSsO',
+'....OAaaaaOBbBbBbBbBOAaaaaaAOOO.',
+'....OAaaaaOBbBbBbBbBOAaaaaaAO...',
+'....OAaaaaOBbBbBbBbbOAaaaaaAO...',
+'....OAaaazOBbBbBbbnbOaaaaaaAO...',
+'....OAaazzObBbBbnbnbOaaaaazAO...',
+'....OAaazzOnbnbnbnbnOaaaazzAO...',
+'....OOOOOOOOOOOOOOOOOOOOOOOO....',
+'..........OLlLOOLlLO............',
+'..........OLlLO.OLlLO...........',
+'..........OLlLO.OLlLO...........',
+'..........OllLO.OllLO...........',
+'..........OllLO.OllLO...........',
+'..........OlllO.OlllO...........',
+'..........OlllO.OlllO...........',
+'..........OBbBO.OBbBO...........',
+'..........ObBbO.ObBbO...........',
+'..........OBbBO.OBbBO...........',
+'..........ObBbO.ObBbO...........',
+'.........OBbBbO.OBbBbO..........',
+'.........ObBbbO.ObBbbO..........',
+'.........ObbbbO.ObbbbO..........',
+'........ObBbbbO.ObBbbbO.........',
+'........ObbbbnO.ObbbbnO.........',
+'........OnnnnnO.OnnnnnO.........',
+'........OOOOOOO.OOOOOOO.........',
+'................................',
+'................................',
+'................................'],
+bard:[
+'......................OW........',
+'.....................OWWwO......',
+'....................OWWwO.......',
+'...................OWWwO........',
+'..........OOOOOOOOOOWwO.........',
+'........OOAAaAAaAAaAOO..........',
+'.......OAAaAAaAAaAAaAAO.........',
+'......OAaAAaAAaAAaAAaAzO........',
+'......OaaaaaaaaaaaaaaazO........',
+'.......OHHHhHHhHHhHHHO..........',
+'.......OHhHHhHHhHHhHHO..........',
+'........OSSSSSSSsssO............',
+'........OSSSSSSSsssO............',
+'........OSSEESSsEEsO............',
+'........OSSEeSSsEesO............',
+'........OSSSSSSssssO............',
+'........OSSSSSsssssO............',
+'.........OsSSSsssssO............',
+'.........OsSSSssstO.............',
+'..........OsSssttO..............',
+'...........OOsstO...............',
+'..........OOOOssOOOO............',
+'.......OOORRROssOORRROO.........',
+'......ORRrRROBbBbORRrRRO........',
+'.....ORRrRROBbTbBbORRrRRO.......',
+'.....ORRrRRObBbTbBORRrRRO.......',
+'....ORRrRRObBbBbTbBORRrRRO......',
+'....ORRrRRObBbBbBTbORRrRRO......',
+'....ORRrRRObBWbBbBTORRrRRO......',
+'....ORRrRRObBbWbBbBORRrRRO......',
+'....ORRrRRObBbBWbBbORRrRRO......',
+'....ORrrRRObBbBbWbBORrrRRO.SS...',
+'....ORrrRROLlLGGlLlORrrRROSSs...',
+'....ORrrRROlLlGgLlLORrrRROSsO...',
+'....ORrrRrObBbBbBbBORrrRrOOO....',
+'....ORrrRrObBbBbBbBORrrRrO......',
+'....ORrrRrObBbBbBbBORrrRrO......',
+'....ORrrrrObBbBbBbbOrrrRrO......',
+'....ORrrrrObBbBbbnbOrrrRrO......',
+'....ORrrrqOnbnbnbnbOrrrrqO......',
+'....OOOOOOOOOOOOOOOOOOOOOO......',
+'...........OTtTOOTtTO...........',
+'...........OTtTO.OTtTO..........',
+'...........OTtTO.OTtTO..........',
+'...........OttTO.OttTO..........',
+'...........OttTO.OttTO..........',
+'...........OtttO.OtttO..........',
+'...........OtttO.OtttO..........',
+'...........OLlLO.OLlLO..........',
+'...........OLlLO.OLlLO..........',
+'...........OllLO.OllLO..........',
+'...........OllLO.OllLO..........',
+'..........OLllLO.OLllLO.........',
+'..........OlllLO.OlllLO.........',
+'..........OllllO.OllllO.........',
+'.........OLlllLO.OLlllLO........',
+'.........OlllllO.OlllllO........',
+'.........OlllllO.OlllllO........',
+'.........OOOOOOO.OOOOOOO........',
+'................................',
+'................................',
+'................................',
+'................................',
+'................................'],
+druid:[
+'.....O..O...........O..O........',
+'.....ONOONO........ONOONO.......',
+'......ONNmO........ONNmO........',
+'.......ONNmO......ONNmO.........',
+'.......OONNmO....ONNmOO.........',
+'.........ONNmOOOONNmO...........',
+'..........OONNmmNNOO............',
+'.........OOAAaAAaAAOO...........',
+'........OAAaAAaAAaAAaO..........',
+'.......OAAaAAaAAaAAaAaO.........',
+'.......OAaAaAaAaAaAaAaO.........',
+'.......OAaaaaaaaaaaaaaO.........',
+'......OAazzzSSSSSsszzaO.........',
+'......OAazzSSSSSSssszaO.........',
+'......OAazzSSEESsEEszaO.........',
+'......OAazzSSEeSsEeszaO.........',
+'......OAazzSSSSSsssszaO.........',
+'......OAazzWSSSSsssWzaO.........',
+'......OAazzWWSSssWWWzaO.........',
+'......OAazzWWWWWWWwwzaO.........',
+'.......OAaWWWwWWwWwwaO..........',
+'.......OAaWWwWWwWWwwaO..........',
+'.......OOOWwWWwWWwwOOO..........',
+'.......OAAaOWwWwWwOAAaO.........',
+'......OAAaAAOWwwWOAAaAAO........',
+'.....OAAaAAaOBbBbOAAaAAaO.......',
+'.....OAaAAaAOBbVbBOAaAAaAO......',
+'....OAaAAaAAOBbBbBOAaAAaAAO.....',
+'....OAaAAaAAOBVbBbOAaAAaAAO.....',
+'....OAaaAaAAOBbBbBOAaaAaAAO.....',
+'....OAaaAaaAOBbBVbOAaaAaaAO.....',
+'....OAaaAaaAOBbBbBOAaaAaaAO.....',
+'....OAaaaaaAOLlNNlOAaaaaaAO.SS..',
+'....OAaaaaaAOlLNmLOAaaaaaAOSSs..',
+'....OAaaaaaaOBbBbBOAaaaaaaOSsO..',
+'....OAaaaaaaOBVbBbOAaaaaaaOOO...',
+'....OAaaaazzOBbBbBOAaaaazzO.....',
+'....OAaaazzzOBbBVbOAaaazzzO.....',
+'....OAaazzzzOBbBbBOAaazzzzO.....',
+'....OAaazzzzOBbBbbOAaazzzzO.....',
+'....OAazzzzzObBbnbOAazzzzzO.....',
+'....OAazzzzzOnbnbnOAazzzzzO.....',
+'....OOOOOOOOOOOOOOOOOOOOOOO.....',
+'...........OLlLOOLlLO...........',
+'...........OLlLO.OLlLO..........',
+'...........OLlLO.OLlLO..........',
+'...........OllLO.OllLO..........',
+'...........OllLO.OllLO..........',
+'...........OlllO.OlllO..........',
+'...........OlllO.OlllO..........',
+'...........ONmNO.ONmNO..........',
+'...........ONmNO.ONmNO..........',
+'...........OmmNO.OmmNO..........',
+'...........OmmNO.OmmNO..........',
+'..........ONmmNO.ONmmNO.........',
+'..........OmmmNO.OmmmNO.........',
+'..........OmmmmO.OmmmmO.........',
+'.........ONmmmNO.ONmmmNO........',
+'.........OmmmmmO.OmmmmmO........',
+'.........OOOOOOO.OOOOOOO........',
+'................................',
+'................................',
+'................................',
+'................................'],
+};
+function heroSprite(cls){const pal=Object.assign({},HERO_PAL.common,HERO_PAL[cls]||HERO_PAL.knight);return {rows:HERO_ROWS[cls]||HERO_ROWS.knight,pal}}
+
+const IPAL={W:'#8a6a48',w:'#5a3f2a',x:'#b08a60',L:'#e8dcc0',G:'#d9b05a',g:'#8a6a2a',R:'#9a2f28',r:'#5e1c18',B:'#3a6a9a',b:'#1f3f60',P:'#d8c8a0',p:'#a08a60',S:'#c8ccd4',s:'#7a8088',K:'#3a3a44',k:'#23232a',N:'#5a8a3a',n:'#365a24',V:'#7a4fb0',v:'#4a2f70',Y:'#fff0a0',C:'#7fd8f0',M:'#e08ab0',T:'#2f7a7a',E:'#f3eee2',e:'#0b0a0e'};
+const ITEM_ART={
+ // rods: shaft from bottom-left to top-right, handle style and tip ornament differ by rod
+ rod0:['...............O','..............OW','.............OWw','............OWwO','...........OWwO.','..........OWwO..','.........OWwO...','........OWwO....','.......OWwO.....','......OWwO......','.....OWwO.......','....OWwO........','...OwwO.........','..OwwO..........','.OwwO...........','.OOO............'],
+ rod1:['...............O','..............OW','.............OWw','............OWwO','...........OWwO.','..........OWwO..','.........OWwO...','........OWwO....','.......OWwO.....','......OxwO......','.....OWwO.......','....OxwO........','...OWwO...OO....','..OxwO...OKO....','.OWwO....OOO....','.OOO............'],
+ rod2:['..............OO','.............OSO','............OWwO','...........OWwO.','..........OWwO..','.........OWwO...','........OWwO....','.......OWwO.....','......OWwO......','.....OSsO.......','....OWwO........','...OSsO...OO....','..OWwO...OSsO...','.OSsO....OsSO...','.OWwO.....OO....','.OOO............'],
+ rod3:['..............OO','.............OYO','............OCYO','...........OWwO.','..........OWwO..','.........OWwO...','........OCwO....','.......OWwO.....','......OWwO......','.....OCwO.......','....OWwO........','...OWwO...OO....','..OCwO...OCYO...','.OWwO....OYCO...','.OwwO.....OO....','.OOO............'],
+ rod4:['..............OO','.............OKO','............OSKO','...........OSKO.','..........OSKO..','.........OSKO...','........OSKO....','.......OSKO.....','......OKKO......','.....OWwO.......','....OWwO........','...OKKO...OO....','..OWwO...OKKO...','.OWwO....OKsO...','.OKKO.....OO....','.OOO............'],
+ rod5:['.Y............OO','.............OYO','....Y.......OLYO','...........OLsO.','..........OSLO..','.........OLsO...','........OSLO.Y..','.......OLsO.....','......OSLO......','.....OWwO.......','....OWwO........','...OwwO...OO....','..OWwO...OGYO...','.OwwO....OYGO...','.OWwO.....OO....','.OOO............'],
+ rod6:['..............OO','.............OVO','............OvVO','...........OkVO.','..........OvkO..','.........OkVO...','........OvkO....','.......OkVO.....','......OvkO......','.....OkKO.......','....OKkO........','...OkKO...OO....','..OKkO...OVvO...','.OkKO....OvVO...','.OKkO.....OO....','.OOO............'],
+ rod7:['...........N..OO','..........NN.ONO','.........N..OWNO','...........OWwO.','.......N..OWwO..','.........OWwO...','....N...OWwO....','.......OWwO.....','......OWwO......','.....OWwO.......','....OxwO........','...OWwO...OO....','..OxwO...ONYO...','.OWwO....OYNO...','.OxwO.....OO....','.OOO............'],
+ net1:['OOOOOOOOOOOO....','OWwWwWwWwWwO....','OwWwWwWwWwWO....','OWwWwWwWwWwO....','OwWwWwWwWwWO....','OWwWwWwWwWwO....','OwWwWwWwWwWO....','OWwWwWwWwWwOO...','OOOOOOOOOOOOWO..','............OWO.','.............OWO','..............OW','...............O','................','................','................'],
+ net2:['OOOOOOOOOOOO....','OCTCTCTCTCTO....','OTCTCTCTCTCO....','OCTCTCTCTCTO....','OTCTCTCTCTCO....','OCTCTCTCTCTO....','OTCTCTCTCTCO....','OCTCTCTCTCTOO...','OOOOOOOOOOOOWO..','............OWO.','.............OWO','..............OW','...............O','................','................','................'],
+ net3:['OOOOOOOOOOOOO...','OSsSsSsSsSsSO...','OsSsSsSsSsSsO...','OSsSsSsSsSsSO...','OsSsSsSsSsSsO...','OSsSsSsSsSsSO...','OsSsSsSsSsSsO...','OSsSsSsSsSsSOO..','OOOOOOOOOOOOOWO.','.............OWO','..............OW','...............O','................','................','................','................'],
+ net4:['OOOOOOOOOOOOO...','ORGRGRGRGRGRO...','OGrGrGrGrGrGO...','ORGRGRGRGRGRO...','OGrGrGrGrGrGO...','ORGRGRGRGRGRO...','OGrGrGrGrGrGO...','ORGRGRGRGRGROO..','OOOOOOOOOOOOOWO.','.............OWO','..............OW','...............O','................','................','................','................'],
+ net5:['O.O.O.O.O.O.O...','.C.L.C.L.C.L....','O.O.O.O.O.O.O...','.L.C.L.C.L.C....','O.O.O.O.O.O.O...','.C.L.C.L.C.L....','O.O.O.O.O.O.O...','.L.C.L.C.L.C.O..','O.O.O.O.O.O.OSO.','.............OSO','..............OS','...............O','................','................','................','................'],
+ con1:['...OOOOOOOOOO...','..OPPPPPPPPPPO..','..OPppppppppPO..','..OPPPPPPPPPPO..','..OPpppppppPPO..','..OPPPPPPPPPPO..','..OPpppppPPPPO..','..OPPPPPPPPPPO..','..OPppppppppPO..','..OPPPPPPPPPPO..','..OPPPPPPRRPPO..','..OPPPPPPRrPPO..','..OppppppppppO..','..OOOOOOOOOOOO..','................','................'],
+ con2:['...OOOOOOOOOO...','..OPPPPPPPPPPO..','..OPppppppppPO..','..OPPPPPPPPPPO..','..OPpppppppPPO..','..OPPPPPPPPPPO..','..OPpppppPPPPO..','..OPPPPPPOOPPO..','..OPppppONNOPO..','..OPPPPPONnOPO..','..OPPPPPPOOPPO..','..OPPPPPPPPPPO..','..OppppppppppO..','..OOOOOOOOOOOO..','................','................'],
+ con3:['...OOOOOOOOOO...','..OPPPPPPPPPPO..','..OPppppppppPO..','..OPPPPPPPPPPO..','..OPpppppppPPO..','..OPPPPPPPPPPO..','..OPpppppPPPPO..','..OPPPPPPOOPPO..','..OPppppOMMOPO..','..OPPPPPOMLOPO..','..OPPPPPPOOPPO..','..OPPPPPPPMPPO..','..OppppppppMpO..','..OOOOOOOOOOOMO.','.............M..','................'],
+ con4:['...OOOOOOOOOO...','..OPPPPGPPPPPO..','..OPppGGGpppPO..','..OPPPGGGGGPPO..','..OPpppGGGppPO..','..OPPPPPPPPPPO..','..OPpppppPPPPO..','..OPPPPPPOOPPO..','..OPppppORROPO..','..OPPPPPORrOPO..','..OPPPPPPOOPPO..','..OPPPPPPPRPPO..','..OppppppppRpO..','..OOOOOOOOOOORO.','.............R..','................'],
+ con5:['...OOOOOOOOOO...','..OPPPPPLPPPPO..','..OPppPLLLppPO..','..OPPPPPLPPPPO..','..OPpppPLPppPO..','..OPPPPPPPPPPO..','..OPpppppPPPPO..','..OPPPPPOOOPPO..','..OPpppOGGGOPO..','..OPPPPOGgGOPO..','..OPPPPPOOOPPO..','..OPPPPPPPGPPO..','..OppppppppGpO..','..OOOOOOOOOOOGO.','.............G..','................'],
+ bait1:['................','................','................','.....OOO........','....OMmMOO......','...OMMMMMmO.....','...OmMOOOMO.....','....OO..OMMO....','.........OMmOO..','..........OMMMO.','...........OmMO.','............OO..','................','................','................','................'].map(r=>r.replace(/m/g,'r').replace(/M/g,'R')),
+ bait2:['................','................','..OO........OO..','.OLLO......OLLO.','OLLLLO....OLLLLO','OLLLLLO..OLLLLLO','.OLLLLOOOOLLLLO.','..OLLOGGGGOLLO..','...OOOGgGGOOO...','..OLLOGGGGOLLO..','.OLLLOOGGOOLLLO.','.OLLO..OO..OLLO.','..OO........OO..','................','................','................'],
+ bait3:['................','......OO........','.....OYYO.......','....OYCCYO......','....OCNNCO......','....ONnnNO......','.....ONNO.......','....OONNOO......','...OLONnOLO.....','...OLOOOOLO.....','....O....O......','................','................','................','................','................'],
+ bait4:['................','................','...OOO..........','..ORrROO........','.ORRYRRrO.......','.OrROOORO.......','..OO..ORRO......','.......ORrOO....','........ORRYO...','.........OrRO...','..........OO....','................','................','................','................','................'],
+ bait5:['................','................','.....OOOOO......','....OBCCCBO.....','...OBCLLCBBO....','...OBCLCCBBO....','...OBCCCBBbO....','...OBBBBBbbO....','....ObBBbbO.....','.....OOOOO......','................','................','................','................','................','................'],
+ bait6:['................','................','....OO...OO.....','...ONnO.ONnO....','..ONNNnONNNnO...','..OnNNNNNnNNO...','...ONnNNNNNnNO..','....ONNnNNNNO...','....OnNNNnNnO...','.....OOnnnOO....','.......OOO......','................','................','................','................','................'],
+ bait7:['....Y......Y....','.......OO.......','..Y...OYLO...Y..','.....OYLLYO.....','....OYLGGLYO....','...OYLGGGGLYO...','....OYLGGLYO....','.....OYLLYO.....','..Y...OYLO...Y..','.......OO.......','....Y......Y....','................','................','................','................','................'],
+ bait8:['................','.......O........','......OCO.......','......OCCO......','.....OCCCO......','.....OCLCCO.....','....OCLLCCO.....','....OCLCCCCO....','....OCCCCCbO....','....OCCCCbbO....','.....OCCbbO.....','......OOOO......','................','................','................','................'],
+ ch1:['................','.....OOOOOO.....','....OGggggGO....','...OGgOOOOgGO...','...OGgO..OgGO...','...OGgO..OgGO...','...OGgOOOOgGO...','...OGggggggGO...','....OGGGGGGO....','.....OOOOOO.....','................','................','................','................','................','................'],
+ ch2:['..............O.','.............OKO','............OKkO','...........OKkO.','..........OKkKO.','.........OKkKO..','........OKkKO...','.......OKkKO....','......OKkKO.....','.....OKkKO......','....OKKO........','...OSSO.........','..OSsO..........','..OOO...........','................','................'],
+ ch3:['......OOOO......','....OOLLLLOO....','...OLLLOOOLLO...','..OLLO....OLO...','.OLLO......OO...','.OLO............','.OLO............','.OLLO......OO...','..OLLO....OLO...','...OLLLOOOLLO...','....OOLLLLOO....','......OOOO......','................','................','................','................'],
+ ch4:['................','...OOO....OOO...','..OWwWO..OWwWO..','..OWOOWOOWOOWO..','...OWWwwwwWWO...','....OWwwwwWO....','....OWwwwwWO....','...OWWwwwwWWO...','..OWOOWOOWOOWO..','..OWwWO..OWwWO..','...OOO....OOO...','................','................','................','................','................'],
+ ch5:['......OO........','.....OSSO.......','.....OSSO.......','...OOOSSOOO.....','..OSSSSSSSSO....','...OOOSSOOO.....','.....OSSO.......','.....OSSO.......','.....OSSO.......','.....OSSO.......','.....OSSO.......','.....OOOO.......','................','................','................','................'],
+ ch6:['................','.....OOOOOO.....','....OGggggGO....','...OGOORROOGO...','...OGORRRROGO...','...OGORrRROGO...','...OGOORROOGO...','...OGggggggGO...','....OGGGGGGO....','.....OOOOOO.....','................','................','................','................','................','................'],
+ ch7:['......OO........','.....OCCO.......','....OCLLCO......','....OCLCCO......','...OCCCCCCO.....','...OCCLCCCO.....','...OCCCCCCO.....','...OTCCCCTO.....','....OTCCTO......','.....OTTO.......','......OO........','................','................','................','................','................'],
+ ch8:['................','...OOOOOOOOOO...','..OGgGGGGGGgGO..','..OGOGOOOOGOGO..','..OGGOGGGGOGGO..','..OGGGOOOOGGGO..','..OGgGGGGGGgGO..','...OOGGGGGGOO...','....OGggggGO....','....OGGGGGGO....','.....OOOOOO.....','................','................','................','................','................'],
+ ln1:['......OOOO......','.....OKkkKO.....','....OKOOOOKO....','....OKOGGOKO....','....OKOGYOKO....','....OKOGGOKO....','....OKOOOOKO....','....OKkkkkKO....','.....OKKKKO.....','......OOOO......','................','................','................','................','................','................'],
+ ln2:['......OOOO......','.....OKkkKO.....','....OKOOOOKO....','....OKOCCOKO....','....OKOCLOKO....','....OKOBCOKO....','....OKOOOOKO....','....OKkkkkKO....','.....OKKKKO.....','......OOOO......','................','................','................','................','................','................'],
+ ln3:['......OOOO......','.....OGggGO.....','....OGOLLOGO....','....OGOLLOGO....','....OGOLEOGO....','....OGOLLOGO....','....OGOOOOGO....','....OGggggGO....','.....OGGGGO.....','......OOOO......','................','................','................','................','................','................'],
+ tk1:['OOOOOOOOOOOOOOOO','OWwWwWwWwWwWwWwO','OWBBBBBBBBBBBBwO','OWBBBBBBBBBBBBwO','OWBBBBAaBBBBBBwO','OWBBBBBBBBBBBBwO','OWBBBBBBBBBAaBwO','OWBBBBBBBBBBBBwO','OWwWwWwWwWwWwWwO','OOOOOOOOOOOOOOOO','................','................','................','................','................','................'],
+ tk2:['OOOOOOOOOOOOOOOO','OSsSsSsSsSsSsSsO','OsBBBBBBBBBBBBsO','OSBBBAaBBBBBBBSO','OsBBBBBBBBBAaBsO','OSBBBBBBBBBBBBSO','OsBBBBBBBBBBBBsO','OSsSsSsSsSsSsSsO','OOOOOOOOOOOOOOOO','................','................','................','................','................','................','................'],
+ tk3:['.OOOOOOOOOOOOOO.','OLBBBBBBBBBBBBLO','OBBLBBBBBBBBBBBO','OBBBBBBAaBBBBBBO','OBBBBBBBBBBBBBBO','OBAaBBBBBBBaBBBO','OBBBBBBBBBBBBBBO','OLBBBBBBBBBBBBLO','.OOOOOOOOOOOOOO.','................','................','................','................','................','................','................'],
+ tk4:['.OOOOOOOOOOOOOO.','OGBBBBBBBBBBBBGO','OBBGBBBBBBBBGBBO','OBBBBBBAaBBBBBBO','OBGBBBBBBBBBBGBO','OBAaBBBBBBBaBBBO','OBBGBBBBBBBBGBBO','OGBBBBBBBBBBBBGO','.OOOOOOOOOOOOOO.','................','................','................','................','................','................','................'],
+ nt1:['OOOOOOO..OOOOOOO','OWwWwWO..OWwWwWO','OWBBBBO..OWBBBBO','OWBAaBO..OWBBBBO','OWBBBBO..OWBAaBO','OOOOOOO..OOOOOOO','................','.....OOOOOOO....','.....OWwWwWO....','.....OWBBBBO....','.....OWBAaBO....','.....OOOOOOO....','................','................','................','................'],
+ nt2:['OOOOOOOOOOOOOOOO','OSsSsSsSsSsSsSsO','OsBBBBBBBBBBBBsO','OSBBAaBBBBBaBBSO','OSsSsSsSsSsSsSsO','OOOOOOOOOOOOOOOO','....OOOOOOOO....','....OSsSsSsO....','....OsBBBBsO....','....OSBAaBSO....','....OSsSsSsO....','....OOOOOOOO....','................','................','................','................'],
+ nt3:['.OOOOOOOOOOOOOO.','OLBBBBBBBBBBBBLO','OBBAaBBBBBaBBBBO','OLBBBBBBBBBBBBLO','.OOOOOOOOOOOOOO.','.OOOOOOOOOOOOOO.','OLBBBBBBBBBBBBLO','OBBBBBaBBBAaBBBO','OLBBBBBBBBBBBBLO','.OOOOOOOOOOOOOO.','................','................','................','................','................','................'],
+ nt4:['.OOOOOOOOOOOOOO.','OGBBBBBBBBBBBBGO','OBGBBBAaBBBBGBBO','OGBBBBBBBBBBBBGO','.OOOOOOOOOOOOOO.','...OGGGGGGGGO...','...OGggggggGO...','...OGGGGGGGGO...','....OOOOOOOO....','................','................','................','................','................','................','................'],
+ map1:['OOOOOOOOOOOOOOO.','OPPPPPPPPPPPPPpO','OPPPPPNNNPPPPPpO','OPPPPNNNNNPPPPpO','OPPPNNNNNNNPPPpO','OPPPPPCCCPPPPPpO','OPPpPPCCCPPpPPpO','OPPPpppCpppPPPpO','OPPPPPPPPPPPPPpO','OPPPPPPPPPPPPPpO','OppppppppppppppO','OOOOOOOOOOOOOOOO','................','................','................','................'],
+ map2:['OOOOOOOOOOOOOOO.','OPPPPPPPPPPPPPpO','OPPPPPPPRPPPPPpO','OPPPPPPRRRPPPPpO','OPPPPPRRYRRPPPpO','OPPPPPRYYYRPPPpO','OPPpPPPRYRPPpPpO','OPPPpppppppPPPpO','OPPPPPPPPPPPPPpO','OPPPPPPPPPPPPPpO','OppppppppppppppO','OOOOOOOOOOOOOOOO','................','................','................','................'],
+ map3:['OOOOOOOOOOOOOOO.','OPPPPPPPPPPPPPpO','OPPPPPPPYPPPPPpO','OPPPPPPYYYPPPPpO','OPPPPYYYYYYYPPpO','OPPPPPPYYYPPPPpO','OPPpPPYYPYYPPPpO','OPPPBBBBBBBBBPpO','OPPPpBBBBBBBpPpO','OPPPPPPPPPPPPPpO','OppppppppppppppO','OOOOOOOOOOOOOOOO','................','................','................','................'],
+ map4:['OOOOOOOOOOOOOOO.','OPPPPPPPPPPPPPpO','OPPPPOOOOOOOPPpO','OPPPOKkkkkkKOPpO','OPPPOKkVVVkKOPpO','OPPPOKkVYVkKOPpO','OPPPOKkVVVkKOPpO','OPPPOKkkkkkKOPpO','OPPPPOOOOOOOPPpO','OPPPPPPPPPPPPPpO','OppppppppppppppO','OOOOOOOOOOOOOOOO','................','................','................','................'],
+};
+function drawItem(g,it,x,y){
+  const tc=TIER[it.tier];const pal=Object.assign({},IPAL,{A:tc,a:shade(tc,-40)});
+  const art=ITEM_ART[it.id];if(!art)return;
+  drawSprite(g,{rows:art,pal},x,y);
+}
+// menu tab icons 12x12
+const TAB_ART={
+ bag:['....OOOO....','...OWwwWO...','..OWOOOOWO..','.OOOOOOOOOO.','.OWWWWWWWwO.','.OWwWWWWWwO.','.OWWGGWWWwO.','.OWWGGWWWwO.','.OWWWWWWWwO.','.OwwwwwwwwO.','..OOOOOOOO..','............'],
+ tank:['.OOOOOOOOOO.','.OLBBBBBBLO.','.OBBBBBBBBO.','.OBBFFBBBBO.','.OBFFFEBBBO.','.OBBFFBBBBO.','.OBBBBBFFBO.','.OBBBBFFEBO.','.OBBBBBFFBO.','.OBGBGBGBBO.','.OOOOOOOOOO.','............'],
+ book:['.OOOOOOOOO..','.OPPPPPPPpO.','.OPGGGGGPpO.','.OPPPPPPPpO.','.OPGGGGGPpO.','.OPPPPPPPpO.','.OPGGGGGPpO.','.OPPPPPPPpO.','.OPGGGGGPpO.','.OpppppppOO.','.OOOOOOOOO..','............'],
+ quill:['.........OO.','........OLLO','.......OLLLO','......OLLLO.','.....OLLLO..','....OLLLO...','...OLLLO....','..OLLLO.....','.OLLLO......','.OGGO.......','OGGO........','OOO.........'],
+ gear:['....OO.OO...','..OOAAOAAOO.','.OAAaAAAaAAO','.OAaOOOOOaAO','OOAO.....OAO','OAAO.....OAA','OAAO.....OAA','OOAO.....OAO','.OAaOOOOOaAO','.OAAaAAAaAAO','..OOAAOAAOO.','....OO.OO...'],
+ coins:['............','...OOOO.....','..OGGGGO....','.OGgGGGGO...','.OGGGGGGO...','.OgGGGGgOOO.','..OGGGGOGGO.','..OOOOGGGGGO','....OGgGGGGO','....OGGGGGGO','.....OgGGgO.','......OOOO..'],
+};
+function drawTabIcon(g,kind){const pal={W:'#7a5a3a',w:'#4a3620',G:'#d9b05a',g:'#8a6a2a',L:'#d8ccb0',B:'#1b3a52',F:'#c86a3a',E:'#fff',P:'#5a3a3a',p:'#3a2424',A:'#8a909a',a:'#5a6068'};drawSprite(g,{rows:TAB_ART[kind],pal},0,0)}
+document.querySelectorAll('#tabs button[data-icon]').forEach(b=>{const c=document.createElement('canvas');c.width=12;c.height=12;drawTabIcon(c.getContext('2d'),b.dataset.icon);b.prepend(c)});
+function shade(hex,d){const n=parseInt(hex.slice(1),16);const r=Math.max(0,Math.min(255,(n>>16)+d)),gg=Math.max(0,Math.min(255,((n>>8)&255)+d)),b=Math.max(0,Math.min(255,(n&255)+d));return `rgb(${r},${gg},${b})`}
+// fish sprites 16x12, shape by rarity, color by hue
+// ---------- fish art (24x16) ----------
+// A species is a silhouette plus a pattern, a fin style, an accent and two hues. The outline is added automatically.
+// silhouette chars: F body, T tail, N fin, E eye, D dorsal/crest, '.' empty. Fish face right.
+const FISH_SIL={
+ minnow:[
+ '........................','........................','........................','..........FFFFFF........','........FFFFFFFFFF......','.TT...FFFFFFFFFFFFEF....','.TTT.FFFFFFFFFFFFFFFF...','.TTTFFFFFFFFFFFFFFFFF...','.TTT.FFFFFFFFFFFFFFF....','.TT...FFFFFFFFFFFFF.....','........FFFFFFFFF.......','..........FFFF..........','........................','........................','........................','........................'],
+ round:[
+ '........................','..........DDDD..........','.........DDDDDD.........','.......FFFFFFFFFF.......','......FFFFFFFFFFFF......','.TT..FFFFFFFFFFFFFFF....','.TTT.FFFFFFFFFFFFEFF....','.TTTTFFFFFFFFFFFFFFFF...','.TTTTFFFFFFFFFFFFFFFF...','.TTT.FFFFFFFFFFFFFFF....','.TT..FFFFFFFFFFFFFF.....','......FFFFFFFFFFFF......','.......FFFFFFFFFF.......','.........NNNNN..........','........................','........................'],
+ eel:[
+ '........................','........................','........................','.TT.....................','.TTTT...................','..TTTTT.................','...FFFFFFF..............','....FFFFFFFFFF..........','......FFFFFFFFFFFF......','.........FFFFFFFFFFFF...','............FFFFFFFEFF..','..............FFFFFFFFF.','................FFFFFF..','........................','........................','........................'],
+ jelly:[
+ '........................','........FFFFFFFF........','......FFFFFFFFFFFF......','.....FFFFFFFFFFFFFF.....','....FFFFFFFFFFFFFFFF....','....FFFFFFFFFFFFFFFF....','....FFFFFFFFFFFFFFFF....','.....FFFFFFFFFFFFFF.....','......FF.FF.FF.FF.......','......TT.TT.TT.TT.......','.......T.TT..T.TT.......','.......T..T..T..T.......','..........T.....T.......','..........T.............','........................','........................'],
+ seahorse:[
+ '........................','..........FFFF..........','.........FFFFFFF........','.........FFEFFFFFF......','..........FFFF..........','.........FFFF...........','........FFFFF...........','.......NFFFFF...........','.......NFFFFF...........','........FFFF............','........FFFF............','.........FFF............','.........FFF............','........FFF.............','.......TTT..............','........T...............'],
+ ray:[
+ '........................','........................','...........FF...........','.........FFFFFF.........','.......FFFFFFFFFF.......','.....FFFFFFFFFFFFFF.....','...FFFFFFFFFFFFFFFFFF...','..FFFFFFFFFEFFEFFFFFFF..','...FFFFFFFFFFFFFFFFFF...','.....FFFFFFFFFFFFFF.....','.......FFFFFFFFFF.......','..........FFFF..........','...........TT...........','...........TT...........','............T...........','............T...........'],
+ big:[
+ '........................','.........DDDDDDD........','........DDDDDDDDD.......','......FFFFFFFFFFFFF.....','.TT..FFFFFFFFFFFFFFFF...','.TTT.FFFFFFFFFFFFFFFFF..','.TTTTFFFFFFFFFFFFFFEFFF.','.TTTTFFFFFFFFFFFFFFFFFF.','.TTTTFFFFFFFFFFFFFFFFFF.','.TTT.FFFFFFFFFFFFFFFFF..','.TT..FFFFFFFFFFFFFFFF...','......FFFFFFFFFFFFF.....','........NNNNNNNN........','.........NNN............','........................','........................'],
+ orb:[
+ '........................','........................','.........FFFFFF.........','.......FFFFFFFFFF.......','......FFFFFFFFFFFF......','.....FFFFFFFFFFFFFF.....','.....FFFFFFFFEEFFFF.....','.....FFFFFFFFEEFFFF.....','.....FFFFFFFFFFFFFF.....','......FFFFFFFFFFFF......','.......FFFFFFFFFF.......','.........FFFFFF.........','........................','........................','........................','........................'],
+ octo:[
+ '........................','.........FFFFFF.........','.......FFFFFFFFFF.......','......FFFFFFFFFFFF......','......FFFFEFFEFFFF......','......FFFFFFFFFFFF......','.......FFFFFFFFFF.......','......TT.TTTT.TT.TT.....','.....TT..TT.TT.T..TT....','....TT..TT..TT..T..T....','....T..TT...T...T...T...','.......T....T...T.......','........................','........................','........................','........................'],
+ crab:[
+ '........................','........................','...FF..............FF...','..FFF..............FFF..','..FF.....FFFFFF.....FF..','...FF..FFFFFFFFFF..FF...','....FFFFFFFFFFFFFFFF....','.....FFFFFEFFFFEFFF.....','.....FFFFFFFFFFFFFF.....','......FFFFFFFFFFFF......','....T..T.T....T.T..T....','...T..T...T..T...T..T...','........................','........................','........................','........................'],
+ turtle:[
+ '........................','........DDDDDDDD........','......DDDDDDDDDDDD......','.....DDDDDDDDDDDDDD.....','....DDDDDDDDDDDDDDDD....','...FDDDDDDDDDDDDDDDDF...','..FFFDDDDDDDDDDDDDDFFFF.','..FFFFFFFFFFFFFFFFFFFEF.','...FF.FFFFFFFFFFFF.FFFF.','...F...FF......FF...FF..','........................','........................','........................','........................','........................','........................'],
+ shrimp:[
+ '........................','........................','..............FFFF......','............FFFFFFFF....','..........FFFFFFFFFEFF..','........FFFFFFFFFFFFF...','......FFFFFFFFFFFF......','.....FFFFFFFFFFF........','....FFFFFFFFF...........','....FFFFFFF.............','.....TTTT...............','....T.TT.T..............','...T..TT..T.............','......T.................','........................','........................'],
+ skull:[
+ '........................','........................','.......FFFFFFFFF........','.....FFFFFFFFFFFFF......','.TT.FFFFFFFFFFFFFFF.....','.TTTFFFFEEFFFFEEFFF.....','.TTTFFFFEEFFFFEEFFFF....','.TTTFFFFFFFFFFFFFFFF....','.TT..FFFFFFFFFFFFFF.....','......FFFFFFFFFFFF......','......F.F.F.F.F.F.......','........................','........................','........................','........................','........................'],
+ serpent:[
+ '........................','..TT....................','..TTTT..................','...FFFFFF...............','....FFFFFFFFF...........','......FFFFFFFFFFF.......','.........FFFFFFFFFF.....','............FFFFFFFFF...','...........DDFFFFFFFFF..','..........DFFFFFFFEFFF..','...........FFFFFFFFFFFF.','.............FFFFFFFF...','........................','........................','........................','........................'],
+ star:[
+ '........................','...........FF...........','...........FF...........','..........FFFF..........','..........FFFF..........','...FFFFFFFFFFFFFFFFFF...','....FFFFFFFFFFFFFFFF....','......FFFFFFFFFFFF......','........FFFFFFFF........','.......FFFFFFFFFF.......','......FFFFF..FFFFF......','.....FFFF......FFFF.....','....FFF..........FFF....','........................','........................','........................'],
+};
+// per species: silhouette, pattern, fin style, accent, hue, hue2 (fins/pattern)
+// pattern: plain, belly, stripes, spots, scales, gradient, bands, glow
+const FISH_STYLE={
+ '0-0':['minnow','belly',0,150],'0-1':['minnow','plain',1,200],'0-2':['shrimp','bands',0,30],'0-3':['crab','spots',0,210],'0-4':['round','scales',1,45],'0-5':['round','glow',0,190],'0-6':['turtle','spots',0,95],'0-7':['big','gradient',1,230],'0-8':['eel','stripes',0,260],'0-9':['skull','plain',1,40],'0-10':['big','scales',2,40],'0-11':['orb','glow',3,200],
+ '1-0':['minnow','spots',1,330],'1-1':['minnow','belly',0,180],'1-2':['shrimp','plain',1,190],'1-3':['seahorse','bands',0,270],'1-4':['minnow','glow',1,55],'1-5':['crab','spots',1,340],'1-6':['star','spots',1,320],'1-7':['turtle','scales',0,110],'1-8':['round','stripes',1,30],'1-9':['serpent','bands',1,150],'1-10':['big','gradient',2,160],'1-11':['orb','glow',3,195],
+ '2-0':['minnow','gradient',0,20],'2-1':['big','plain',0,0],'2-2':['crab','plain',0,10],'2-3':['round','spots',1,15],'2-4':['shrimp','bands',0,5],'2-5':['jelly','glow',1,25],'2-6':['eel','stripes',1,250],'2-7':['eel','glow',1,20],'2-8':['turtle','scales',1,10],'2-9':['skull','plain',1,30],'2-10':['serpent','scales',2,0],'2-11':['serpent','glow',3,20],
+ '3-0':['minnow','scales',0,215],'3-1':['crab','spots',0,230],'3-2':['shrimp','glow',1,260],'3-3':['jelly','gradient',1,280],'3-4':['minnow','stripes',1,210],'3-5':['octo','spots',1,265],'3-6':['ray','gradient',1,225],'3-7':['turtle','glow',1,55],'3-8':['star','plain',1,45],'3-9':['skull','glow',2,195],'3-10':['big','spots',2,235],'3-11':['orb','glow',3,50],
+ '4-0':['round','plain',0,250],'4-1':['crab','plain',0,240],'4-2':['shrimp','plain',1,40],'4-3':['eel','gradient',0,230],'4-4':['jelly','plain',0,260],'4-5':['orb','glow',1,300],'4-6':['turtle','scales',1,220],'4-7':['skull','glow',2,120],'4-8':['big','stripes',2,255],'4-9':['jelly','glow',2,190],'4-10':['serpent','bands',3,280],'4-11':['big','scales',3,200],
+};
+const fishCache={};
+function fishCanvas(f){
+  if(fishCache[f.id])return fishCache[f.id];
+  const [silName,pat,fin,hue]=FISH_STYLE[f.id]||['minnow','plain',0,f.hue];const sil=FISH_SIL[silName];
+  const r=f.r,sat=[34,46,56,64,72][r],lum=[40,46,48,52,56][r];
+  const h2=(hue+(r>=2?40:20))%360;
+  const col=(l,s=sat,hh=hue)=>`hsl(${hh} ${s}% ${l}%)`;
+  const oc=document.createElement('canvas');oc.width=24;oc.height=16;const g=oc.getContext('2d');
+  const px=(x,y,c)=>{g.fillStyle=c;g.fillRect(x,y,1,1)};
+  const rows=sil;let minY=16,maxY=0;for(let y=0;y<16;y++)for(let x=0;x<24;x++)if(rows[y][x]!=='.'){minY=Math.min(minY,y);maxY=Math.max(maxY,y)}
+  for(let y=0;y<16;y++)for(let x=0;x<24;x++){const ch=rows[y][x];if(ch==='.')continue;
+    const k=(y-minY)/Math.max(1,maxY-minY);
+    let c=col(lum);
+    if(ch==='T')c=col(lum-10,sat,h2);else if(ch==='N'||ch==='D')c=col(lum-4,sat+10,h2);
+    else{
+      if(pat==='belly'&&k>0.62)c=col(lum+20,sat-10);
+      if(pat==='gradient')c=col(lum-14+k*30);
+      if(pat==='stripes'&&(x%4===0||x%4===1)&&k>0.15&&k<0.9)c=col(lum-16);
+      if(pat==='bands'&&(x%5<2))c=col(lum-14,sat,h2);
+      if(pat==='spots'&&nz(x,y,f.spot*7+1)>0.78)c=col(lum-18,sat,h2);
+      if(pat==='scales'&&((x+y)%2===0)&&k>0.2&&k<0.85)c=col(lum+9);
+      if(pat==='glow'){c=col(lum+Math.round(Math.sin(x*0.9+y*0.6)*6));if(nz(x,y,f.spot*7+2)>0.86)c=col(lum+30,sat+15,h2)}
+      if(k<0.18&&pat!=='gradient')c=col(lum-10);
+      if(ch==='E'){c=r>=3?col(85,60,h2):'#f3eee2'}
+    }
+    px(x,y,c);
+  }
+  // eye pupil
+  for(let y=0;y<16;y++)for(let x=0;x<24;x++)if(rows[y][x]==='E'&&(x+1>=24||rows[y][x+1]!=='E'))px(x,y,'#0b0a0e');
+  // fin style: 0 none, 1 top spines, 2 trailing streamers, 3 crown/glow dots
+  if(fin>=1)for(let x=4;x<20;x+=3){const y=rows.findIndex(rw=>rw[x]!=='.');if(y>1&&rows[y][x]==='F'){px(x,y-1,col(lum-6,sat+10,h2));if(fin>=2)px(x,y-2,col(lum-2,sat+10,h2))}}
+  if(fin>=2){for(let y=5;y<11;y++)if(rows[y][1]==='T'||rows[y][2]==='T')px(0,y,col(lum-8,sat,h2))}
+  if(fin>=3){[[2,2],[21,2],[2,13],[21,13],[11,0],[12,15]].forEach(([x,y])=>{if(rows[y][x]==='.')px(x,y,col(80,70,h2))})}
+  // outline pass
+  const img=g.getImageData(0,0,24,16),d=img.data,out=new Uint8ClampedArray(d);const a=(x,y)=>x<0||y<0||x>=24||y>=16?0:d[(y*24+x)*4+3];
+  const oc2=r===4?[70,40,90]:[11,10,14];
+  for(let y=0;y<16;y++)for(let x=0;x<24;x++){if(a(x,y))continue;if(a(x-1,y)||a(x+1,y)||a(x,y-1)||a(x,y+1)){const i=(y*24+x)*4;out[i]=oc2[0];out[i+1]=oc2[1];out[i+2]=oc2[2];out[i+3]=255}}
+  img.data.set(out);g.putImageData(img,0,0);
+  // mythic aura sparkles
+  if(r===4){g.fillStyle=col(88,80,h2);[[1,3],[22,12],[20,1],[3,13]].forEach(([x,y])=>g.fillRect(x,y,1,1))}
+  fishCache[f.id]=oc;return oc;
+}
+function drawFish(g,f,x,y,scale){const c=fishCanvas(f);g.imageSmoothingEnabled=false;g.drawImage(c,x,y,24*scale,16*scale)}
+// scene (288x192, 32px tiles)
+const cv=$('scene'),cx=cv.getContext('2d');const W=288,H=192,T=32;
+const C={st:'#44404a',st2:'#302d35',st3:'#56525c',st4:'#625e68',mt:'#201e25',bk:'#4d3f3a',bk2:'#33292a',bk3:'#5f4e47',bk4:'#6c5a50',bk5:'#423632',wa:'#0d1d2c',wa2:'#091521',wa3:'#16314a',wa4:'#2b5068',wd:'#55392a',wd2:'#36241a',wd3:'#6e4e36',wd4:'#86634a',wd5:'#45301f',ir:'#30303a',ir2:'#5a5a66',mo:'#38502e',mo2:'#2a3c22'};
+const nz=(x,y,s=0)=>{let h=(x*374761393+y*668265263+s*1442695041)|0;h=(h^(h>>13))*1274126177;h=(h^(h>>16))>>>0;return (h%1000)/1000};
+const MAP=['WWWWWwwww','SSSwwwwww','SSDDDDwww','SSSwwwwww','Swwwwwwww','wwwwwwwww'];
+const at=(x,y)=>(y<0||y>=6||x<0||x>=9)?'w':MAP[y][x];const isW=(x,y)=>at(x,y)==='w';
+let base=null;
+function buildBase(){
+  const oc=document.createElement('canvas');oc.width=W;oc.height=H;const o=oc.getContext('2d');const p=(x,y,c,w=1,h=1)=>{o.fillStyle=c;o.fillRect(x,y,w,h)};
+  for(let ty=0;ty<6;ty++)for(let tx=0;tx<9;tx++){const t=MAP[ty][tx],X=tx*T,Y=ty*T;
+    if(t==='S'){ // cobblestone: irregular stones, each with a lit top-left edge and a shadowed bottom-right edge
+      p(X,Y,C.mt,T,T);
+      const stones=[[0,0,12,10],[13,0,10,8],[24,0,8,9],[0,11,8,9],[9,9,13,11],[23,10,9,10],[0,21,14,11],[15,21,8,11],[24,21,8,11]];
+      stones.forEach(([sx,sy,sw,sh])=>{const n=nz(X+sx,Y+sy,1);const col=n<0.25?C.st2:n>0.75?C.st3:C.st;const x=X+sx,y=Y+sy,w=sw-1,h=sh-1;
+        p(x,y,col,w,h);p(x,y,C.st4,w-1,1);p(x,y,C.st4,1,h-1);p(x,y+h-1,C.st2,w,1);p(x+w-1,y,C.st2,1,h);
+        for(let i=0;i<4;i++){const rx=x+1+Math.floor(nz(x,y,10+i)*(w-2)),ry=y+1+Math.floor(nz(x,y,20+i)*(h-2));if(nz(rx,ry,3)>0.5)p(rx,ry,nz(rx,ry,4)>0.5?C.st2:C.st3,1,1)}
+        if(nz(x,y,2)>0.78){p(x+1,y+h-2,C.mo2,3,1);p(x+2,y+h-3,C.mo,1,1)}
+        if(nz(x,y,5)>0.85){p(x+Math.floor(w/2),y+1,C.mt,1,Math.floor(h/2));p(x+Math.floor(w/2)+1,y+Math.floor(h/2),C.mt,1,2)}});
+    }else if(t==='W'){ // brick rampart: offset courses, chipped corners, lit cap stone
+      p(X,Y,C.bk2,T,T);
+      for(let r=0;r<4;r++){const off=(r%2)*8;for(let b=-1;b<3;b++){const bx=X+off+b*16,by=Y+r*8;const n=nz(bx,by,3);const sx=Math.max(X,bx);const w=Math.min(15,X+T-sx);if(w<=0)continue;
+        const col=n<0.2?C.bk5:n>0.72?C.bk3:C.bk;p(sx,by+1,col,w,6);p(sx,by+1,C.bk4,w-1,1);p(sx,by+6,C.bk2,w,1);p(sx+w-1,by+1,C.bk2,1,6);
+        if(nz(bx,by,4)>0.8)p(sx+2,by+3,C.bk2,3,1);if(nz(bx,by,9)>0.9)p(sx+w-3,by+1,C.bk2,2,2)}}
+      p(X,Y,C.bk4,T,2);p(X,Y+2,C.bk3,T,1);p(X,Y+T-1,OUT,T,1);p(X,Y+T-3,C.bk2,T,2);
+      if(nz(X,Y,4)>0.5){p(X+6,Y+18,C.mo,6,3);p(X+8,Y+21,C.mo2,3,2);p(X+7,Y+17,C.mo,2,1)}
+    }
+  }
+  for(let ty=0;ty<6;ty++)for(let tx=0;tx<9;tx++){if(at(tx,ty)!=='S')continue;const X=tx*T,Y=ty*T;
+    if(isW(tx+1,ty)){p(X+T-4,Y,C.st2,4,T);p(X+T-2,Y,C.mt,2,T);p(X+T-1,Y,OUT,1,T);for(let j=0;j<T;j+=5)p(X+T-3,Y+j,C.mo2,1,2)}
+    if(isW(tx,ty+1)){p(X,Y+T-6,C.st2,T,6);p(X,Y+T-2,C.mt,T,2);p(X,Y+T-1,OUT,T,1);for(let i=0;i<T;i+=7)p(X+i,Y+T-4,C.mo2,3,1)}
+    if(isW(tx-1,ty))p(X,Y,OUT,1,T);
+  }
+  // cracks across the stone, moss between stones
+  for(let x=0;x<96;x+=5)for(let y=32;y<160;y++)if(nz(x,y,7)>0.965){p(x,y,C.mt,3,1)}
+  base=oc;
+}
+function drawWater(g,t){
+  const f=Math.floor(t/700)%6;
+  for(let ty=0;ty<6;ty++)for(let tx=0;tx<9;tx++){if(at(tx,ty)!=='w'&&at(tx,ty)!=='D')continue;const X=tx*T,Y=ty*T;
+    g.fillStyle=C.wa;g.fillRect(X,Y,T,T);
+    for(let i=0;i<T;i+=2)for(let j=0;j<T;j+=2){const n=nz(X+i,Y+j,5);if(n<0.07){g.fillStyle=C.wa2;g.fillRect(X+i,Y+j,3,1)}else if(n>0.985){g.fillStyle=C.wa3;g.fillRect(X+i,Y+j,2,1)}}
+    for(let k=0;k<4;k++){const n=nz(tx,ty,20+k);const wy=Y+Math.floor(n*30);const wx=X+((Math.floor(n*61)+f*2)%T);g.fillStyle=k<2?C.wa4:C.wa3;g.fillRect(wx,wy,4,1);g.fillRect(wx+6,wy,2,1);if(k===0)g.fillRect(wx+2,wy+1,2,1)}
+    const land=(dx,dy)=>at(tx+dx,ty+dy)==='S'||at(tx+dx,ty+dy)==='W';g.fillStyle=C.wa4;
+    if(land(-1,0))for(let j=0;j<T;j+=4)if(nz(X,Y+j,f)>0.35)g.fillRect(X,Y+j,1+(j%8===0?1:0),2);
+    if(land(0,-1))for(let i=0;i<T;i+=4)if(nz(X+i,Y,f)>0.35)g.fillRect(X+i,Y,2,1+(i%8===0?1:0));
+  }
+}
+function drawDock(g){const p=(x,y,c,w=1,h=1)=>{g.fillStyle=c;g.fillRect(x,y,w,h)};
+  for(let ty=0;ty<6;ty++)for(let tx=0;tx<9;tx++){if(at(tx,ty)!=='D')continue;const X=tx*T,Y=ty*T;
+    p(X,Y+26,'rgba(0,0,0,0.45)',T,6);
+    p(X,Y+4,C.wd,T,22);
+    for(let i=0;i<T;i+=11){p(X+i,Y+4,C.wd2,1,22)}            // plank seams
+    for(let r=0;r<3;r++){const y=Y+4+r*7;p(X,y,C.wd3,T,1);p(X,y+6,C.wd5,T,1);for(let i=0;i<T;i+=4)if(nz(X+i,y,11+r)>0.55)p(X+i,y+2+(i%3),C.wd2,2,1)} // boards with grain
+    for(let i=4;i<T;i+=11){p(X+i,Y+6,C.ir,1,1);p(X+i,Y+23,C.ir,1,1)} // nails
+    p(X,Y+3,OUT,T,1);p(X,Y+26,OUT,T,1);p(X,Y+25,C.wd2,T,1);
+    if(tx%2===0){p(X+2,Y-4,OUT,8,34);p(X+3,Y-3,C.wd2,6,32);p(X+3,Y-3,C.wd3,2,30);p(X+4,Y-3,C.wd4,1,1);p(X+2,Y+4,C.ir,8,2);p(X+2,Y+20,C.ir,8,2);p(X+3,Y+5,C.ir2,6,1)}}
+  p(5*T+31,2*T+3,OUT,1,24);
+}
+// props: drawn at 1x and refined to 2x with a bevel pass (lit top-left, shaded bottom-right)
+function refine2x(sp){
+  const {rows,pal}=sp;const h=rows.length,w=Math.max(...rows.map(r=>r.length));
+  const oc=document.createElement('canvas');oc.width=w*2;oc.height=h*2;const g=oc.getContext('2d');
+  const get=(x,y)=>x<0||y<0||y>=h||x>=rows[y].length?'.':rows[y][x];
+  for(let y=0;y<h;y++)for(let x=0;x<w;x++){const ch=get(x,y);if(ch==='.')continue;const base=ch==='O'?OUT:(pal[ch]||'#f0f');
+    g.fillStyle=base;g.fillRect(x*2,y*2,2,2);
+    if(ch!=='O'){const up=get(x,y-1)==='O',left=get(x-1,y)==='O',down=get(x,y+1)==='O',right=get(x+1,y)==='O';
+      if(up||left){g.fillStyle='rgba(255,255,255,0.14)';if(up)g.fillRect(x*2,y*2,2,1);if(left)g.fillRect(x*2,y*2,1,2)}
+      if(down||right){g.fillStyle='rgba(0,0,0,0.22)';if(down)g.fillRect(x*2,y*2+1,2,1);if(right)g.fillRect(x*2+1,y*2,1,2)}}}
+  return oc;
+}
+const propCache=new Map();
+function prop(g,sp,x,y){let c=propCache.get(sp);if(!c){c=refine2x(sp);propCache.set(sp,c)}g.drawImage(c,x,y)}
+const lantern={pal:{I:C.ir,i:C.ir2,F:'#f2b23a',f:'#ffe79a',W:C.wd2,w:C.wd},rows:['....OO....','...OiIO...','..OIIIIO..','..OFFFFO..','..OFffFO..','..OFFFFO..','..OIIIIO..','...OIIO...','....OO....','...OWwO...','...OWwO...','...OWwO...','...OWwO...','...OWwO...','...OWwO...','...OWwO...','...OWwO...','..OWWwWO..','..OOOOOO..']};
+const barrel={pal:{W:C.wd,w:C.wd2,L:C.wd3,I:C.ir,i:C.ir2},rows:['..OOOOOO..','.OLWWWWLO.','OIIIIIIIIO','OWLWWWWwWO','OWLWWWWwWO','OIIIIIIIIO','OWLWWWWwWO','OWLWWWWwWO','OIiIIIIIIO','.OwwwwwwO.','..OOOOOO..']};
+const crate={pal:{W:C.wd,w:C.wd2,L:C.wd3},rows:['OOOOOOOOOO','OLLLLLLLLO','OLWWWWWWwO','OLWwWWWwwO','OLWWwWwWwO','OLWWWwWWwO','OLWwWWWwwO','OLWWWWWWwO','OwwwwwwwwO','OOOOOOOOOO']};
+const bucket={pal:{I:C.ir,i:C.ir2,B:'#2a4a5a',F:'#8aa3a8'},rows:['..OiiiO..','.OIIIIIO.','OBFBBBFBO','OBBBBBBBO','OIBBBBBIO','.OIBBBIO.','..OOOOO..']};
+const rope={pal:{R:'#7a6a4a',r:'#5a4a30'},rows:['.OOOOO.','ORrRrRO','ORrOrRO','ORrRrRO','.OOOOO.']};
+const netP={pal:{N:'#6a6a58',n:'#44443a'},rows:['O.O.O.O.','.N.n.N.n','O.O.O.O.','.n.N.n.N','O.O.O.O.','.N.n.N.n','O.O.O.O.']};
+const reeds={pal:{G:'#3f5a2e',g:'#2a3d20'},rows:['..G...g.','..G.G.g.','.OG.G.gO','.OGOGOg.','..GOGOg.','..OGOGO.','...OGO..','...OGO..','...OGO..']};
+const mooring={pal:{W:C.wd2,w:C.wd3,I:C.ir},rows:['.OOOO.','OwWWWO','OIIIIO','OWWWwO','OWWWwO','OWWWwO','OIIIIO','OWWWwO','OOOOOO']};
+const tree={pal:{D:'#1b2e20',M:'#25402a',L:'#35563a',T:'#3a2a1c',t:'#2a1d12'},rows:['.......OOOOO........','.....OODDDDDOO......','....ODDMMMMDDDO.....','...ODMMLLMMMDDDO....','..ODMMLLLMMMMDDDO...','..ODMLLMMMMDMMDDO...','.ODMMMMMMDDMMMMDDO..','.ODMMMMDDMMMMMDDDO..','.ODDMMMMMMMMDDDDDO..','..ODDDMMMDDDDDDDO...','..ODDDDDDDDDDDDO....','...OODDDDDDDDOO.....','.....OOOTtOOO.......','.......OTtO.........','.......OTtO.........','.......OTtO.........','......OTTttO........','......OOOOOO........']};
+const windowP={pal:{K:'#2a2630',F:'#f0b040',f:'#b07a28',S:'#4a4650'},rows:['OOOOOOOO','OSKKKKSO','OKFFfFKO','OKFfFFKO','OKKOOKKO','OKFFfFKO','OKfFFFKO','OSKKKKSO','OOOOOOOO']};
+const vines={pal:{N:'#3a5a2e',n:'#28401f',L:'#4f7a3a'},rows:['N.n..N.n','N.n..N..','nN.n.n.N','.N.N..n.','.n.nN.N.','.N..n.n.','..N.N...','..n.n...','..N.....','..n.....']};
+const rack={pal:{W:'#5a3f2a',w:'#3b291c',F:'#8a8a7a',f:'#5a5a50',E:'#c9c0a8'},rows:['OWwOOOOOOOWwO','OWwWWWWWWWWwO','OWwOOOOOOOWwO','OWwOFOfOFOWwO','OWwOFEfEFOWwO','OWwOFOfOFOWwO','OWwOfOFOfOWwO','OWw.O.O.O.WwO','OWw.......WwO','OWw.......WwO','OWw.......WwO','OOO.......OOO']};
+const anchor={pal:{K:'#3a3a44',k:'#23232a',S:'#6a6a74'},rows:['..OOO..','.OKSKO.','.OKOKO.','..OKO..','OOOKOOO','OkKKKKkO','.OOKOO.','..OKO..','OKOKOKO','.OKKKO.','..OOO..']};
+const boat={pal:{W:'#5e4330',w:'#3b291c',L:'#7a5a3e',K:'#3a3a44'},rows:['..OOOOOOOOOOOOOO..','.OWwWwWwWwWwWwWwO.','OWLLLLLLLLLLLLLLWO','OWwwwwwwKwwwwwwwWO','.OWWWWWWWWWWWWWWO.','..OwwwwwwwwwwwwO..','...OOOOOOOOOOOO...']};
+const lily={pal:{N:'#3f6a3a',n:'#2a4a28',M:'#c47a9a'},rows:['.OOOO.','ONNNnO','ONnNNO','.OONO.']};
+const lily2={pal:{N:'#3f6a3a',n:'#2a4a28',M:'#c47a9a'},rows:['..OO...','.ONNOO.','ONNMNNO','ONnNNnO','.OOnOO.']};
+const drift={pal:{W:'#4a3626',w:'#2e2016',L:'#5e4a38'},rows:['OO.......','OWOO....O','.OWWOOOOW','..OwwWWwO','...OOOOO.']};
+const crow={pal:{K:'#15131a',k:'#2a2630',Y:'#d9b05a'},rows:['..OO..','.OKkO.','OKKKKOY','.OKKO.','..OO..','..O.O.']};
+// hand-drawn props at scene resolution (light from the upper left)
+const PP={W:'#6e4e36',w:'#4a3222',x:'#8a6a48',d:'#2e1f14',I:'#3a3a44',i:'#5a5a66',k:'#23232a',F:'#f2b23a',f:'#ffe79a',r:'#c8781e',S:'#4a4650',s:'#302d35',L:'#625e68',B:'#2a4a5a',b:'#1a3040',A:'#8aa3a8',N:'#2f4a2c',n:'#1d2e1b',M:'#3f6a3a',G:'#4f7a3a',E:'#c9c0a8',e:'#8a8a7a',R:'#7a6a4a',q:'#5a4a30'};
+const barrelHD={pal:PP,rows:[
+'......OOOOOOOO......','....OOxxWWWWxxOO....','...OxWWWWWWWWWWxO...','..OIIIIIIIIIIIIIIO..','..OiIIIIIIIIIIIIkO..','.OxWWxWWwWWwWWwWWwO.','.OxWWxWWwWWwWWwWWwO.','.OxWWxWWwWWwWWwWWwO.','.OxWWxWWwWWwWWwWWwO.','.OIIIIIIIIIIIIIIIIO.','.OiIIIIIIIIIIIIIIkO.','.OxWWxWWwWWwWWwWWwO.','.OxWWxWWwWWwWWwWWwO.','.OxWWxWWwWWwWWwWWwO.','.OWWWxWWwWWwWWwWwdO.','..OIIIIIIIIIIIIIIO..','..OiIIIIIIIIIIIIkO..','..OwWWwWWwWWwWwwdO..','...OwwwwwwwwwwwdO...','....OOwwwwwwwwOO....','......OOOOOOOO......','....................']};
+const crateHD={pal:PP,rows:[
+'OOOOOOOOOOOOOOOOOOOO','OxxxxxxxxxxxxxxxxxwO','OxWWWWWWWWWWWWWWWwwO','OxWwWWWWWWWWWWWwWwwO','OxWWwWWWWWWWWWwWWwwO','OxWWWwWWWWWWWwWWWwwO','OxWWWWwWWWWWwWWWWwwO','OxWWWWWwWWWwWWWWWwwO','OxWWWWWWwWwWWWWWWwwO','OxWWWWWWWwWWWWWWWwwO','OxWWWWWWwWwWWWWWWwwO','OxWWWWWwWWWwWWWWWwwO','OxWWWWwWWWWWwWWWWwwO','OxWWWwWWWWWWWwWWWwwO','OxWWwWWWWWWWWWwWWwwO','OxWwWWWWWWWWWWWwWwwO','OxWWWWWWWWWWWWWWWwwO','OxwwwwwwwwwwwwwwwwdO','OwwwwwwwwwwwwwwwwddO','OOOOOOOOOOOOOOOOOOOO']};
+const lanternHD={pal:PP,rows:[
+'........OOOO........','.......OiIIkO.......','.......OIkkkO.......','.....OOOIIIIOOO.....','....OiIIIIIIIIkO....','....OIOOOOOOOOIO....','....OIOFFFFFFOIO....','....OIOFffffFOIO....','....OIOFfffrFOIO....','....OIOFFffrFOIO....','....OIOFFrrrFOIO....','....OIOrrrrrrOIO....','....OIOOOOOOOOIO....','....OiIIIIIIIIkO....','.....OOIIIIIIOO.....','.......OIIkO........','........OOO.........','.......OxWwO........','.......OxWwO........','.......OxWwO........','.......OxWwO........','.......OxWwO........','.......OxWwO........','.......OxWwO........','.......OxWwO........','.......OxWwO........','.......OxWwO........','.......OxWwO........','.......OxWwO........','.......OxWwO........','.......OxWwO........','.......OxWwO........','.......OxWwO........','......OxWWwwO.......','.....OxWWWwwdO......','.....OwwwwwwdO......','......OOOOOO........','....................']};
+const boatHD={pal:PP,rows:[
+'......OOOOOOOOOOOOOOOOOOOOOOOO......','....OOxxWWWWWWWWWWWWWWWWWWxxwOO.....','..OOxWWwWWwWWwWWwWWwWWwWWwWWwWwwOO..','.OxWWWWWWWWWWWWWWWWWWWWWWWWWWWWWwwO.','OxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxwwO','OxWwwwwwwwwwwwwwkkwwwwwwwwwwwwwwwwdO','OxWWWWWWWWWWWWWWkkWWWWWWWWWWWWWWWwdO','OxWwWWwWWwWWwWWwkkwWWwWWwWWwWWwWwwdO','.OwWWWWWWWWWWWWWkkWWWWWWWWWWWWWwwdO.','.OwwWWwWWwWWwWWwkkwWWwWWwWWwWWwwddO.','..OOwwwwwwwwwwwwwwwwwwwwwwwwwwwdOO..','....OOwwwwwwwwwwwwwwwwwwwwwwwOO.....','......OOOOOOOOOOOOOOOOOOOOOOO.......','....................................']};
+const treeHD={pal:PP,rows:[
+'..............OOOOOOOOOO................','...........OOOnnnnnnnnnnOOO.............','.........OOnnnnNNNNnnnnnnnnOO...........','........OnnnNNNNNNNNNNnnnnnnnO..........','.......OnnNNNNNMMMNNNNNNnnnnnnO.........','......OnnNNNNMMMMMMMNNNNNNnnnnnO........','.....OnnNNNNMMMGGMMMMNNNNNnnnnnnO.......','.....OnNNNNMMMGGGGMMMNNNNNNnnnnnO.......','....OnnNNNNMMMGGGMMMMNNNnnNNNnnnnO......','....OnNNNNNMMMMMMMMMNNNNnnNNNNnnnO......','....OnNNNNNNMMMMMMMNNNNnnnNNNNNnnO......','...OnnNNNNNNNMMMMMNNNNnnnnNNNNNnnnO.....','...OnnNNNNNNNNNNNNNNNnnnnnnNNNNnnnO.....','...OnnnNNNNNNNNNNNNnnnnnnnnnNNNnnnO.....','...OnnnnNNNNNNNNNnnnnnnnnnnnnNNnnnO.....','....OnnnnNNNNNNnnnnnnnnnnnnnnnnnnO......','....OnnnnnnnnnnnnnnnnnnnnnnnnnnnnO......','.....OnnnnnnnnnnnnnnnnnnnnnnnnnnO.......','......OOnnnnnnnnnnnnnnnnnnnnnnOO........','........OOOnnnnnOOwwOOnnnOOO............','...........OOOOOOxWwwOOOO...............','.................OxWwdO.................','.................OxWwdO.................','.................OxWwdO.................','.................OxWwdO.................','.................OxWwdO.................','.................OxWwdO.................','................OxWWwwdO................','...............OxWWwwwddO...............','..............OxWWwwwwwddO..............','.............OOOOOOOOOOOOOO.............','........................................','........................................','........................................','........................................','........................................']};
+const rackHD={pal:PP,rows:[
+'OxWwO..................OxWwO','OxWwOOOOOOOOOOOOOOOOOOOOxWwO','OxWWxxxxxxxxxxxxxxxxxxxWWwO.','OxWwwwwwwwwwwwwwwwwwwwwwWwO.','OxWwOOOOOOOOOOOOOOOOOOOOxWwO','OxWwO.OeO.OeO.OeO.OeO.OxWwO.','OxWwOOEeeOOEeeOOEeeOOEeeOxWwO','OxWwOEEEeeEEEeeEEEeeEEEeeWwO','OxWwOEEEeeEEEeeEEEeeEEEeeWwO','OxWwOEEEeeEEEeeEEEeeEEEeeWwO','OxWwOeEEeeeEEeeeEEeeeEEeeWwO','OxWwO.OeeO.OeeO.OeeO.OeeOWwO','OxWwO..OO...OO...OO...OO.WwO','OxWwO....................WwO','OxWwO....................WwO','OxWwO....................WwO','OxWwO....................WwO','OxWwO....................WwO','OxWwO....................WwO','OxWwO....................WwO','OxWWwO..................OWwO','OwwwwdO................OwwdO','OOOOOOO................OOOOO','............................']};
+const bucketHD={pal:PP,rows:[
+'....OOOiiiiOOO....','...OiIIIIIIIIkO...','..OIIOOOOOOOOIIO..','..OBAAABBBBAAABO..','..OBAABBBBBBAABO..','..OBBBBBBBBBBbBO..','..OIIIIIIIIIIIIO..','..OBBBBBBBBBBbBO..','...OBBBBBBBBbBO...','...OIIIIIIIIIIO...','....ObBBBBBbbO....','.....OObbbbOO.....','.......OOOO.......','..................']};
+const anchorHD={pal:PP,rows:[
+'.....OOOO.....','....OiIIkO....','....OIOOIO....','....OIO.IO....','....OIOOIO....','.....OIIO.....','......OIO.....','..OOOOOIOOOOO.','.OkIIIIIIIIIkO','..OOOOOIOOOOO.','......OIO.....','......OIO.....','......OIO.....','......OIO.....','.OO...OIO...OO','OkIO..OIO..OIkO','OIIO..OIO..OIIO','OIIIOOOIOOOIIIO','.OIIIIIIIIIIIO.','..OOIIIIIIIOO..','....OOOOOOO....','..............']};
+const mooringHD={pal:PP,rows:[
+'...OOOOOO...','..OxxWWWwO..','.OxWWWWWwwO.','.OIIIIIIIIO.','.OxWWWWWwwO.','.OxWWWWWwwO.','.OxWWWWWwwO.','.OxWWWWWwwO.','.OxWWWWWwwO.','.OIIIIIIIIO.','.OxWWWWWwwO.','.OxWWWWWwwO.','.OxWWWWWwwO.','.OxWWWWWwwO.','.OxWWWWWwwO.','.OwwwwwwwdO.','.OOOOOOOOOO.','............']};
+
+const flies=Array.from({length:9},()=>({x:80+Math.random()*200,y:20+Math.random()*160,p:Math.random()*6.28,s:.6+Math.random()*.6}));
+const mist=Array.from({length:5},(_,i)=>({y:30+i*34,o:Math.random()*100,sp:.003+Math.random()*.004}));
+const HX=124,HY=12,BX=208,BY=100;
+function drawScene(g,t){
+  if(!base)buildBase();
+  drawWater(g,t);
+  for(let i=0;i<70;i++){const x=(i*37+Math.floor(t/900))%288,y=40+(i*53)%140;if(at(Math.floor(x/32),Math.floor(y/32))==='w'&&nz(i,Math.floor(t/900),8)>0.5){g.fillStyle='rgba(120,170,200,0.10)';g.fillRect(x,y,5,1)}}
+  g.drawImage(base,0,0);drawDock(g);
+  prop(g,windowP,36,6);prop(g,vines,56,26);drawSprite(g,treeHD,-12,-8);drawSprite(g,rackHD,44,36);drawSprite(g,barrelHD,6,76);drawSprite(g,crateHD,28,84);drawSprite(g,bucketHD,40,112);drawSprite(g,anchorHD,62,116);prop(g,rope,72,40);drawSprite(g,mooringHD,80,104);prop(g,crow,82,92);
+  const bobB=Math.round(Math.sin(t/1100))*2;g.fillStyle='rgba(0,0,0,0.35)';g.fillRect(116,140+bobB,36,4);drawSprite(g,boatHD,112,124+bobB);g.strokeStyle='rgba(120,100,70,0.6)';g.lineWidth=1;g.beginPath();g.moveTo(92,113.5);g.lineTo(114,131.5+bobB);g.stroke();
+  prop(g,lily,100,160);prop(g,lily2,114,172);prop(g,drift,132,180);prop(g,lily,148,156);
+  const eqNet=item(S.eq.net),eqLn=item(S.eq.lantern),eqCh=item(S.eq.charm),eqBait=item(S.eq.bait),eqRod=item(S.eq.rod);
+  const item2=(it,x,y)=>{const key='it:'+it.id;let c=propCache.get(key);if(!c){c=refine2x({rows:ITEM_ART[it.id],pal:Object.assign({},IPAL,{A:TIER[it.tier],a:shade(TIER[it.tier],-40)})});propCache.set(key,c)}g.drawImage(c,x,y)};
+  if(eqNet&&eqNet.id!=='net0')item2(eqNet,2,128);else prop(g,netP,4,136);
+  prop(g,reeds,20,156);prop(g,reeds,44,172);
+  if(eqLn){drawSprite(g,{rows:lanternHD.rows.slice(17),pal:PP},72,45);item2(eqLn,66,24)}else drawSprite(g,lanternHD,72,28);
+  if(eqCh)item2(eqCh,26,54);
+  if(eqBait&&(S.bait[eqBait.id]||0)>0)item2(eqBait,56,88);
+  const fishing=!!S.run;const bob=(Math.floor(t/800)%2)*2;
+  g.fillStyle='rgba(0,0,0,0.4)';g.fillRect(HX+8,HY+61,20,3);
+  drawSprite(g,heroSprite(S.char||'rogue'),HX,HY+bob);
+  if(eqRod&&ITEM_ART[eqRod.id])item2(eqRod,HX+27,HY+8+bob);else{g.fillStyle=C.wd4;for(let i=0;i<28;i++)g.fillRect(HX+29+i,HY+38+bob-i,2,2)}
+  if(fishing){const tipx=HX+57,tipy=HY+8+bob,by=BY+Math.sin(t/700)*2;
+    g.strokeStyle='rgba(220,220,230,0.4)';g.lineWidth=1;g.beginPath();g.moveTo(tipx+.5,tipy+.5);g.quadraticCurveTo(tipx+12,by,BX+1,by);g.stroke();
+    g.fillStyle='#c9c0a8';g.fillRect(BX,by-2,4,2);g.fillStyle='#8a2a22';g.fillRect(BX,by,4,2);g.fillStyle=OUT;g.fillRect(BX-1,by-2,1,4);g.fillRect(BX+4,by-2,1,4);g.fillRect(BX,by-3,4,1);g.fillRect(BX,by+2,4,1);
+    if(Math.floor(t/400)%9===0){g.fillStyle='rgba(200,225,240,0.5)';g.fillRect(BX+7,by-6-Math.floor(t/400)%3*2,2,2)}
+    const bt=t-bite;if(bite&&bt<1400){const r=2+bt/1400*12;g.strokeStyle=`rgba(200,220,235,${0.5*(1-bt/1400)})`;g.beginPath();g.ellipse(BX+2,by+2,r,r*.45,0,0,7);g.stroke()}}
+  // lighting
+  const td=timeOfDay();g.globalCompositeOperation='multiply';
+  g.fillStyle=td==='day'?'rgba(238,240,246,1)':td==='dusk'?'rgba(215,140,95,0.95)':td==='night'?'rgba(62,78,135,0.95)':'rgba(150,165,200,0.95)';g.fillRect(0,0,W,H);
+  const vg=g.createRadialGradient(144,96,68,144,96,200);vg.addColorStop(0,'rgba(255,255,255,1)');vg.addColorStop(1,td==='day'?'rgba(170,168,180,1)':'rgba(120,115,130,1)');g.fillStyle=vg;g.fillRect(0,0,W,H);
+  g.globalCompositeOperation='screen';
+  if(td==='day'){g.fillStyle='rgba(140,165,190,0.14)';g.fillRect(0,0,W,H)}
+  if(td!=='day'){const wg=g.createRadialGradient(44,16,2,44,16,28);wg.addColorStop(0,'rgba(240,176,64,0.5)');wg.addColorStop(1,'rgba(240,176,64,0)');g.fillStyle=wg;g.fillRect(12,0,68,48);
+    const gr=g.createRadialGradient(82,36,4,82,36,td==='night'?88:48);gr.addColorStop(0,'rgba(242,178,58,'+(td==='night'?0.62:0.3)+')');gr.addColorStop(1,'rgba(242,178,58,0)');g.fillStyle=gr;g.fillRect(0,0,220,160);
+    for(let y=68;y<140;y+=3){const a=(td==='night'?0.22:0.1)*(1-(y-68)/72);g.fillStyle=`rgba(242,178,58,${a})`;const w=20-Math.floor((y-68)/5);g.fillRect(82-w/2+Math.sin(t/500+y)*3,y,w,2)}}
+  g.globalCompositeOperation='source-over';
+  if(td==='night'){flies.forEach(f=>{f.p+=0.012*f.s;const x=f.x+Math.sin(f.p)*10,y=f.y+Math.cos(f.p*.7)*6;const a=.25+.75*Math.abs(Math.sin(f.p*2.1));g.fillStyle=`rgba(210,240,120,${a})`;g.fillRect(Math.floor(x),Math.floor(y),2,2);g.fillStyle=`rgba(210,240,120,${a*.25})`;g.fillRect(Math.floor(x)-2,Math.floor(y)-2,6,6)});g.fillStyle='#fff0b0';g.fillRect(80,34,4,4)}
+  if(td==='dawn'||td==='night'){mist.forEach(m=>{m.o+=m.sp;const x=((Math.sin(m.o)*.5+.5)*W*1.4)-W*.2;g.fillStyle=td==='dawn'?'rgba(200,210,230,0.16)':'rgba(120,140,180,0.08)';g.fillRect(Math.floor(x),m.y,120,8);g.fillStyle=td==='dawn'?'rgba(200,210,230,0.08)':'rgba(120,140,180,0.04)';g.fillRect(Math.floor(x)-16,m.y-4,152,16)})}
+  // catch popup: a big fish drawn on the scene; its label is a DOM overlay so Korean text stays crisp
+  const bt=t-bite;const pop=$('catchPop');
+  if(bite&&bitePop&&bt<2600){const f=fishById(bitePop.id);const k=Math.min(1,bt/200),fade=bt>2200?1-(bt-2200)/400:1;g.globalAlpha=fade;
+    const cw=112,chh=80,cx0=172,cy0=8-Math.floor((1-k)*8);
+    g.fillStyle='rgba(8,6,12,0.88)';g.fillRect(cx0,cy0,cw,chh);g.fillStyle=TIER[Math.min(5,f.r+1)];g.fillRect(cx0,cy0,cw,2);g.fillRect(cx0,cy0+chh-2,cw,2);g.fillRect(cx0,cy0,2,chh);g.fillRect(cx0+cw-2,cy0,2,chh);
+    drawFish(g,f,cx0+8,cy0+8,4);g.globalAlpha=1;
+    if(pop){pop.hidden=false;pop.style.opacity=fade;pop.innerHTML=`<b class="r${f.r}">${f.name}</b><span>${RAR[f.r]} · ${bitePop.cm}cm</span>`}}
+  else if(pop&&!pop.hidden)pop.hidden=true;
+}
+// ---------- PiP widget ----------
+const pipC=document.createElement('canvas');pipC.width=288;pipC.height=192;const pg=pipC.getContext('2d');pg.imageSmoothingEnabled=false;
+let pipOn=false;
+function drawPip(){pg.imageSmoothingEnabled=false;pg.drawImage(cv,0,0);
+  let s=S.run?Math.floor((Date.now()-S.run.startAt)/1000):(S.brk?Math.max(0,Math.ceil((S.brk.endAt-Date.now())/1000)):0);if(S.run&&S.goalMin&&s<S.goalMin*60)s=S.goalMin*60-s;
+  const txt=`${pad(Math.floor(s/3600))}:${pad(Math.floor(s%3600/60))}:${pad(s%60)}`;
+  pg.font='20px DotGothic16, monospace';pg.textAlign='left';pg.fillStyle='#000';pg.fillText(txt,12,26);pg.fillText(txt,10,24);pg.fillStyle='#efe3c2';pg.fillText(txt,10,24);
+  pg.font='10px DotGothic16, monospace';const st=statusText();pg.fillStyle='#000';pg.fillText(st,11,185);pg.fillStyle='#d8ccb0';pg.fillText(st,10,184);
+  const td=TIMES[timeOfDay()];pg.textAlign='right';pg.fillStyle='#000';pg.fillText(td,279,17);pg.fillStyle='#bfae88';pg.fillText(td,278,16);}
+let pipStream=false,docPip=null;
+// Safari only enters PiP from inside a user gesture, so the stream is prepared on the first click and the PiP call stays synchronous.
+function preparePip(){const v=$('pipVideo');if(v.srcObject)return;try{drawPip();v.srcObject=pipC.captureStream(15);pipStream=true;v.play().catch(()=>{})}catch(e){}}
+function pipFallback(msg){S.compact=true;save();renderAll();toast(msg)}
+function pipReady(msg){pipOn=true;$('pipBtn').textContent='위젯 닫기';$('pipHint').textContent=msg}
+async function openDocPip(){
+  const pw=await documentPictureInPicture.requestWindow({width:300,height:236});docPip=pw;
+  [...document.styleSheets].forEach(ss=>{try{const css=[...ss.cssRules].map(r=>r.cssText).join('\n');const st=pw.document.createElement('style');st.textContent=css;pw.document.head.append(st)}catch(e){if(ss.href){const l=pw.document.createElement('link');l.rel='stylesheet';l.href=ss.href;pw.document.head.append(l)}}});
+  pw.document.body.style.cssText='margin:0;background:#07060a;overflow:hidden';
+  const box=document.querySelector('.sceneBox');const ph=document.createElement('div');ph.id='scenePh';ph.className='frame';ph.style.cssText='display:grid;place-items:center;min-height:160px;color:var(--muted);font-size:12px';ph.textContent='낚시 화면이 위젯 창에 떠 있어요';
+  box.replaceWith(ph);box.style.maxWidth='none';pw.document.body.append(box);box.classList.add('inpip');
+  pw.addEventListener('pagehide',()=>{box.classList.remove('inpip');box.style.maxWidth='';ph.replaceWith(box);docPip=null;pipOff()});
+  pipReady('위젯 창이 다른 창 위에 떠 있어요. 출항/귀항도 거기서 돼요.');
+}
+function togglePip(){
+  const v=$('pipVideo');audio.unlock();
+  const webkit=typeof v.webkitSetPresentationMode==='function';
+  if(pipOn){try{if(docPip){docPip.close();return}if(document.pictureInPictureElement){document.exitPictureInPicture().catch(()=>{})}else if(webkit)v.webkitSetPresentationMode('inline')}catch(e){}pipOff();return}
+  if(window.documentPictureInPicture){openDocPip().catch(()=>{docPip=null;pipFallback('위젯 창을 열지 못해 축소 모드로 열었어요')});return}
+  preparePip();
+  if(webkit){try{v.webkitSetPresentationMode('picture-in-picture')}catch(e){}
+    setTimeout(()=>{if(v.webkitPresentationMode==='picture-in-picture')pipReady('작은 창이 다른 창 위에 떠 있어요. 출항/귀항은 이 페이지에서.');else pipFallback('Safari가 PiP를 거부해 축소 모드로 열었어요. 한 번 더 눌러보거나 Chrome으로 열어보세요')},1200);return}
+  if(document.pictureInPictureEnabled&&v.requestPictureInPicture){v.requestPictureInPicture().then(()=>pipReady('작은 창이 다른 창 위에 떠 있어요. 출항/귀항은 이 페이지에서.')).catch(()=>pipFallback('이 브라우저에선 PiP가 안 돼 축소 모드로 열었어요'));return}
+  pipFallback('이 브라우저는 PiP가 없어 페이지 안 축소 모드로 열었어요');
+}
+function pipOff(){pipOn=false;$('pipBtn').textContent='위젯 모드';$('pipHint').textContent=''}
+$('pipBtn').onclick=togglePip;
+$('pipVideo').addEventListener('leavepictureinpicture',pipOff);
+// the PiP window's own pause/play button doubles as mute/unmute for the game sound
+$('pipVideo').addEventListener('pause',()=>{if(pipOn){S.muted=true;audio.setVol();renderTop();save()}});
+$('pipVideo').addEventListener('play',()=>{if(pipOn&&S.muted){S.muted=false;audio.setVol();renderTop();save()}});
+$('pipVideo').addEventListener('webkitpresentationmodechanged',()=>{if($('pipVideo').webkitPresentationMode!=='picture-in-picture')pipOff()});
+
+// ---------- character lines ----------
+const LINES={
+ rogue:{idle:['이 호수, 주인이 없는 것치곤 조용하군.','오늘 잡은 건 반만 장부에 적지.','물 밑에서 누가 보고 있는 기분이야.','안개가 짙을수록 일하기 좋지.'],start:['슬슬 나가볼까. 소리 내지 말고.','오늘은 남의 물고기도 내 것이 되는 날.'],catch:['걸렸다. 값은 내가 정하지.','이건 팔지 말고 숨겨둘까.'],rare:['…이건 왕실에서도 못 본 놈이군.','조용히 해. 아무도 못 봤지?'],end:['돌아가자. 장부는 나중에.']},
+ mage:{idle:['물의 흐름이 룬과 닮았어.','이 안개는 자연스러운 게 아니야.','낚시도 결국 인내의 마법이지.','수면에 비친 별이 하나 늘었군.'],start:['수면에 집중을 묶는다.','자, 시작해볼까. 흐트러지지 말고.'],catch:['이론대로야.','흥미로운 표본이군.'],rare:['이건… 탑에 보고해야겠어.','별의 배열이 맞았어!'],end:['오늘 연구는 여기까지.']},
+ knight:{idle:['기다림도 수련이다.','성벽은 지키는 자가 있어야 선다.','비가 오든 안개가 끼든, 자리를 지킨다.','갑옷이 무거운 건 익숙하다.'],start:['출정이다. 끝까지 간다.','맹세코 중간에 돌아가지 않겠다.'],catch:['잡았다. 다음.','정직하게 낚은 한 마리.'],rare:['이것은 왕께 바칠 만하다!','명예로운 상대였다.'],end:['임무 완료. 귀환한다.']},
+ bard:{idle:['이 물소리에 가사를 붙이면 좋겠는데.','술집에선 오늘 얘기를 세 배로 부풀릴 거야.','♪ 안개 호수에 달이 지면~','관객이 물고기뿐이라도 무대는 무대지.'],start:['자, 오늘의 노래를 시작하지.','첫 소절은 던지는 소리로.'],catch:['후렴에 넣을 만하군.','박수는 나중에.'],rare:['이건 발라드감이야!','이 이야기로 평생 술을 얻어먹겠어.'],end:['앵콜은 다음에.']},
+ druid:{idle:['물이 오늘은 말이 없군.','갈대가 바람의 방향을 알려준다.','달이 차면 뱀장어가 올라온다.','부두 밑에 새끼들이 돌아왔어.'],start:['호수여, 조금만 나눠다오.','바람이 좋다. 던지자.'],catch:['고맙다, 작은 것아.','필요한 만큼만.'],rare:['오래 산 것이군. 경의를.','호수가 선물을 주었다.'],end:['호수에 감사를. 돌아간다.']},
+};
+let sayT=null,nextIdleSay=0;
+function say(kind){const L=(LINES[S.char]||LINES.rogue)[kind];if(!L)return;const b=$('bubble');b.textContent=L[Math.floor(Math.random()*L.length)];b.hidden=false;clearTimeout(sayT);sayT=setTimeout(()=>{b.hidden=true},4200)}
+
+// ---------- loop ----------
+const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
+let lastSec=-1,lastTod=timeOfDay();
+function frame(t){
+  const now=Date.now();const bar=$('bar'),fill=$('barFill');
+  if(S.run){tickFishing(now);const s=Math.floor((now-S.run.startAt)/1000);if(s!==lastSec){lastSec=s;const gS=S.goalMin*60;const disp=S.goalMin&&s<gS?gS-s:s;$('clock').innerHTML=fmtClock(disp);$('bigClock').innerHTML=fmtClock(disp);if(s%5===0&&!S.goalMin){$('status').textContent=statusText()}
+    const goalS=S.goalMin*60,done=S.goalMin&&s>=goalS;
+    if(S.goalMin){bar.hidden=false;bar.classList.remove('rest');fill.style.width=Math.min(100,s/goalS*100)+'%';$('status').textContent=done?`목표 달성! 귀항하면 완주 보너스 · ${statusText()}`:`목표까지 ${fmtH(Math.max(0,goalS-s))||'1분 미만'} · ${statusText()}`}else bar.hidden=true;
+    $('clock').classList.toggle('done',!!done);$('bigClock').classList.toggle('done',!!done);
+    if(done&&!S.run.goalDone)goalReached()}}
+  else if(S.brk){const left=Math.max(0,Math.ceil((S.brk.endAt-now)/1000));$('clock').innerHTML=fmtClock(left);$('bigClock').innerHTML=fmtClock(left);bar.hidden=false;bar.classList.add('rest');fill.style.width=(left/(S.breakMin*60)*100)+'%';
+    if(!left&&!S.brk.rang){S.brk.rang=true;audio.bell();toast('다시 출항할 시간이에요');renderTimer();save()}}
+  else if(lastSec!==0){lastSec=0;$('clock').innerHTML=fmtClock(0);$('bigClock').innerHTML=fmtClock(0);bar.hidden=true}
+  const tod=timeOfDay();if(tod!==lastTod){lastTod=tod;renderTop();audio.retune()}
+  if(S.run&&now>nextIdleSay){if(nextIdleSay)say('idle');nextIdleSay=now+rand(180,420)*1000}
+  drawScene(cx,reducedMotion?0:t);if(pipOn||pipStream)drawPip();
+  const tk=$('tankCanvas');if(tk)drawTank(tk.getContext('2d'),reducedMotion?0:t);
+  requestAnimationFrame(frame);
+}
+// aquarium: fish drift back and forth in a stone tank
+const tankSwim={};
+function drawTank(g,t){
+  g.fillStyle='#0a1a26';g.fillRect(0,0,144,56);
+  for(let i=0;i<144;i+=3)for(let j=0;j<56;j+=3)if(nz(i,j,9)<0.06){g.fillStyle='#0d2231';g.fillRect(i,j,2,1)}
+  g.fillStyle='#14314a';for(let i=0;i<6;i++){const x=(i*31+Math.floor(t/400))%150-4;g.fillRect(x,6+i*8,3,1)}
+  g.fillStyle='#3a3340';g.fillRect(0,50,144,6);g.fillStyle='#4a4250';for(let i=0;i<144;i+=7)g.fillRect(i+(i%14?2:0),51,3,1);
+  g.fillStyle='#2a3d22';[[12,42],[40,44],[96,40],[128,44]].forEach(([x,y])=>{g.fillRect(x,y,2,8);g.fillRect(x+3,y+3,2,5)});
+  g.fillStyle='rgba(120,180,220,0.08)';g.fillRect(0,0,144,2);
+  curTank().forEach((c,i)=>{const f=fishById(c.id);const key=S.tankSel+':'+i;const sw=tankSwim[key]||(tankSwim[key]={x:Math.random()*120,y:6+Math.random()*34,dir:1,sp:.08+Math.random()*.1,ph:Math.random()*6});
+    sw.x+=sw.dir*sw.sp;if(sw.x>118){sw.dir=-1}if(sw.x<2){sw.dir=1}const y=sw.y+Math.sin(t/900+sw.ph)*2;
+    g.save();if(sw.dir<0){g.translate(Math.floor(sw.x)+24,Math.floor(y));g.scale(-1,1);drawFish(g,f,0,0,1)}else drawFish(g,f,Math.floor(sw.x),Math.floor(y),1);g.restore()});
+  g.fillStyle='rgba(0,0,0,0.35)';g.fillRect(0,0,144,1);g.fillRect(0,0,1,56);g.fillRect(143,0,1,56);
+}
+requestAnimationFrame(frame);
+// logic also runs on a plain interval, so catches and the goal still fire while the tab is in the background (rAF pauses there)
+function goalReached(){const R=S.run;if(!R||R.goalDone)return;R.goalDone=true;save();audio.fanfare();say('idle');renderTimer();
+  const o=overlay(`<h2 style="text-align:center">완주 달성!</h2><div class="hint" style="text-align:center">목표 ${S.goalMin}분을 채웠어요. 귀항하면 완주 보너스가 붙어요.<br>계속 낚시해도 보너스는 유지돼요.</div><div class="row center" style="margin-top:6px"><button class="btn" id="goalGo">계속 낚시</button><button class="btn primary" id="goalEnd">지금 귀항</button></div>`);
+  o.querySelector('#goalGo').onclick=()=>o.remove();o.querySelector('#goalEnd').onclick=()=>{o.remove();endRun()}}
+setInterval(()=>{const now=Date.now();if(S.run){tickFishing(now);const s=Math.floor((now-S.run.startAt)/1000);if(S.goalMin&&s>=S.goalMin*60&&!S.run.goalDone)goalReached()}
+  else if(S.brk&&!S.brk.rang&&S.brk.endAt<=now){S.brk.rang=true;audio.bell();toast('다시 출항할 시간이에요');renderTimer();save()}},1000);
+
+// ---------- audio ----------
+const audio=(()=>{
+  let ac=null,master,music,delay,chord=0;
+  const DAY=[0,2,4,7,9,12,14,16],NIGHT=[0,3,5,7,10,12,15,17];
+  const freq=(root,st)=>root*Math.pow(2,st/12);
+  function unlock(){if(!ac){try{ac=new (window.AudioContext||window.webkitAudioContext)();build()}catch(e){return}}if(S.muted){if(ac.state==='running')ac.suspend()}else if(ac.state==='suspended')ac.resume()}
+  function build(){
+    master=ac.createGain();master.connect(ac.destination);music=ac.createGain();music.connect(master);
+    delay=ac.createDelay(2);delay.delayTime.value=0.46;const fb=ac.createGain();fb.gain.value=0.38;const lp=ac.createBiquadFilter();lp.frequency.value=1800;delay.connect(fb);fb.connect(lp);lp.connect(delay);delay.connect(music);
+    const buf=ac.createBuffer(1,ac.sampleRate*2,ac.sampleRate);const d=buf.getChannelData(0);let b0=0;for(let i=0;i<d.length;i++){b0=0.98*b0+0.02*(Math.random()*2-1);d[i]=b0*3}
+    const noise=ac.createBufferSource();noise.buffer=buf;noise.loop=true;const nf=ac.createBiquadFilter();nf.type='lowpass';nf.frequency.value=380;const ng=ac.createGain();ng.gain.value=0.3;
+    const lfo=ac.createOscillator();lfo.frequency.value=0.11;const lg=ac.createGain();lg.gain.value=0.12;lfo.connect(lg);lg.connect(ng.gain);lfo.start();noise.connect(nf);nf.connect(ng);ng.connect(music);noise.start();
+    setVol();schedule();pad();
+  }
+  function setVol(){if(!master)return;master.gain.cancelScheduledValues(ac.currentTime);master.gain.setValueAtTime(S.muted?0:S.vol*0.6,ac.currentTime);master.gain.value=S.muted?0:S.vol*0.6;if(S.muted){ac.suspend().catch(()=>{})}else if(ac.state!=='running')ac.resume().catch(()=>{})}
+  function retune(){chord=0}
+  function scale(){const n=timeOfDay()==='night'||timeOfDay()==='dawn';return{root:n?196:220,st:n?NIGHT:DAY,gap:n?[1.8,3.8]:[1.3,3]}}
+  function pluck(f,g,dur,type){const o=ac.createOscillator();o.type=type||'triangle';o.frequency.value=f;const e=ac.createGain();e.gain.setValueAtTime(0,ac.currentTime);e.gain.linearRampToValueAtTime(g,ac.currentTime+0.02);e.gain.exponentialRampToValueAtTime(0.0005,ac.currentTime+dur);o.connect(e);e.connect(music);e.connect(delay);o.start();o.stop(ac.currentTime+dur+0.1)}
+  function schedule(){const sc=scale();const st=sc.st[Math.floor(Math.random()*sc.st.length)];pluck(freq(sc.root,st+(Math.random()<0.3?12:0)),0.07+Math.random()*0.04,2.6,'triangle');setTimeout(schedule,rand(sc.gap[0],sc.gap[1])*1000)}
+  function pad(){const sc=scale();const chords=[[0,7,16],[-3,4,12],[5,12,19],[-5,2,9]];const c=chords[chord%4];chord++;
+    c.forEach(st=>{const o=ac.createOscillator();o.type='sine';o.frequency.value=freq(sc.root/2,st);const o2=ac.createOscillator();o2.type='sine';o2.frequency.value=freq(sc.root/2,st)*1.004;const e=ac.createGain();e.gain.setValueAtTime(0,ac.currentTime);e.gain.linearRampToValueAtTime(0.03,ac.currentTime+4);e.gain.setValueAtTime(0.03,ac.currentTime+12);e.gain.linearRampToValueAtTime(0,ac.currentTime+16);o.connect(e);o2.connect(e);e.connect(music);o.start();o2.start();o.stop(ac.currentTime+16.5);o2.stop(ac.currentTime+16.5)});
+    setTimeout(pad,15000)}
+  function chime(r){if(!ac||S.muted)return;if(r>=2){rare();return}[0,4,7].forEach((st,i)=>setTimeout(()=>pluck(freq(440,st+12),0.06,1.2,'sine'),i*90))}
+  function rare(){if(!ac||S.muted)return;[0,7,12,16].forEach((st,i)=>setTimeout(()=>pluck(freq(330,st+12),0.08,1.8,'sine'),i*120))}
+  function bell(){if(!ac||S.muted)return;pluck(880,0.12,3,'sine');setTimeout(()=>pluck(1320,0.05,3,'sine'),30)}
+  function fanfare(){if(!ac||S.muted)return;[[0,0],[4,120],[7,240],[12,360],[12,600],[16,720]].forEach(([st,d])=>setTimeout(()=>{pluck(freq(523,st),0.12,1.6,'triangle');pluck(freq(523,st+12),0.05,1.2,'sine')},d))}
+  return{unlock,setVol,retune,chime,rare,bell,fanfare};
+})();
+document.addEventListener('pointerdown',()=>{audio.unlock();if(typeof $('pipVideo').webkitSetPresentationMode==='function')preparePip()});document.addEventListener('keydown',()=>audio.unlock());
+
+// ---------- boot ----------
+renderAll();
+if(!S.char)showCharSelect();
+</script>
+</body></html>
