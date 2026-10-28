@@ -320,17 +320,22 @@ const FISH2={
    {t:'px',a:[[12,12,4],[11,21,4],[26,7,4]],m:M(335,40,88),ink:false},                                        // petal tips catch light
   ]},
  // 이슬구피 (흔함, 요정의 샘): a single drop of dew sits inside its body and never dries
+ // 이슬구피 (흔함, 요정의 샘): a single drop of dew sits inside its body and never dries
  '1-1':{parts:[
    {t:'poly',a:[[9,12],[15,15],[15,17],[9,20],[12,16]],m:M(45,25,46),ink:true,tex:'rays'},
-   {t:'poly',a:[[22,12],[27,8],[31,12]],m:M(45,25,44),ink:true,tex:'rays'},
+   {t:'poly',a:[[22,12],[27,7],[31,12]],m:M(45,25,44),ink:true,tex:'rays'},
+   {t:'poly',a:[[18,13],[21,10],[23,13]],m:M(45,25,44),ink:true},                                                   // second little fin
    {t:'e',a:[27,16,10,4.5],m:M(45,28,50,{step:7}),tex:'scales',rim:true},
-   {t:'e',a:[25,16,3,3.5],m:M(195,40,70,{step:6}),ink:true},                                                   // the dew drop
+   {t:'e',a:[27,18,7,1.8],m:M(45,20,62),lift:0.1,ink:false},
+   {t:'e',a:[25,16,3,3.5],m:M(195,45,68,{step:6}),ink:true},                                                        // the dew drop
    {t:'px',a:[[24,14,4]],m:M(195,40,97),ink:false},
+   {t:'px',a:[[26,18,3]],m:M(195,40,85),ink:false},
    {t:'poly',a:[[28,19],[32,23],[34,19]],m:M(45,25,44),ink:true,tex:'rays'},
    {t:'e',a:[35,16,4.5,2.8],m:M(45,22,54,{step:6}),rim:true},
+   {t:'px',a:[[38,17,0],[39,17,0]],m:M(45,20,30)},                                                                   // tiny mouth
    ...eye(37.5,15.5,{sz:2,h:40,s:20,l:85,pl:15}),
+   {t:'px',a:[[30,8,3],[33,5,3]],m:M(195,40,80),ink:false},                                                          // a dew drop falling onto it
   ],glow:[[25,16,4,'hsl(195 50% 75%)',0.3]]},
- // 뼈새우 (희귀, 심연의 우물): no flesh left, only the shell, and still it moves
  '4-2':{parts:[
    {t:'line',a:[16,22,13,28],m:M(45,8,52),tone:1},{t:'line',a:[20,23,18,29],m:M(45,8,52),tone:1},             // legs
    {t:'line',a:[24,23,24,29],m:M(45,8,52),tone:1},{t:'line',a:[28,23,30,29],m:M(45,8,52),tone:1},
@@ -578,19 +583,21 @@ const FISH2={
    ...eye(39.5,13.5,{sz:3,h:120,s:70,l:60,pl:10}),
    ...eye(44.5,13.5,{sz:2,h:120,s:70,l:60,pl:10}),
   ],glow:[[40,13,4,'hsl(120 60% 55%)',0.35],[44,13,3,'hsl(120 60% 55%)',0.3]]},
+ // 재송어 (흔함, 잉걸불 협곡): lives in ash-grey water; smoke follows it
  '2-0':{parts:[
+   {t:'curve',a:[12,13,6,9,2,4],th:[1.4,0.4],m:M(20,4,40),fade:[10,1],ink:false},                                  // smoke trailing off
+   {t:'curve',a:[12,15,5,16,1,13],th:[1.2,0.4],m:M(20,4,36),fade:[9,0],ink:false},
    {t:'poly',a:[[5,10],[12,15],[12,17],[5,22],[8,16]],m:M(20,8,36),ink:true,tex:'rays'},
    {t:'poly',a:[[18,10],[22,6],[28,7],[31,10]],m:M(20,8,34),ink:true,tex:'rays'},
-   {t:'e',a:[26,16,14,5.5],m:M(20,10,44,{step:7}),tex:'scales',rim:true},                                        // ash-grey body
+   {t:'e',a:[26,16,14,5.5],m:M(20,10,44,{step:7}),tex:'scales',rim:true},
    {t:'e',a:[25,18,10,2.6],m:M(20,8,54),lift:0.1,ink:false},
-   {t:'px',a:[[17,14,0],[21,13,0],[25,13,0],[29,14,0],[33,15,0],[19,17,0],[23,18,0],[27,17,0]],m:M(20,8,28)},     // soot flecks
-   {t:'px',a:[[20,15,3],[28,15,3]],m:M(20,70,55),ink:false},                                                      // two embers still glowing under the ash
+   {t:'px',a:[[17,14,0],[21,13,0],[25,13,0],[29,14,0],[33,15,0],[19,17,0],[23,18,0],[27,17,0]],m:M(20,8,28)},
+   {t:'px',a:[[20,15,3],[28,15,3],[24,16,3]],m:M(20,70,55),ink:false},                                             // embers under the ash
    {t:'poly',a:[[24,20],[29,24],[32,20]],m:M(20,8,36),ink:true,tex:'rays'},
    {t:'e',a:[36,16,6,3.8],m:M(20,8,46,{step:6}),rim:true},
    {t:'line',a:[38,18,43,17],m:M(20,8,24),tone:0,ink:false},
    ...eye(38.5,15.5,{sz:2,h:40,s:20,l:82,pl:12}),
-  ]},
- // 숯빛 메기 (흔함, 잉걸불 협곡): roots through the charcoal on the gorge floor; whiskers always singed
+  ],glow:[[24,16,4,'hsl(20 60% 50%)',0.15]]},
  '2-1':{parts:[
    {t:'poly',a:[[3,9],[11,14],[11,18],[3,23],[7,16]],m:M(20,10,14),ink:true,tex:'rays'},
    {t:'poly',a:[[14,11],[20,8],[30,8],[34,11]],m:M(20,10,13),ink:true,tex:'rays'},
@@ -605,21 +612,22 @@ const FISH2={
   ],glow:[[22,19,3,'hsl(20 70% 50%)',0.25],[28,14,3,'hsl(20 70% 50%)',0.25]]},
 
  // 잿더미게 (흔함, 잉걸불 협곡): wears a coat of ash; poke it and ash puffs up
+ // 잿더미게 (흔함, 잉걸불 협곡): sits half-buried in ash; poke it and ash puffs up
  '2-2':{parts:[
-   {t:'line',a:[13,21,9,27],m:M(20,6,30),tone:1},{t:'line',a:[18,22,15,28],m:M(20,6,30),tone:1},
-   {t:'line',a:[30,22,33,28],m:M(20,6,30),tone:1},{t:'line',a:[35,21,39,27],m:M(20,6,30),tone:1},
-   {t:'e',a:[24,17,12,6.5],m:M(20,6,36,{step:6}),tex:'grain',rim:true},                                          // ash-coated shell
-   {t:'e',a:[24,14,10,3],m:M(20,4,50),ink:false,lift:0.1,tex:'grain'},                                            // ash layer on top
-   {t:'px',a:[[18,16,3],[27,18,3]],m:M(20,80,50),ink:false},                                                       // ember peeking through
-   {t:'e',a:[10,12,4,3],m:M(20,6,38,{step:7}),rot:-0.5,rim:true},
-   {t:'poly',a:[[6,9],[10,8],[9,12],[6,13]],m:M(20,6,34),ink:true},
-   {t:'e',a:[39,11,4.5,3.2],m:M(20,6,40,{step:7}),rot:0.6,rim:true},
-   {t:'poly',a:[[41,6],[46,7],[44,11],[41,10]],m:M(20,6,36),ink:true},
-   {t:'px',a:[[29,10,1],[29,9,2],[32,10,1],[32,9,2]],m:M(20,6,28)},
-   {t:'px',a:[[29,8,0],[32,8,0]],m:M(0,0,6)},
-   {t:'px',a:[[14,8,3],[22,6,3],[33,5,3],[40,3,3]],m:M(20,4,55),ink:false},                                        // ash drifting up
+   {t:'e',a:[24,25,20,3],m:M(20,4,26),ink:false,tex:'grain',fade:[24,46]},                                       // ash drift it sits in
+   {t:'line',a:[12,22,9,26],m:M(20,6,30),tone:1},{t:'line',a:[17,23,15,27],m:M(20,6,30),tone:1},
+   {t:'line',a:[31,23,33,27],m:M(20,6,30),tone:1},{t:'line',a:[36,22,39,26],m:M(20,6,30),tone:1},
+   {t:'e',a:[24,19,13,5.5],m:M(20,6,36,{step:6}),tex:'grain',rim:true},                                          // wide flat shell
+   {t:'e',a:[24,16,11,2.6],m:M(20,4,50),ink:false,lift:0.1,tex:'grain'},                                          // ash layer on top
+   {t:'px',a:[[18,19,3],[28,20,3]],m:M(20,80,50),ink:false},                                                       // ember peeking through
+   {t:'e',a:[9,19,4,2.6],m:M(20,6,38,{step:7}),rot:0.1,rim:true},                                                  // claws tucked low
+   {t:'poly',a:[[4,18],[8,17],[7,21],[4,21]],m:M(20,6,34),ink:true},
+   {t:'e',a:[39,19,4,2.6],m:M(20,6,40,{step:7}),rot:-0.1,rim:true},
+   {t:'poly',a:[[40,17],[45,18],[44,21],[40,21]],m:M(20,6,36),ink:true},
+   {t:'px',a:[[21,13,1],[21,12,2],[27,13,1],[27,12,2]],m:M(20,6,28)},
+   {t:'px',a:[[21,11,0],[27,11,0]],m:M(0,0,6)},
+   {t:'px',a:[[14,10,3],[22,7,3],[33,6,3],[40,4,3],[30,9,3]],m:M(20,4,55),ink:false},                               // ash drifting up
   ]},
- // 용암 복어 (희귀, 잉걸불 협곡): swells and glows red when angry; never touch bare-handed
  '2-3':{parts:[
    {t:'poly',a:[[6,12],[12,15],[12,17],[6,20],[9,16]],m:M(10,50,30),ink:true,tex:'rays'},
    {t:'e',a:[25,16,13,11],m:M(8,55,28,{step:7}),tex:'cracks',rim:true},                                          // swollen body, cooled crust
@@ -698,32 +706,35 @@ const FISH2={
    ...eye(41.5,14.5,{sz:2,h:45,s:90,l:90,pl:60,glint:false}),
   ],outline:'#4a2e5e',glow:[[25,17,8,'hsl(355 80% 55%)',0.45],[42,14,3,'hsl(45 80% 70%)',0.3]],tint:[[25,17,9,355,70,0.35]],spark:[[8,10,'hsl(40 90% 80%)'],[44,26,'hsl(40 90% 80%)']]},
  // 별모래 정어리 (흔함, 별이 진 바다): star-sand stuck to its scales; schools through the night sea
+ // 별모래 정어리 (흔함, 별이 진 바다): star-sand stuck to its scales; never alone
  '3-0':{parts:[
-   {t:'poly',a:[[7,11],[13,15],[13,17],[7,21],[10,16]],m:M(225,25,34),ink:true,tex:'rays'},
-   {t:'poly',a:[[20,11],[23,7],[28,8],[30,11]],m:M(225,25,32),ink:true,tex:'rays'},
-   {t:'e',a:[26,16,12,3.6],m:M(225,22,46,{step:7}),tex:'scales',rim:true,spec:[[22,14,6]]},
-   {t:'e',a:[25,17.5,8,1.8],m:M(225,15,62),lift:0.1,ink:false},
-   {t:'px',a:[[17,15,4],[21,14,4],[25,15,4],[29,14,4],[33,15,4],[23,17,4],[31,17,4]],m:M(50,70,90),ink:false},     // star sand
-   {t:'poly',a:[[26,18],[30,22],[32,18]],m:M(225,25,34),ink:true,tex:'rays'},
-   {t:'e',a:[35,16,5,2.8],m:M(225,22,48,{step:6}),rim:true},
-   ...eye(37.5,15.5,{sz:2,h:40,s:20,l:85,pl:12}),
-  ],spark:[[4,8,'hsl(50 60% 85%)'],[42,22,'hsl(50 60% 85%)']]},
- // 별게 (흔함, 별이 진 바다): constellation dots on its back; join them and you get a different one
+   {t:'e',a:[12,9,7,2.2],m:M(225,18,30,{step:5}),fade:[16,4],ink:false},                                          // two of the school, behind
+   {t:'e',a:[11,24,7,2.2],m:M(225,18,30,{step:5}),fade:[15,3],ink:false},
+   {t:'px',a:[[14,9,3],[13,24,3]],m:M(50,50,80),ink:false},
+   {t:'poly',a:[[13,12],[19,15],[19,17],[13,21],[16,16]],m:M(225,25,34),ink:true,tex:'rays'},
+   {t:'poly',a:[[24,12],[27,8],[32,9],[34,12]],m:M(225,25,32),ink:true,tex:'rays'},
+   {t:'e',a:[30,16,12,3.4],m:M(225,22,46,{step:7}),tex:'scales',rim:true,spec:[[26,14,6]]},
+   {t:'e',a:[29,17.5,8,1.6],m:M(225,15,62),lift:0.1,ink:false},
+   {t:'px',a:[[21,15,4],[25,14,4],[29,15,4],[33,14,4],[37,15,4],[27,17,4],[35,17,4]],m:M(50,70,90),ink:false},     // star sand
+   {t:'poly',a:[[30,18],[34,22],[36,18]],m:M(225,25,34),ink:true,tex:'rays'},
+   {t:'e',a:[39,16,5,2.6],m:M(225,22,48,{step:6}),rim:true},
+   ...eye(41.5,15.5,{sz:2,h:40,s:20,l:85,pl:12}),
+  ],spark:[[5,16,'hsl(50 60% 85%)'],[45,24,'hsl(50 60% 85%)']]},
  '3-1':{parts:[
-   {t:'line',a:[13,21,9,27],m:M(225,20,26),tone:1},{t:'line',a:[18,22,15,28],m:M(225,20,26),tone:1},
-   {t:'line',a:[30,22,33,28],m:M(225,20,26),tone:1},{t:'line',a:[35,21,39,27],m:M(225,20,26),tone:1},
-   {t:'e',a:[24,17,12,6.5],m:M(228,26,30,{step:7}),tex:'grain',rim:true},                                         // night-blue shell
-   {t:'px',a:[[18,14,4],[23,12,4],[29,13,4],[31,18,4],[21,19,4]],m:M(50,70,92),ink:false},                          // stars
-   {t:'line',a:[18,14,23,12],m:M(50,30,55),tone:2,ink:false},{t:'line',a:[23,12,29,13],m:M(50,30,55),tone:2,ink:false},
-   {t:'line',a:[29,13,31,18],m:M(50,30,55),tone:2,ink:false},
-   {t:'e',a:[10,12,4,3],m:M(228,24,32,{step:7}),rot:-0.5,rim:true},
-   {t:'poly',a:[[6,9],[10,8],[9,12],[6,13]],m:M(228,22,28),ink:true},
-   {t:'e',a:[39,11,4.5,3.2],m:M(228,24,34,{step:7}),rot:0.6,rim:true},
-   {t:'poly',a:[[41,6],[46,7],[44,11],[41,10]],m:M(228,22,30),ink:true},
-   {t:'px',a:[[29,10,1],[29,9,2],[32,10,1],[32,9,2]],m:M(228,20,24)},
-   {t:'px',a:[[29,8,0],[32,8,0]],m:M(0,0,6)},
-  ]},
- // 은하새우 (희귀, 별이 진 바다): when it leaps it draws a small galaxy
+   {t:'line',a:[14,22,10,28],m:M(225,20,26),tone:1},{t:'line',a:[19,23,17,29],m:M(225,20,26),tone:1},
+   {t:'line',a:[29,23,31,29],m:M(225,20,26),tone:1},{t:'line',a:[34,22,38,28],m:M(225,20,26),tone:1},
+   {t:'e',a:[24,18,11,6],m:M(228,26,30,{step:7}),tex:'grain',rim:true},                                           // night-blue shell
+   {t:'px',a:[[18,15,4],[23,13,4],[29,14,4],[31,19,4],[21,20,4]],m:M(50,70,92),ink:false},                          // stars
+   {t:'line',a:[18,15,23,13],m:M(50,30,55),tone:2,ink:false},{t:'line',a:[23,13,29,14],m:M(50,30,55),tone:2,ink:false},
+   {t:'line',a:[29,14,31,19],m:M(50,30,55),tone:2,ink:false},
+   {t:'curve',a:[14,15,9,10,8,3],th:[1.6,1],m:M(228,24,32,{step:7})},                                              // left arm raised high
+   {t:'poly',a:[[6,1],[11,1],[9,5],[6,5]],m:M(228,22,30),ink:true},
+   {t:'curve',a:[34,15,40,12,44,6],th:[1.6,1],m:M(228,24,34,{step:7})},                                            // right arm pointing up
+   {t:'poly',a:[[42,3],[47,4],[46,8],[42,7]],m:M(228,22,32),ink:true},
+   {t:'px',a:[[46,2,4]],m:M(50,70,95),ink:false},                                                                    // the star it points at
+   {t:'px',a:[[22,12,1],[22,11,2],[26,12,1],[26,11,2]],m:M(228,20,24)},
+   {t:'px',a:[[22,10,0],[26,10,0]],m:M(0,0,6)},
+  ],spark:[[46,2,'hsl(50 70% 95%)']]},
  '3-2':{parts:[
    {t:'curve',a:[6,26,12,12,20,8],th:[1.4,0.3],m:M(270,40,55),fade:[14,4],ink:false},                             // galaxy trail
    {t:'px',a:[[8,24,4],[11,17,4],[15,11,4],[7,20,3],[13,14,3]],m:M(280,50,90),ink:false},
