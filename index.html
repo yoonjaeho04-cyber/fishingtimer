@@ -524,7 +524,7 @@ function renderPane(){
     const f=codexSel?fishById(codexSel):allFish().find(x=>S.codex[x.id]);
     const right=document.createElement('div');
     if(f){const got=S.codex[f.id];const c=document.createElement('div');c.className='card';c.style.gridTemplateColumns='1fr';
-      const art=document.createElement('div');art.className='art';art.style.cssText='width:200px;height:144px;justify-self:center';const cv=document.createElement('canvas');cv.width=96;cv.height=68;cv.style.cssText='width:192px;height:136px';if(got)drawFishHD(cv.getContext('2d'),f,0,2,1);else{const x=cv.getContext('2d');x.fillStyle='#2a2434';x.font='40px DotGothic16, monospace';x.textAlign='center';x.fillText('?',48,46)}art.append(cv);
+      const art=document.createElement('div');art.className='art';art.style.cssText='width:200px;height:144px;justify-self:center';const cv=document.createElement('canvas');const xl=got?fishCanvasXL(f):null;cv.width=xl?192:96;cv.height=xl?136:68;cv.style.cssText='width:192px;height:136px';if(got){if(xl)cv.getContext('2d').drawImage(xl,0,4);else drawFishHD(cv.getContext('2d'),f,0,2,1)}else{const x=cv.getContext('2d');x.fillStyle='#2a2434';x.font='40px DotGothic16, monospace';x.textAlign='center';x.fillText('?',48,46)}art.append(cv);
       const info=document.createElement('div');
       info.innerHTML=got?`<h3 class="r${f.r}">${f.name}</h3><div class="kv"><span>등급</span><span class="r${f.r}">${RAR[f.r]}</span><span>서식지</span><span>${SPOTS[f.spot].name}</span><span>시간대</span><span>${f.time?TIMES[f.time]+'에만':'언제나'}</span><span>크기</span><span>${f.min}~${f.max}cm</span><span>기본가</span><span class="gold">${f.price} G</span><span>잡은 수</span><span>${got.n}마리</span><span>최고 기록</span><span>${got.best}cm${got.best>=f.max-Math.round((f.max-f.min)*0.1)?' ★':''}</span></div>`
         :`<h3 class="r${f.r}">???</h3><div class="kv"><span>등급</span><span class="r${f.r}">${RAR[f.r]}</span><span>서식지</span><span>${SPOTS[f.spot].name}</span><span>시간대</span><span>${f.time?TIMES[f.time]+'에만':'언제나'}</span></div>`;
@@ -1710,14 +1710,18 @@ const HERO2={
 };
 
 // ---------- fish & hero rendering (v2 engine) ----------
-const fishHD={},fishSD={};
-function fishCanvasHD(f){return fishHD[f.id]||(fishHD[f.id]=renderFish(FISH3[f.id],f.r))}
-function fishCanvasSD(f){return fishSD[f.id]||(fishSD[f.id]=renderFish(FISH3[f.id],f.r,0.5))}
+const fishHD={},fishSD={},fishImg={},fishImg2={},fishImgTried={};
+// Painted art in assets/fish/<id>.png (96x64) and <id>@2.png (192x128) is preferred; the drawn version is the fallback.
+function loadFishArt(){allFish().forEach(f=>{if(fishImgTried[f.id])return;fishImgTried[f.id]=1;const im=new Image();im.onload=()=>{fishImg[f.id]=im;delete fishHD[f.id];delete fishSD[f.id];if(typeof renderPane==='function')renderPane()};im.src='assets/fish/'+f.id+'.png';const im2=new Image();im2.onload=()=>{fishImg2[f.id]=im2;if(typeof renderPane==='function')renderPane()};im2.src='assets/fish/'+f.id+'@2.png'})}
+function fishCanvasHD(f){if(fishHD[f.id])return fishHD[f.id];if(fishImg[f.id]){const c=document.createElement('canvas');c.width=96;c.height=64;c.getContext('2d').drawImage(fishImg[f.id],0,0,96,64);return fishHD[f.id]=c}return fishHD[f.id]=renderFish(FISH3[f.id],f.r)}
+function fishCanvasSD(f){if(fishSD[f.id])return fishSD[f.id];if(fishImg[f.id]){const c=document.createElement('canvas');c.width=48;c.height=32;const g=c.getContext('2d');g.imageSmoothingEnabled=true;g.imageSmoothingQuality='high';g.drawImage(fishImg[f.id],0,0,48,32);return fishSD[f.id]=c}return fishSD[f.id]=renderFish(FISH3[f.id],f.r,0.5)}
+function fishCanvasXL(f){if(fishImg2[f.id]){const c=document.createElement('canvas');c.width=192;c.height=128;c.getContext('2d').drawImage(fishImg2[f.id],0,0,192,128);return c}return null}
 function drawFish(g,f,x,y,scale=1){const c=fishCanvasSD(f);g.imageSmoothingEnabled=false;g.drawImage(c,x,y,48*scale,32*scale)}
 function drawFishHD(g,f,x,y,scale=1){const c=fishCanvasHD(f);g.imageSmoothingEnabled=false;g.drawImage(c,x,y,96*scale,64*scale)}
 const heroCache={};
 function heroCanvas(cls,k=1){const key=cls+':'+k;return heroCache[key]||(heroCache[key]=renderFish(HERO2[cls]||HERO2.rogue,null,k))}
 function heroSprite(cls){return {__hero:cls}}
+loadFishArt();
 function drawSprite(g,sp,x,y,scale=1){if(sp.__hero){const c=heroCanvas(sp.__hero,1);g.imageSmoothingEnabled=false;g.drawImage(c,x,y,32*scale,64*scale);return}const{rows,pal}=sp;for(let j=0;j<rows.length;j++){const r=rows[j];for(let i=0;i<r.length;i++){const ch=r[i];if(ch==='.')continue;g.fillStyle=ch==='O'?OUT:(pal[ch]||'#f0f');g.fillRect(x+i*scale,y+j*scale,scale,scale)}}}
 // hero sprites 32x64: muted palette, dithered shading, light from the upper left. One full sprite per class.
 const IPAL={W:'#8a6a48',w:'#5a3f2a',x:'#b08a60',L:'#e8dcc0',G:'#d9b05a',g:'#8a6a2a',R:'#9a2f28',r:'#5e1c18',B:'#3a6a9a',b:'#1f3f60',P:'#d8c8a0',p:'#a08a60',S:'#c8ccd4',s:'#7a8088',K:'#3a3a44',k:'#23232a',N:'#5a8a3a',n:'#365a24',V:'#7a4fb0',v:'#4a2f70',Y:'#fff0a0',C:'#7fd8f0',M:'#e08ab0',T:'#2f7a7a',E:'#f3eee2',e:'#0b0a0e'};
