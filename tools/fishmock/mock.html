@@ -1,0 +1,21 @@
+<!doctype html><meta charset="utf-8"><title>물고기 시안</title>
+<style>body{margin:0;background:#15121b;color:#cfc6b8;font:13px sans-serif;padding:16px}
+.row{display:grid;grid-template-columns:150px 110px 120px 210px 60px 60px;gap:14px;align-items:center;margin-bottom:10px;padding:8px;background:#0c0a10;border:2px solid #2b2434}
+canvas{image-rendering:pixelated;background:#101a24}
+.w{background:#0d1a26;padding:4px;display:inline-block}
+h1{font-size:15px;color:#d9b05a;margin:0 0 10px}
+small{color:#7d7488;display:block;margin-top:3px}.hd{color:#7d7488;font-size:11px}</style>
+<h1>물고기 시안 — 48×32 종별 디자인</h1>
+<div class="row hd"><div>종</div><div>지금 (24×16, 2.5배)</div><div>시안 2배 (도감 칸 크기)</div><div>시안 4배 (확대)</div><div>1배 (장면)</div><div>물 위</div></div>
+<div id="list"></div>
+<script src="old.js"></script><script src="fish2.js"></script><script src="species.js"></script>
+<script>
+const RAR=['흔함','희귀','영웅','전설','신화'];
+const water=g=>{const W=g.canvas.width,H=g.canvas.height;for(let y=0;y<H;y++)for(let x=0;x<W;x++){g.fillStyle=((x+y*3)%11===0)?'#16283a':'#0e1a28';g.fillRect(x,y,1,1)}};
+Object.keys(FISH2).forEach(id=>{const f=fishById(id);const row=document.createElement('div');row.className='row';
+ const nm=document.createElement('div');nm.innerHTML=`<b>${f.name}</b><small>${RAR[f.r]} · ${SPOTS[f.spot].name}</small>`;row.append(nm);
+ const o=document.createElement('canvas');o.width=24;o.height=16;o.style.cssText='width:60px;height:40px';o.getContext('2d').drawImage(fishCanvas(f),0,0);row.append(o);
+ const c=renderFish(FISH2[id]);
+ const mk=(sc,wat)=>{const cv=document.createElement('canvas');cv.width=48;cv.height=32;cv.style.cssText=`width:${48*sc}px;height:${32*sc}px`;const g=cv.getContext('2d');if(wat)water(g);g.drawImage(c,0,0);return cv};
+ row.append(mk(2),mk(4),mk(1),mk(1,true));list.append(row)});
+</script>
