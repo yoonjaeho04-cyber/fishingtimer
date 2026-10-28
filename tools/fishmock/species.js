@@ -400,19 +400,21 @@ const FISH2={
    {t:'line',a:[2,24,2,30],m:M(90,25,30),tone:1,ink:false},{t:'line',a:[5,22,5,30],m:M(90,25,30),tone:1,ink:false}, // reeds
   ]},
  // 은빛잉어 (희귀, 안개 호수): scales like mirrors, said to have escaped the old castle's pond
+ // 은빛잉어 (희귀, 안개 호수): scales like mirrors, said to have escaped the old castle's pond
  '0-4':{parts:[
-   {t:'poly',a:[[4,8],[12,14],[12,18],[4,24],[8,16]],m:M(210,10,52),ink:true,tex:'rays'},
-   {t:'poly',a:[[16,9],[20,3],[30,4],[33,9]],m:M(210,10,50),ink:true,tex:'rays'},
-   {t:'e',a:[25,16,14,7],m:M(210,8,62,{step:8}),tex:'scales',rim:true,spec:[[18,11,10],[24,13,5]]},            // mirror body
-   {t:'e',a:[24,19,10,3],m:M(210,6,72),lift:0.1,ink:false},
-   {t:'px',a:[[20,12,4],[27,11,4],[33,14,4],[22,16,4],[30,17,4]],m:M(210,10,98),ink:false},                      // mirror glints
-   {t:'poly',a:[[23,22],[28,28],[33,23]],m:M(210,10,50),ink:true,tex:'rays'},
-   {t:'e',a:[36,16,6.5,4.5],m:M(210,8,64,{step:8}),rim:true},
-   {t:'line',a:[39,19,44,18],m:M(210,8,30),tone:0,ink:false},
-   {t:'line',a:[42,19,45,22],m:M(210,8,40),tone:1,ink:false},                                                    // barbel
+   {t:'poly',a:[[4,8],[12,14],[12,18],[4,24],[8,16]],m:M(210,10,40),ink:true,tex:'rays'},
+   {t:'poly',a:[[16,9],[20,3],[30,4],[33,9]],m:M(210,10,38),ink:true,tex:'rays'},
+   {t:'e',a:[25,16,14,7],m:M(210,10,52,{step:9}),tex:'scales',rim:true,spec:[[18,11,10],[24,13,5]]},            // mirror body
+   {t:'e',a:[25,12,12,3],m:M(210,12,36),ink:false,lift:-0.1,tex:'scales'},                                        // darker back
+   {t:'e',a:[24,19,10,3],m:M(210,6,68),lift:0.1,ink:false},
+   {t:'px',a:[[20,12,4],[27,11,4],[33,14,4],[22,16,4],[30,17,4],[16,15,4]],m:M(210,10,98),ink:false},              // mirror glints
+   {t:'px',a:[[19,13,0],[26,12,0],[32,15,0],[21,17,0],[29,18,0]],m:M(210,12,30)},                                   // and their shadows
+   {t:'poly',a:[[23,22],[28,28],[33,23]],m:M(210,10,40),ink:true,tex:'rays'},
+   {t:'e',a:[36,16,6.5,4.5],m:M(210,8,54,{step:8}),rim:true},
+   {t:'line',a:[39,19,44,18],m:M(210,8,26),tone:0,ink:false},
+   {t:'line',a:[42,19,45,22],m:M(210,8,36),tone:1,ink:false},
    ...eye(39.5,15.5,{sz:2,h:40,s:30,l:80,pl:12}),
   ]},
- // 유령잉어 (희귀, 안개 호수, 밤): translucent; lantern light shows the bones inside
  '0-5':{parts:[
    {t:'poly',a:[[5,9],[12,14],[12,18],[5,23],[8,16]],m:M(190,15,50),ink:true,tex:'rays',fade:[12,4]},
    {t:'poly',a:[[17,9],[21,4],[29,5],[32,9]],m:M(190,15,48),ink:true,tex:'rays',fade:[24,17]},
@@ -502,18 +504,17 @@ const FISH2={
    {t:'px',a:[[24,9,4],[23,10,3]],m:M(330,40,72),ink:false},                                                      // flower bud
   ]},
  // 별꽃불가사리 (희귀, 요정의 샘): five arms whose tips glow at night, scattered like a constellation
+ // 별꽃불가사리 (희귀, 요정의 샘): five arms whose tips glow at night, scattered like a constellation
  '1-6':{parts:[
-   {t:'poly',a:[[24,16],[20,2],[28,2]],m:M(270,30,40,{step:7}),ink:true,tex:'grain'},                            // arms
-   {t:'poly',a:[[24,16],[44,10],[42,18]],m:M(270,30,40,{step:7}),ink:true,tex:'grain'},
-   {t:'poly',a:[[24,16],[38,30],[30,31]],m:M(270,30,40,{step:7}),ink:true,tex:'grain'},
-   {t:'poly',a:[[24,16],[18,31],[10,28]],m:M(270,30,40,{step:7}),ink:true,tex:'grain'},
-   {t:'poly',a:[[24,16],[4,16],[8,9]],m:M(270,30,40,{step:7}),ink:true,tex:'grain'},
-   {t:'e',a:[24,16,5,4.5],m:M(270,30,44,{step:7}),rim:true,tex:'spots'},                                          // center
-   {t:'px',a:[[24,4,4],[42,13,4],[35,29,4],[13,28,4],[6,13,4]],m:M(55,80,85),ink:false},                           // glowing tips
-   {t:'px',a:[[22,10,0],[26,8,0],[32,14,0],[36,12,0],[30,24,0],[33,27,0],[16,24,0],[13,27,0],[14,14,0],[10,12,0]],m:M(270,25,28)}, // bumps
-   {t:'px',a:[[24,16,0]],m:M(270,25,20)},
-  ],glow:[[24,4,3,'hsl(55 70% 70%)',0.4],[42,13,3,'hsl(55 70% 70%)',0.4],[35,29,3,'hsl(55 70% 70%)',0.4],[13,28,3,'hsl(55 70% 70%)',0.4],[6,13,3,'hsl(55 70% 70%)',0.4]]},
- // 이끼거북 (희귀, 요정의 샘): small flowers grow on its shell; fairies rest there
+   {t:'poly',a:[[24,16],[22,2],[26,2]],m:M(270,30,40,{step:7}),ink:true,tex:'grain'},                            // slender arms
+   {t:'poly',a:[[24,16],[44,10],[43,14]],m:M(270,30,40,{step:7}),ink:true,tex:'grain'},
+   {t:'poly',a:[[24,16],[38,30],[34,31]],m:M(270,30,40,{step:7}),ink:true,tex:'grain'},
+   {t:'poly',a:[[24,16],[14,31],[10,29]],m:M(270,30,40,{step:7}),ink:true,tex:'grain'},
+   {t:'poly',a:[[24,16],[4,14],[5,10]],m:M(270,30,40,{step:7}),ink:true,tex:'grain'},
+   {t:'e',a:[24,16,4.5,4],m:M(270,30,44,{step:7}),rim:true,tex:'spots'},
+   {t:'px',a:[[24,3,4],[23,3,4],[43,11,4],[43,12,4],[36,30,4],[35,30,4],[12,30,4],[12,29,4],[5,12,4],[5,11,4]],m:M(55,85,88),ink:false}, // glowing tips
+   {t:'px',a:[[24,9,0],[33,13,0],[30,23,0],[18,24,0],[15,15,0]],m:M(270,25,28)},
+  ],glow:[[24,3,4,'hsl(55 70% 70%)',0.5],[43,11,4,'hsl(55 70% 70%)',0.5],[36,30,4,'hsl(55 70% 70%)',0.5],[12,30,4,'hsl(55 70% 70%)',0.5],[5,12,4,'hsl(55 70% 70%)',0.5]]},
  '1-7':{parts:[
    {t:'e',a:[11,22,4,2.2],m:M(100,18,30),rot:0.5},{t:'e',a:[33,23,4,2.2],m:M(100,18,32),rot:-0.4},
    {t:'e',a:[22,17,13,7],m:M(105,30,30,{step:7}),tex:'grain',rim:true},                                          // mossy shell
@@ -533,9 +534,10 @@ const FISH2={
    {t:'poly',a:[[4,8],[12,14],[12,18],[4,24],[8,16]],m:M(30,30,30),ink:true,tex:'rays'},
    {t:'poly',a:[[16,9],[20,4],[30,5],[33,9]],m:M(30,28,28),ink:true,tex:'rays'},
    {t:'e',a:[25,16,14,7],m:M(32,32,36,{step:7}),tex:'plates',rim:true},                                          // bark body
-   {t:'e',a:[25,16,9,4.5],m:M(32,28,30),ink:false,tex:'ridges'},                                                  // tree rings
-   {t:'e',a:[25,16,5,2.5],m:M(32,28,38),ink:false,tex:'ridges'},
-   {t:'px',a:[[25,16,0]],m:M(32,28,22)},
+   {t:'e',a:[21,15,7,4],m:M(32,28,30),ink:false,tex:'ridges',rot:0.2},                                          // a knot in the wood
+   {t:'e',a:[21,15,3.5,2],m:M(32,28,38),ink:false,tex:'ridges',rot:0.2},
+   {t:'px',a:[[21,15,0],[20,15,0]],m:M(32,28,20)},
+   {t:'line',a:[28,12,36,13],m:M(32,24,28),tone:0,ink:false},{t:'line',a:[28,19,36,18],m:M(32,24,28),tone:0,ink:false}, // grain lines
    {t:'curve',a:[14,20,10,26,6,30],th:[1,0.4],m:M(30,30,26)},                                                    // root tendrils
    {t:'curve',a:[20,22,18,28,13,31],th:[1,0.4],m:M(30,30,26)},
    {t:'poly',a:[[23,22],[28,28],[33,23]],m:M(30,28,28),ink:true,tex:'rays'},
@@ -556,22 +558,26 @@ const FISH2={
    ...eye(44.5,12.5,{sz:2,h:40,s:60,l:80,pl:15}),
   ],glow:[[44,12,3,'hsl(30 60% 70%)',0.25]]},
  // 샘의 수호자 (전설, 요정의 샘): drags those who foul the spring under. Watches fishers.
+ // 샘의 수호자 (전설, 요정의 샘): drags those who foul the spring under. Watches fishers.
  '1-10':{parts:[
-   {t:'poly',a:[[3,8],[11,14],[11,18],[3,24],[7,16]],m:M(160,25,22),ink:true,tex:'rays'},
-   {t:'e',a:[24,17,15,8],m:M(160,28,26,{step:7}),tex:'scales',rim:true},                                         // hunched body
-   {t:'poly',a:[[12,10],[16,3],[20,8],[24,2],[28,8],[32,4],[35,10]],m:M(160,25,20),ink:true,tex:'rays'},         // spiny ridge
-   {t:'curve',a:[20,22,16,28,24,31],th:[1.4,0.6],m:M(160,25,24)},                                                // long grasping fingers
-   {t:'curve',a:[26,23,24,29,31,31],th:[1.4,0.6],m:M(160,25,24)},
-   {t:'curve',a:[31,22,32,28,38,30],th:[1.4,0.6],m:M(160,25,24)},
-   {t:'e',a:[38,15,7,5.5],m:M(160,28,28,{step:7}),rim:true},                                                      // broad head
-   {t:'curve',a:[34,10,38,4,44,8],th:[0.8,0.4],m:M(110,30,30)},                                                   // weed hair
+   {t:'poly',a:[[2,10],[10,15],[10,18],[2,24],[6,16]],m:M(160,25,22),ink:true,tex:'rays'},
+   {t:'e',a:[20,18,11,6.5],m:M(160,28,26,{step:7}),tex:'scales',rim:true},                                       // body
+   {t:'e',a:[28,13,9,6],m:M(160,28,27,{step:7}),tex:'scales',rim:true},                                           // the hunch
+   {t:'poly',a:[[12,12],[15,5],[18,10],[21,3],[24,9],[27,4],[30,8],[33,5],[35,10]],m:M(160,25,20),ink:true,tex:'rays'}, // spiny ridge
+   {t:'curve',a:[24,23,20,30,27,32],th:[1.3,0.5],m:M(160,25,24)},                                                 // long grasping fingers
+   {t:'curve',a:[29,24,28,31,35,32],th:[1.3,0.5],m:M(160,25,24)},
+   {t:'curve',a:[33,23,36,30,42,31],th:[1.3,0.5],m:M(160,25,24)},
+   {t:'curve',a:[36,21,42,27,47,27],th:[1.3,0.5],m:M(160,25,24)},
+   {t:'e',a:[39,15,7,5],m:M(160,28,29,{step:7}),rim:true},                                                          // broad head
+   {t:'poly',a:[[35,17],[47,16],[46,21],[36,21]],m:M(160,26,24),ink:true},                                         // heavy lower jaw
+   {t:'curve',a:[34,10,38,4,44,8],th:[0.8,0.4],m:M(110,30,30)},                                                     // weed hair
    {t:'curve',a:[36,10,42,6,47,10],th:[0.8,0.4],m:M(110,30,30)},
-   {t:'line',a:[38,18,46,17],m:M(160,20,8),tone:0,ink:false},
-   {t:'px',a:[[39,19,4],[41,19,4],[43,18,4],[40,16,4],[42,16,4]],m:M(50,10,88),ink:false},                        // teeth both rows
+   {t:'curve',a:[33,11,36,6,39,7],th:[0.7,0.3],m:M(110,30,30)},
+   {t:'line',a:[37,17,46,17],m:M(160,20,8),tone:0,ink:false},
+   {t:'px',a:[[38,18,4],[40,18,4],[42,18,4],[44,17,4],[39,16,4],[43,16,4]],m:M(50,10,88),ink:false},
    ...eye(39.5,13.5,{sz:3,h:120,s:70,l:60,pl:10}),
-   ...eye(44.5,13.5,{sz:2,h:120,s:70,l:60,pl:10}),                                                                // second eye
+   ...eye(44.5,13.5,{sz:2,h:120,s:70,l:60,pl:10}),
   ],glow:[[40,13,4,'hsl(120 60% 55%)',0.35],[44,13,3,'hsl(120 60% 55%)',0.3]]},
- // 재송어 (흔함, 잉걸불 협곡): lives in ash-grey water, tastes smoked
  '2-0':{parts:[
    {t:'poly',a:[[5,10],[12,15],[12,17],[5,22],[8,16]],m:M(20,8,36),ink:true,tex:'rays'},
    {t:'poly',a:[[18,10],[22,6],[28,7],[31,10]],m:M(20,8,34),ink:true,tex:'rays'},
@@ -621,7 +627,7 @@ const FISH2={
    {t:'px',a:[[18,10,3],[24,8,3],[30,10,3],[16,16,3],[33,16,3],[20,22,3],[29,23,3]],m:M(30,90,70),ink:false},     // glowing cracks
    {t:'px',a:[[14,8,2],[19,4,2],[25,3,2],[31,4,2],[36,8,2],[12,14,2],[38,14,2],[13,22,2],[37,22,2],[18,27,2],[25,29,2],[32,27,2]],m:M(30,20,60)}, // spines
    {t:'poly',a:[[29,24],[33,29],[36,25]],m:M(10,50,30),ink:true,tex:'rays'},
-   {t:'px',a:[[33,13,2],[34,13,2],[33,14,2],[34,14,2]],m:M(50,40,85)},{t:'px',a:[[34,14,0]],m:M(0,0,6),ink:false},
+   ...eye(33.5,13.5,{sz:3,h:50,s:40,l:80,pl:8}),
    {t:'line',a:[35,19,40,19],m:M(10,40,12),tone:0,ink:false},
    {t:'px',a:[[37,20,4],[39,20,4]],m:M(50,10,90),ink:false},                                                        // beak teeth
   ],glow:[[24,19,9,'hsl(20 80% 55%)',0.3]],tint:[[24,19,11,20,70,0.25]]},
@@ -861,16 +867,17 @@ const FISH2={
    {t:'poly',a:[[26,20],[30,25],[33,21]],m:M(200,12,44),ink:true,tex:'rays',fade:[28,34]},
   ],outline:'#2a3040',glow:[[36,15,6,'hsl(200 30% 75%)',0.2]]},
  // 밑바닥의 뱀 (신화, 심연의 우물, 밤): the Leviathan's shadow; climbs the well wall at night
+ // 밑바닥의 뱀 (신화, 심연의 우물, 밤): the Leviathan's shadow; climbs the well wall at night
  '4-10':{parts:[
-   {t:'curve',a:[2,28,8,6,20,14],th:[1.4,3.2],m:M(250,25,14,{step:5}),tex:'scales'},                                 // coils
-   {t:'curve',a:[20,14,32,24,28,4],th:[3.2,2.8],m:M(250,25,15,{step:5}),tex:'scales'},
-   {t:'curve',a:[28,4,22,0,44,10],th:[2.8,3],m:M(250,25,16,{step:5}),tex:'scales'},
-   {t:'poly',a:[[6,8],[10,2],[12,9],[16,3],[18,10]],m:M(250,20,12),ink:true,tex:'rays',fade:[10,4]},               // shadow frill
-   {t:'e',a:[43,13,5.5,3.6],m:M(250,25,18,{step:5}),rot:0.1,rim:true},
-   {t:'line',a:[41,15,48,15],m:M(250,20,6),tone:0,ink:false},
-   {t:'px',a:[[44,16,3],[47,16,3],[45,14,3]],m:M(300,40,60),ink:false},                                              // violet fangs
-   {t:'line',a:[48,15,48,13],m:M(300,60,55),tone:2,ink:false},
-   {t:'px',a:[[8,18,3],[14,10,3],[26,18,3],[34,12,3]],m:M(300,50,45)},                                                // dim violet sheen on the coils
-   ...eye(44.5,12.5,{sz:2,h:300,s:80,l:70,pl:60,glint:false}),
-  ],outline:'#4a2e5e',glow:[[45,12,5,'hsl(300 70% 60%)',0.45]],tint:[[45,12,6,300,50,0.3]],spark:[[4,4,'hsl(300 60% 80%)'],[36,28,'hsl(300 60% 80%)']]},
+   {t:'poly',a:[[6,16],[9,6],[12,14],[16,4],[19,12],[23,5],[26,13]],m:M(250,22,12),ink:true,tex:'rays',fade:[12,4]}, // shadow frill
+   {t:'curve',a:[2,26,10,6,22,16],th:[1.2,3.4],m:M(250,25,14,{step:5}),tex:'scales'},
+   {t:'curve',a:[22,16,34,28,43,13],th:[3.4,3],m:M(250,25,15,{step:5}),tex:'scales'},
+   {t:'poly',a:[[26,20],[30,29],[34,26]],m:M(250,20,11),ink:true,tex:'rays'},
+   {t:'e',a:[42,12,5.8,3.6],m:M(250,25,18,{step:5}),rot:-0.2,rim:true},
+   {t:'line',a:[40,14,47,13],m:M(250,20,5),tone:0,ink:false},
+   {t:'px',a:[[43,15,3],[46,15,3],[44,12,3]],m:M(300,40,60),ink:false},                                            // violet fangs
+   {t:'line',a:[47,13,48,11],m:M(300,60,55),tone:2,ink:false},
+   {t:'px',a:[[8,14,3],[14,9,3],[20,13,3],[28,22,3],[36,22,3]],m:M(300,50,45)},                                    // dim violet sheen along the spine
+   ...eye(43.5,11.5,{sz:2,h:300,s:80,l:70,pl:60,glint:false}),
+  ],outline:'#4a2e5e',glow:[[44,11,5,'hsl(300 70% 60%)',0.45]],tint:[[44,11,6,300,50,0.3]],spark:[[4,6,'hsl(300 60% 80%)'],[36,30,'hsl(300 60% 80%)']]},
 };
