@@ -4,7 +4,7 @@
 // then optional texture, inner ink edges, an outer outline, and glow halos.
 const FW=48,FH=32;
 const BAYER=[[0,8,2,10],[12,4,14,6],[3,11,1,9],[15,7,13,5]];
-const bay=(x,y)=>BAYER[y&3][x&3]/16;
+const bay=(x,y)=>BAYER[y&3][x&3]/16;const chk=(x,y)=>((x+y)&1)?0.72:0.28;
 function hsl(h,s,l){return `hsl(${((h%360)+360)%360} ${Math.max(0,Math.min(100,s))}% ${Math.max(0,Math.min(100,l))}%)`}
 function inPoly(pts,x,y){let c=false;for(let i=0,j=pts.length-1;i<pts.length;j=i++){const [xi,yi]=pts[i],[xj,yj]=pts[j];if(((yi>y)!==(yj>y))&&(x<(xj-xi)*(y-yi)/(yj-yi)+xi))c=!c}return c}
 function bbox(pts){let x0=99,y0=99,x1=-99,y1=-99;pts.forEach(([x,y])=>{x0=Math.min(x0,x);y0=Math.min(y0,y);x1=Math.max(x1,x);y1=Math.max(y1,y)});return[x0,y0,x1,y1]}
@@ -17,7 +17,7 @@ function renderFish(spec){
     const put=(x,y,tone)=>{if(x<0||y<0||x>=W||y>=H)return;cells[y*W+x]={p:pi,tone,m,p0:p}};
     // shade: normalized position inside part's ellipse/bbox -> light amount
     const shadeAt=(nx,ny)=>{const lt=0.5-(nx*(p.lx??0.45)+ny*(p.ly??0.7))*0.5;return Math.max(0,Math.min(0.999,lt+(p.lift||0)))};
-    const toneOf=(x,y,lt)=>{const v=lt*(p.tones||4)+ (p.flat?0:(bay(x,y)-0.5)*0.9);return Math.max(0,Math.min((p.tones||4)-1,Math.floor(v)))};
+    const toneOf=(x,y,lt)=>{const v=lt*(p.tones||4)+ (p.flat?0:(chk(x,y)-0.5)*0.9);return Math.max(0,Math.min((p.tones||4)-1,Math.floor(v)))};
     const fadeOk=(x,y)=>{if(!p.fade)return true;const [x0,x1]=p.fade;const t=(x-x0)/(x1-x0);const keep=x1>x0?1-t:1-t; return bay(x,y)<Math.max(0,Math.min(1,keep))};
     const holeOk=(x,y)=>!p.holes||!p.holes.some(([hx,hy,hr])=>(x-hx)**2+(y-hy)**2<=hr*hr);
     if(p.t==='e'){const [cx,cy,rx,ry]=p.a;const rot=p.rot||0,cs=Math.cos(rot),sn=Math.sin(rot);
@@ -32,7 +32,7 @@ function renderFish(spec){
         for(let yy=Math.floor(y-r);yy<=y+r;yy++)for(let xx=Math.floor(x-r);xx<=x+r;xx++){const dx=xx+0.5-x,dy=yy+0.5-y;if(dx*dx+dy*dy>r*r)continue;if(!fadeOk(xx,yy))continue;const lt=0.5-(dy/r)*0.5*0.8;put(xx,yy,toneOf(xx,yy,Math.max(0,Math.min(0.999,lt))))}}}
   });
   // textures and ink edges
-  const toneAdj=new Array(W*H).fill(0);
+  const toneAdj=new Array(W*H).fill(0),cool=new Array(W*H).fill(0);
   for(let y=0;y<H;y++)for(let x=0;x<W;x++){const c=cells[y*W+x];if(!c)continue;const p=c.p0;
     if(p.tex==='scales'){const ox=((y>>1)&1)*2;if(((x+ox)&3)===0&&(y&1)===1)toneAdj[y*W+x]-=1;else if(((x+ox)&3)===2&&(y&1)===0)toneAdj[y*W+x]+=1}
     if(p.tex==='rays'&&(((x-(y>>1))%3)+3)%3===0)toneAdj[y*W+x]-=1;
@@ -40,6 +40,7 @@ function renderFish(spec){
     if(p.tex==='ridges'&&(y%3===0))toneAdj[y*W+x]-=1;
     if(p.tex==='web'&&((x+y)%5===0||(x-y+40)%5===0))toneAdj[y*W+x]-=1;
     if(p.rim){const beh=(xx,yy)=>{const q=pid(xx,yy);return q<c.p};if(beh(x,y-1)||beh(x-1,y))toneAdj[y*W+x]+=1}
+    if(spec.water!==false&&p.rim2!==false&&!p.fade){const emp=(xx,yy)=>pid(xx,yy)===-1;if((emp(x,y+1)||emp(x+1,y))&&((x+y)&1))cool[y*W+x]=1}
     if(p.spec){p.spec.forEach(([sx,sy,ln])=>{if(y===sy&&x>=sx&&x<sx+ln)toneAdj[y*W+x]+=2})}
     if(p.tex==='scales2'&&(((x>>1)+(y>>1))&1)===0&&((x&1)===0))toneAdj[y*W+x]-=1;
     if(p.tex==='stripes'&&(x%6<2))toneAdj[y*W+x]-=1;
@@ -57,6 +58,7 @@ function renderFish(spec){
   const setPx=(x,y,css)=>{const [r,gg,b]=cssToRgb(css);const i=(y*W+x)*4;d[i]=r;d[i+1]=gg;d[i+2]=b;d[i+3]=255};
   for(let y=0;y<H;y++)for(let x=0;x<W;x++){const c=cells[y*W+x];if(!c)continue;const t=Math.max(-1,Math.min((c.p0.tones||4),c.tone+toneAdj[y*W+x]));const m=c.m;
     let l=m.l+(t-1.5)*(m.step||8),s=m.s+(t-1.5)*(m.sstep||-3),h=m.h+(t-1.5)*(m.hshift||0);
+    if(cool[y*W+x]){h=h+(205-h)*0.18;l+=5}
     (spec.tint||[]).forEach(([cx,cy,r,th,ts,amt])=>{const dd=Math.hypot(x+0.5-cx,y+0.5-cy)/r;if(dd>=1)return;const k=(1-dd)*amt;if(bay(x,y)<k*1.4){h=th;s=Math.max(s,ts);l=l+k*30}});
     setPx(x,y,hsl(h,s,l))}
   // outer outline
