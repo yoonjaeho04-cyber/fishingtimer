@@ -3,6 +3,7 @@
 // material (h,s,l). Shading is computed per part (light from upper-left) with ordered dithering,
 // then optional texture, inner ink edges, an outer outline, and glow halos.
 const FW=48,FH=32;
+if(typeof window!=='undefined'&&typeof window.nz!=='function'&&typeof nz==='undefined')window.nz=(x,y,s=0)=>{let h=(x*374761393+y*668265263+s*1442695041)|0;h=(h^(h>>13))*1274126177;h=(h^(h>>16))>>>0;return (h%1000)/1000};
 const BAYER=[[0,8,2,10],[12,4,14,6],[3,11,1,9],[15,7,13,5]];
 const bay=(x,y)=>BAYER[y&3][x&3]/16;const chk=(x,y)=>((x+y)&1)?0.72:0.28;
 function hsl(h,s,l){return `hsl(${((h%360)+360)%360} ${Math.max(0,Math.min(100,s))}% ${Math.max(0,Math.min(100,l))}%)`}
@@ -10,7 +11,7 @@ function inPoly(pts,x,y){let c=false;for(let i=0,j=pts.length-1;i<pts.length;j=i
 function bbox(pts){let x0=99,y0=99,x1=-99,y1=-99;pts.forEach(([x,y])=>{x0=Math.min(x0,x);y0=Math.min(y0,y);x1=Math.max(x1,x);y1=Math.max(y1,y)});return[x0,y0,x1,y1]}
 const RARITY_OUTLINE=[null,null,null,'#3a2c16','#4a2e5e'];
 function renderFish(spec,r){
-  const W=FW,H=FH;
+  const W=spec.w||FW,H=spec.h||FH;
   const cells=new Array(W*H).fill(null); // {p:partIndex, tone:0..4}
   const pid=(x,y)=>x<0||y<0||x>=W||y>=H?-1:(cells[y*W+x]?cells[y*W+x].p:-1);
   spec.parts.forEach((p,pi)=>{

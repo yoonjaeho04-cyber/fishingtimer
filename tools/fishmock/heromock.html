@@ -1,0 +1,18 @@
+<!doctype html><meta charset="utf-8"><title>캐릭터 시안</title>
+<style>body{margin:0;background:#15121b;color:#cfc6b8;font:12px sans-serif;padding:14px}
+h1{font-size:15px;color:#d9b05a;margin:0 0 4px}.hd{color:#7d7488;font-size:11px;margin-bottom:10px}
+.g{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+.c{background:#0c0a10;border:2px solid #2b2434;padding:8px;display:flex;flex-direction:column;align-items:center;gap:6px}
+.row{display:flex;gap:8px;align-items:flex-end}
+canvas{image-rendering:pixelated;background:#0e1a28;display:block}
+.n{font-size:13px}.n small{color:#7d7488;margin-left:4px}</style>
+<h1>캐릭터 디자인 시안 — 물고기와 같은 엔진·톤</h1><div class="hd">위: 지금(32×64, 2배) · 아래: 새 디자인 4배 / 2배(선택 화면 크기) / 1배(장면 크기)</div>
+<div class="g" id="g"></div>
+<script src="oldhero.js"></script><script src="fish2.js"></script><script src="heroes.js"></script>
+<script>
+const CH=[['rogue','도적'],['mage','마법사'],['knight','기사'],['bard','음유시인'],['druid','드루이드']];
+CH.forEach(([id,name])=>{const c=document.createElement('div');c.className='c';const n=document.createElement('div');n.className='n';n.textContent=name;c.append(n);
+ const o=document.createElement('canvas');o.width=32;o.height=64;o.style.cssText='width:64px;height:128px';drawSprite(o.getContext('2d'),heroSprite(id),0,0);c.append(o);
+ const cv=renderFish(HERO2[id]);const mk=sc=>{const k=document.createElement('canvas');k.width=32;k.height=64;k.style.cssText=`width:${32*sc}px;height:${64*sc}px`;k.getContext('2d').drawImage(cv,0,0);return k};
+ const big=mk(4);c.append(big);const r=document.createElement('div');r.className='row';r.append(mk(2),mk(1));c.append(r);g.append(c)});
+</script>
