@@ -10,7 +10,23 @@ function hsl(h,s,l){return `hsl(${((h%360)+360)%360} ${Math.max(0,Math.min(100,s
 function inPoly(pts,x,y){let c=false;for(let i=0,j=pts.length-1;i<pts.length;j=i++){const [xi,yi]=pts[i],[xj,yj]=pts[j];if(((yi>y)!==(yj>y))&&(x<(xj-xi)*(y-yi)/(yj-yi)+xi))c=!c}return c}
 function bbox(pts){let x0=99,y0=99,x1=-99,y1=-99;pts.forEach(([x,y])=>{x0=Math.min(x0,x);y0=Math.min(y0,y);x1=Math.max(x1,x);y1=Math.max(y1,y)});return[x0,y0,x1,y1]}
 const RARITY_OUTLINE=[null,null,null,'#3a2c16','#4a2e5e'];
-function renderFish(spec,r){
+function scaleSpec(spec,k){const sc=v=>v*k;const parts=spec.parts.map(p=>{const q=Object.assign({},p);
+    if(p.t==='e'){q.a=[p.a[0]*k,p.a[1]*k,p.a[2]*k,p.a[3]*k]}
+    else if(p.t==='poly'){q.a=p.a.map(([x,y])=>[x*k,y*k])}
+    else if(p.t==='line'){q.a=p.a.map(sc);q.w=k}
+    else if(p.t==='curve'){q.a=p.a.map(sc);q.th=(p.th||[2,2]).map(sc)}
+    else if(p.t==='px'){q.t='pxk';q.k=k;q.a=p.a.map(([x,y,t])=>[x*k,y*k,t])}
+    if(p.holes)q.holes=p.holes.map(([x,y,r])=>[x*k,y*k,r*k]);
+    if(p.fade)q.fade=p.fade.map(sc);
+    if(p.spec)q.spec=p.spec.map(([x,y,l])=>[x*k,y*k,l*k]);
+    return q});
+  return Object.assign({},spec,{w:(spec.w||FW)*k,h:(spec.h||FH)*k,k,parts,
+    glow:(spec.glow||[]).map(([x,y,r,c,a])=>[x*k,y*k,r*k,c,a]),
+    tint:(spec.tint||[]).map(([x,y,r,h,s,a])=>[x*k,y*k,r*k,h,s,a]),
+    spark:spec.spark?spec.spark.map(([x,y,c])=>[x*k,y*k,c]):spec.spark})}
+function renderFish(spec,r,k){
+  if(k&&k!==1)spec=scaleSpec(spec,k);
+  const K=spec.k||1;
   const W=spec.w||FW,H=spec.h||FH;
   const cells=new Array(W*H).fill(null); // {p:partIndex, tone:0..4}
   const pid=(x,y)=>x<0||y<0||x>=W||y>=H?-1:(cells[y*W+x]?cells[y*W+x].p:-1);
@@ -26,8 +42,9 @@ function renderFish(spec,r){
       for(let y=Math.floor(cy-ry-rx);y<=cy+ry+rx;y++)for(let x=Math.floor(cx-rx-ry);x<=cx+rx+ry;x++){const dx=x+0.5-cx,dy=y+0.5-cy;const ux=(dx*cs+dy*sn)/rx,uy=(-dx*sn+dy*cs)/ry;if(ux*ux+uy*uy>1)continue;if(!fadeOk(x,y)||!holeOk(x,y))continue;put(x,y,toneOf(x,y,shadeAt(ux,uy)))}}
     else if(p.t==='poly'){const pts=p.a;const [x0,y0,x1,y1]=bbox(pts);const cx=(x0+x1)/2,cy=(y0+y1)/2,rx=Math.max(1,(x1-x0)/2),ry=Math.max(1,(y1-y0)/2);
       for(let y=Math.floor(y0);y<=y1;y++)for(let x=Math.floor(x0);x<=x1;x++){if(!inPoly(pts,x+0.5,y+0.5))continue;if(!fadeOk(x,y)||!holeOk(x,y))continue;put(x,y,toneOf(x,y,shadeAt((x+0.5-cx)/rx,(y+0.5-cy)/ry)))}}
-    else if(p.t==='line'){const [xa,ya,xb,yb]=p.a;const n=Math.max(Math.abs(xb-xa),Math.abs(yb-ya));for(let i=0;i<=n;i++){const x=Math.round(xa+(xb-xa)*i/n),y=Math.round(ya+(yb-ya)*i/n);if(!fadeOk(x,y))continue;put(x,y,p.tone??2);if(p.w>1)put(x,y+1,p.tone??2)}}
+    else if(p.t==='line'){const [xa,ya,xb,yb]=p.a;const n=Math.max(Math.abs(xb-xa),Math.abs(yb-ya));for(let i=0;i<=n;i++){const x=Math.round(xa+(xb-xa)*i/n),y=Math.round(ya+(yb-ya)*i/n);if(!fadeOk(x,y))continue;put(x,y,p.tone??2);if(p.w>1){for(let j=0;j<p.w;j++)for(let i=0;i<p.w;i++)put(x+i,y+j,p.tone??2)}}}
     else if(p.t==='px'){p.a.forEach(([x,y,tone])=>put(x,y,tone??2))}
+    else if(p.t==='pxk'){p.a.forEach(([x,y,tone])=>{for(let j=0;j<p.k;j++)for(let i=0;i<p.k;i++)put(x+i,y+j,tone??2)})}
     else if(p.t==='curve'){ // quadratic bezier with thickness profile
       const [xa,ya,xc,yc,xb,yb]=p.a;const n=64;const th=p.th||[2,2];
       for(let i=0;i<=n;i++){const t=i/n;const x=(1-t)*(1-t)*xa+2*(1-t)*t*xc+t*t*xb,y=(1-t)*(1-t)*ya+2*(1-t)*t*yc+t*t*yb;const r=th[0]+(th[1]-th[0])*t;
@@ -35,21 +52,22 @@ function renderFish(spec,r){
   });
   // textures and ink edges
   const toneAdj=new Array(W*H).fill(0),cool=new Array(W*H).fill(0);
-  for(let y=0;y<H;y++)for(let x=0;x<W;x++){const c=cells[y*W+x];if(!c)continue;const p=c.p0;
-    if(p.tex==='scales'){const ox=((y>>1)&1)*2;if(((x+ox)&3)===0&&(y&1)===1)toneAdj[y*W+x]-=1;else if(((x+ox)&3)===2&&(y&1)===0)toneAdj[y*W+x]+=1}
-    if(p.tex==='rays'&&(((x-(y>>1))%3)+3)%3===0)toneAdj[y*W+x]-=1;
-    if(p.tex==='plates'&&((x%7===0)||(y%5===0)))toneAdj[y*W+x]-=1;
-    if(p.tex==='ridges'&&(y%3===0))toneAdj[y*W+x]-=1;
-    if(p.tex==='web'&&((x+y)%5===0||(x-y+40)%5===0))toneAdj[y*W+x]-=1;
-    if(p.rim){const beh=(xx,yy)=>{const q=pid(xx,yy);return q<c.p};if(beh(x,y-1)||beh(x-1,y))toneAdj[y*W+x]+=1}
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){const c=cells[y*W+x];if(!c)continue;const p=c.p0;const X=x,Y=y;x=Math.floor(x/K);y=Math.floor(y/K);
+    if(p.tex==='scales'){const ox=((y>>1)&1)*2;if(((x+ox)&3)===0&&(y&1)===1)toneAdj[Y*W+X]-=1;else if(((x+ox)&3)===2&&(y&1)===0)toneAdj[Y*W+X]+=1}
+    if(p.tex==='rays'&&(((x-(y>>1))%3)+3)%3===0)toneAdj[Y*W+X]-=1;
+    if(p.tex==='plates'&&((x%7===0)||(y%5===0)))toneAdj[Y*W+X]-=1;
+    if(p.tex==='ridges'&&(y%3===0))toneAdj[Y*W+X]-=1;
+    if(p.tex==='web'&&((x+y)%5===0||(x-y+40)%5===0))toneAdj[Y*W+X]-=1;
+    if(p.tex==='scales2'&&(((x>>1)+(y>>1))&1)===0&&((x&1)===0))toneAdj[Y*W+X]-=1;
+    if(p.tex==='stripes'&&(x%6<2))toneAdj[Y*W+X]-=1;
+    if(p.tex==='bands'&&(((x+y)>>1)%5===0))toneAdj[Y*W+X]-=1;
+    if(p.tex==='spots'&&nz(x,y,7)>0.84)toneAdj[Y*W+X]-=2;
+    if(p.tex==='grain'&&nz(x,y,3)>0.7)toneAdj[Y*W+X]-=1;
+    if(p.tex==='cracks'&&nz(x>>1,y,5)>0.9)toneAdj[Y*W+X]-=2;
+    x=X;y=Y;
+    if(p.rim){const beh=(xx,yy)=>{const q=pid(xx,yy);return q<c.p};if(beh(x,y-1)||beh(x-1,y))toneAdj[Y*W+X]+=1}
     if(spec.water!==false&&p.rim2!==false&&!p.fade){const emp=(xx,yy)=>pid(xx,yy)===-1;if((emp(x,y+1)||emp(x+1,y))&&((x+y)&1))cool[y*W+x]=1}
-    if(p.spec){p.spec.forEach(([sx,sy,ln])=>{if(y===sy&&x>=sx&&x<sx+ln)toneAdj[y*W+x]+=2})}
-    if(p.tex==='scales2'&&(((x>>1)+(y>>1))&1)===0&&((x&1)===0))toneAdj[y*W+x]-=1;
-    if(p.tex==='stripes'&&(x%6<2))toneAdj[y*W+x]-=1;
-    if(p.tex==='bands'&&(((x+y)>>1)%5===0))toneAdj[y*W+x]-=1;
-    if(p.tex==='spots'&&nz(x,y,7)>0.84)toneAdj[y*W+x]-=2;
-    if(p.tex==='grain'&&nz(x,y,3)>0.7)toneAdj[y*W+x]-=1;
-    if(p.tex==='cracks'&&nz(x>>1,y,5)>0.9)toneAdj[y*W+x]-=2;
+    if(p.spec){p.spec.forEach(([sx,sy,ln])=>{if(y>=sy&&y<sy+K&&x>=sx&&x<sx+ln)toneAdj[Y*W+X]+=2})}
     if(p.ink!==false){ // inner ink: edge of this part against other parts drawn before it or empty
       const other=(xx,yy)=>{const q=pid(xx,yy);return q!==c.p&&q<c.p}; // only against parts behind (lower index) or empty (-1)
       if(other(x-1,y)||other(x+1,y)||other(x,y-1)||other(x,y+1))toneAdj[y*W+x]-=(p.inkW??2)}
