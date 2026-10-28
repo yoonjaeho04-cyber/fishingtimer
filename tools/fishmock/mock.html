@@ -14,5 +14,5 @@ canvas{image-rendering:pixelated;background:#0e1a28;display:block}
 SPOTS.forEach(sp=>{const h=document.createElement('h2');h.textContent=sp.name;list.append(h);const g=document.createElement('div');g.className='g';
  sp.fish.forEach(f=>{const c=document.createElement('div');c.className='c';const n=document.createElement('div');n.className='n';n.innerHTML=`${f.name}<small class="r${f.r}">${RAR[f.r]}</small>`;
   const o=document.createElement('canvas');o.width=24;o.height=16;o.style.cssText='width:60px;height:40px';o.getContext('2d').drawImage(fishCanvas(f),0,0);
-  const v=document.createElement('canvas');v.width=48;v.height=32;v.style.cssText='width:96px;height:64px';if(FISH2[f.id])v.getContext('2d').drawImage(renderFish(FISH2[f.id]),0,0);
+  const v=document.createElement('canvas');v.width=48;v.height=32;v.style.cssText='width:96px;height:64px';if(FISH2[f.id])v.getContext('2d').drawImage(renderFish(FISH2[f.id],f.r),0,0);
   c.append(n,o,v);g.append(c)});list.append(g)});</script>

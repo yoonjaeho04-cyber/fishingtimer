@@ -8,7 +8,8 @@ const bay=(x,y)=>BAYER[y&3][x&3]/16;const chk=(x,y)=>((x+y)&1)?0.72:0.28;
 function hsl(h,s,l){return `hsl(${((h%360)+360)%360} ${Math.max(0,Math.min(100,s))}% ${Math.max(0,Math.min(100,l))}%)`}
 function inPoly(pts,x,y){let c=false;for(let i=0,j=pts.length-1;i<pts.length;j=i++){const [xi,yi]=pts[i],[xj,yj]=pts[j];if(((yi>y)!==(yj>y))&&(x<(xj-xi)*(y-yi)/(yj-yi)+xi))c=!c}return c}
 function bbox(pts){let x0=99,y0=99,x1=-99,y1=-99;pts.forEach(([x,y])=>{x0=Math.min(x0,x);y0=Math.min(y0,y);x1=Math.max(x1,x);y1=Math.max(y1,y)});return[x0,y0,x1,y1]}
-function renderFish(spec){
+const RARITY_OUTLINE=[null,null,null,'#3a2c16','#4a2e5e'];
+function renderFish(spec,r){
   const W=FW,H=FH;
   const cells=new Array(W*H).fill(null); // {p:partIndex, tone:0..4}
   const pid=(x,y)=>x<0||y<0||x>=W||y>=H?-1:(cells[y*W+x]?cells[y*W+x].p:-1);
@@ -63,14 +64,15 @@ function renderFish(spec){
     setPx(x,y,hsl(h,s,l))}
   // outer outline
   const solid=(x,y)=>x>=0&&y>=0&&x<W&&y<H&&d[(y*W+x)*4+3]>0;
-  const outl=spec.outline||'#0b0a0e';const [orr,og,ob]=cssToRgb(outl);
+  const outl=spec.outline||(r!=null&&RARITY_OUTLINE[r])||'#0b0a0e';const [orr,og,ob]=cssToRgb(outl);
   const mark=[];for(let y=0;y<H;y++)for(let x=0;x<W;x++){if(solid(x,y))continue;if(solid(x-1,y)||solid(x+1,y)||solid(x,y-1)||solid(x,y+1))mark.push([x,y])}
   mark.forEach(([x,y])=>{const i=(y*W+x)*4;d[i]=orr;d[i+1]=og;d[i+2]=ob;d[i+3]=255});
   // glows (soft dithered halos outside the outline)
   (spec.glow||[]).forEach(gl=>{const [cx,cy,r,css,str]=gl;const [rr,gg,bb]=cssToRgb(css);
     for(let y=Math.floor(cy-r);y<=cy+r;y++)for(let x=Math.floor(cx-r);x<=cx+r;x++){if(x<0||y<0||x>=W||y>=H)continue;const i=(y*W+x)*4;if(d[i+3])continue;const dd=Math.hypot(x+0.5-cx,y+0.5-cy)/r;if(dd>1)continue;const a=Math.pow(1-dd,1.6)*(str||0.8);if(bay(x,y)<a){d[i]=rr;d[i+1]=gg;d[i+2]=bb;d[i+3]=255}}});
   // sparkles
-  (spec.spark||[]).forEach(([x,y,css])=>{if(x<0||y<0||x>=W||y>=H)return;const [rr,gg,bb]=cssToRgb(css||'#f4ecd8');const i=(y*W+x)*4;d[i]=rr;d[i+1]=gg;d[i+2]=bb;d[i+3]=255});
+  const sparks=spec.spark||(r===3?[[6,5,'hsl(45 50% 80%)'],[43,27,'hsl(45 50% 80%)']]:[]);
+  sparks.forEach(([x,y,css])=>{if(x<0||y<0||x>=W||y>=H)return;const [rr,gg,bb]=cssToRgb(css||'#f4ecd8');const i=(y*W+x)*4;d[i]=rr;d[i+1]=gg;d[i+2]=bb;d[i+3]=255});
   g.putImageData(img,0,0);return oc;
 }
 let _cc;function cssToRgb(css){if(css[0]==='#'){const n=parseInt(css.slice(1),16);return[(n>>16)&255,(n>>8)&255,n&255]}_cc=_cc||document.createElement('canvas').getContext('2d',{willReadFrequently:true});_cc.fillStyle=css;_cc.fillRect(0,0,1,1);const p=_cc.getImageData(0,0,1,1).data;return[p[0],p[1],p[2]]}

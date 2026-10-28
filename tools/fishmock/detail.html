@@ -3,4 +3,4 @@ h2{font-size:14px;color:#d9b05a;margin:14px 0 6px}.g{display:grid;grid-template-
 <body></body><script src="old.js"></script><script src="fish2.js"></script><script src="species.js"></script>
 <script>const RAR=['흔함','희귀','영웅','전설','신화'];
 SPOTS.forEach((sp,si)=>{const h=document.createElement('h2');h.textContent=sp.name;document.body.append(h);const g=document.createElement('div');g.className='g';
- sp.fish.forEach(f=>{if(!FISH2[f.id])return;const d=document.createElement('div');const c=document.createElement('canvas');c.width=48;c.height=32;c.getContext('2d').drawImage(renderFish(FISH2[f.id]),0,0);const t=document.createElement('div');t.innerHTML=`${f.name} <span class="r${f.r}">${RAR[f.r]}</span>`;d.append(c,t);g.append(d)});document.body.append(g)});</script>
+ sp.fish.forEach(f=>{if(!FISH2[f.id])return;const d=document.createElement('div');const c=document.createElement('canvas');c.width=48;c.height=32;c.getContext('2d').drawImage(renderFish(FISH2[f.id],f.r),0,0);const t=document.createElement('div');t.innerHTML=`${f.name} <span class="r${f.r}">${RAR[f.r]}</span>`;d.append(c,t);g.append(d)});document.body.append(g)});</script>
