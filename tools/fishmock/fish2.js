@@ -13,20 +13,20 @@ const RARITY_OUTLINE=[null,null,null,'#3a2c16','#4a2e5e'];
 function scaleSpec(spec,k){const sc=v=>v*k;const parts=spec.parts.map(p=>{const q=Object.assign({},p);
     if(p.t==='e'){q.a=[p.a[0]*k,p.a[1]*k,p.a[2]*k,p.a[3]*k]}
     else if(p.t==='poly'){q.a=p.a.map(([x,y])=>[x*k,y*k])}
-    else if(p.t==='line'){q.a=p.a.map(sc);q.w=k}
-    else if(p.t==='curve'){q.a=p.a.map(sc);q.th=(p.th||[2,2]).map(sc)}
-    else if(p.t==='px'){q.t='pxk';q.k=k;q.a=p.a.map(([x,y,t])=>[x*k,y*k,t])}
+    else if(p.t==='line'){q.a=p.a.map(sc);q.w=Math.max(1,Math.round((p.w||1)*k))}
+    else if(p.t==='curve'){q.a=p.a.map(sc);q.th=(p.th||[2,2]).map(v=>Math.max(0.55,v*k))}
+    else if(p.t==='px'){if(k>=1){q.t='pxk';q.k=k;q.a=p.a.map(([x,y,t])=>[x*k,y*k,t])}else q.a=p.a.map(([x,y,t])=>[Math.round(x*k),Math.round(y*k),t])}
     if(p.holes)q.holes=p.holes.map(([x,y,r])=>[x*k,y*k,r*k]);
     if(p.fade)q.fade=p.fade.map(sc);
     if(p.spec)q.spec=p.spec.map(([x,y,l])=>[x*k,y*k,l*k]);
     return q});
-  return Object.assign({},spec,{w:(spec.w||FW)*k,h:(spec.h||FH)*k,k,parts,
+  return Object.assign({},spec,{w:(spec.w||FW)*k,h:(spec.h||FH)*k,k:(spec.tk||1)*k,parts,
     glow:(spec.glow||[]).map(([x,y,r,c,a])=>[x*k,y*k,r*k,c,a]),
     tint:(spec.tint||[]).map(([x,y,r,h,s,a])=>[x*k,y*k,r*k,h,s,a]),
     spark:spec.spark?spec.spark.map(([x,y,c])=>[x*k,y*k,c]):spec.spark})}
 function renderFish(spec,r,k){
   if(k&&k!==1)spec=scaleSpec(spec,k);
-  const K=spec.k||1;
+  const K=spec.k||spec.tk||1;
   const W=spec.w||FW,H=spec.h||FH;
   const cells=new Array(W*H).fill(null); // {p:partIndex, tone:0..4}
   const pid=(x,y)=>x<0||y<0||x>=W||y>=H?-1:(cells[y*W+x]?cells[y*W+x].p:-1);
@@ -79,7 +79,7 @@ function renderFish(spec,r,k){
   for(let y=0;y<H;y++)for(let x=0;x<W;x++){const c=cells[y*W+x];if(!c)continue;const t=Math.max(-1,Math.min((c.p0.tones||4),c.tone+toneAdj[y*W+x]));const m=c.m;
     let l=m.l+(t-1.5)*(m.step||8),s=m.s+(t-1.5)*(m.sstep||-3),h=m.h+(t-1.5)*(m.hshift||0);
     if(cool[y*W+x]){h=h+(205-h)*0.18;l+=5}
-    (spec.tint||[]).forEach(([cx,cy,r,th,ts,amt])=>{const dd=Math.hypot(x+0.5-cx,y+0.5-cy)/r;if(dd>=1)return;const k=(1-dd)*amt;if(bay(x,y)<k*1.4){h=th;s=Math.max(s,ts);l=l+k*30}});
+    (spec.tint||[]).forEach(([cx,cy,r,th,ts,amt])=>{const dd=Math.hypot(x+0.5-cx,y+0.5-cy)/r;if(dd>=1)return;const k=(1-dd)*(1-dd)*amt;let dh=((th-h)%360+540)%360-180;h=h+dh*Math.min(1,k*1.6);s=s+(ts-s)*Math.min(1,k*1.2);l=l+k*34});
     setPx(x,y,hsl(h,s,l))}
   // outer outline
   const solid=(x,y)=>x>=0&&y>=0&&x<W&&y<H&&d[(y*W+x)*4+3]>0;

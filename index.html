@@ -86,7 +86,7 @@ input[type=number]{width:64px;font-family:var(--display)}
 .grid{display:flex;flex-wrap:wrap;gap:4px}
 .slot{width:64px;height:64px;background:#0d0b12;border:2px solid #2b2434;box-shadow:inset 2px 2px 0 #3a3146,inset -2px -2px 0 #000;display:grid;place-items:center;position:relative;flex:none}
 .slot canvas{width:52px;height:52px;image-rendering:pixelated;object-fit:contain}
-.slot canvas[width="24"]{width:60px;height:40px}
+.slot.fish{width:104px;height:76px}.slot.fish canvas{width:96px;height:64px}
 .slot[aria-pressed=true]{border-color:var(--gold)}
 .slot.eq::before{content:"E";position:absolute;left:3px;top:1px;font:11px var(--display);color:var(--gold);text-shadow:1px 1px 0 #000}
 .slot .cnt{position:absolute;right:3px;bottom:1px;font:11px var(--display);color:#fff;text-shadow:1px 1px 0 #000}
@@ -103,8 +103,8 @@ input[type=number]{width:64px;font-family:var(--display)}
 .card h3{margin:0;font:18px var(--display);text-shadow:1px 1px 0 #000}
 .card .kv{display:grid;grid-template-columns:auto 1fr;gap:3px 12px;font-size:13px;margin-top:6px}
 .card .kv span:nth-child(odd){color:var(--muted)}
-.card .desc{grid-column:1/3;font-size:12px;color:#c4b797;border-top:1px solid #2b2434;padding-top:6px;margin-top:4px;line-height:1.5}
-.card .act{grid-column:1/3;display:flex;justify-content:flex-end;gap:6px}
+.card .desc{grid-column:1/-1;font-size:12px;color:#c4b797;border-top:1px solid #2b2434;padding-top:6px;margin-top:4px;line-height:1.5}
+.card .act{grid-column:1/-1;display:flex;justify-content:flex-end;gap:6px}
 .sec{font:12px var(--display);color:var(--bronze2);letter-spacing:1px;text-shadow:1px 1px 0 #000;display:flex;align-items:center;gap:8px}
 .sec::after{content:"";flex:1;height:1px;background:var(--bronze3)}
 .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
@@ -142,8 +142,8 @@ input[type=number]{width:64px;font-family:var(--display)}
 .chars canvas{width:32px;height:48px;image-rendering:pixelated}
 .chars .n{font-weight:700}.chars .d{font-size:12px;color:var(--muted)}
 .haul{display:flex;flex-direction:column;gap:4px;max-height:240px;overflow:auto}
-.haul .f{display:grid;grid-template-columns:48px 1fr auto auto;gap:8px;align-items:center;padding:3px 8px;background:var(--panel2);font-size:13px;opacity:0;transform:translateY(4px);transition:opacity .3s,transform .3s}
-.haul .f canvas{width:48px;height:32px;image-rendering:pixelated}
+.haul .f{display:grid;grid-template-columns:96px 1fr auto auto;gap:8px;align-items:center;padding:3px 8px;background:var(--panel2);font-size:13px;opacity:0;transform:translateY(4px);transition:opacity .3s,transform .3s}
+.haul .f canvas{width:96px;height:64px;image-rendering:pixelated}
 .haul .f.in{opacity:1;transform:none}
 .haul .f{border:2px solid transparent;text-align:left;color:var(--fg)}
 .haul .f.tanked{border-color:#3a6a8a;background:#14202c}
@@ -234,7 +234,9 @@ const SPOTS=[
   ['세계수 뿌리잉어',2,130,null,40,70,'세계수의 뿌리 사이에서 산다. 비늘에 나이테 같은 무늬가 있다.',1],
   ['샘의 뱀',2,150,'dusk',70,110,'노을이 지면 샘을 한 바퀴 돌고 사라진다.',13],
   ['샘의 수호자',3,380,null,90,150,'샘을 더럽히는 자를 물속으로 끌어들인다. 낚시꾼에겐 너그럽다.',6],
-  ['요정여왕의 눈물',4,1300,null,5,9,'눈물 모양의 작은 물고기. 요정들은 이것을 잡은 자를 평생 기억한다.',7]]},
+  ['요정여왕의 눈물',4,1300,null,5,9,'눈물 모양의 작은 물고기. 요정들은 이것을 잡은 자를 평생 기억한다.',7],
+  ['달빛 송사리',1,50,'night',5,9,'달이 뜨면 비늘이 은빛으로 바뀐다. 낮에는 평범한 송사리와 구분이 안 된다.',0],
+  ['요정 등불고기',2,140,'dusk',10,16,'요정들이 길을 밝히려 기르는 물고기. 꼬리 끝에 작은 불이 켜져 있다.',0]]},
  {name:'잉걸불 협곡',price:9000,fish:[
   ['재송어',0,26,null,20,38,'잿빛 물에서 산다. 살이 훈제한 것처럼 향긋하다.',0],
   ['숯빛 메기',0,22,null,30,60,'협곡 바닥의 숯을 뒤적인다. 수염이 늘 그을려 있다.',6],
@@ -247,7 +249,11 @@ const SPOTS=[
   ['화산거북',2,190,null,50,80,'등딱지가 현무암이다. 낚아 올리면 김이 난다.',10],
   ['해골창꼬치',2,210,'night',60,100,'머리가 뼈로 드러나 있다. 밤에만 사냥한다.',12],
   ['잠든 용의 새끼',3,560,null,40,60,'용의 알에서 깨어났지만 물을 떠나지 못한다. 잡으면 가만히 잠들어 있다.',13],
-  ['심장불 살라만더',4,1900,null,25,35,'협곡의 열원이라 불린다. 이것이 사라지면 협곡이 식는다고 한다.',13]]},
+  ['심장불 살라만더',4,1900,null,25,35,'협곡의 열원이라 불린다. 이것이 사라지면 협곡이 식는다고 한다.',13],
+  ['재가오리',1,85,null,40,70,'재 아래로 미끄러져 다닌다. 등에 누군가의 발자국이 찍혀 있다.',5],
+  ['숯불 달팽이',1,78,null,8,14,'껍데기 안에서 불씨가 돈다. 느리지만 뜨겁다.',11],
+  ['용암 거머리',2,190,'night',20,35,'바위 틈에서 뜨거운 피를 빤다. 낚이면 바늘이 달아오른다.',2],
+  ['잿빛 재판관',3,600,null,60,90,'협곡의 재판관. 거짓말을 한 낚시꾼의 줄만 끊는다고 한다.',6]]},
  {name:'별이 진 바다',price:30000,fish:[
   ['별모래 정어리',0,36,null,10,18,'비늘에 별모래가 붙어 있다. 밤바다를 떼로 헤엄치면 은하수처럼 보인다.',0],
   ['별게',0,40,null,8,14,'등에 별자리 점이 있다. 점을 이으면 다른 별자리가 된다.',9],
@@ -260,7 +266,13 @@ const SPOTS=[
   ['바다불가사리',1,110,null,10,18,'떨어진 별 조각이 굳은 것이라 한다.',14],
   ['유령선원',3,850,'night',40,60,'물고기 꼴을 한 익사한 선원. 낚이면 뱃노래를 부른다.',12],
   ['별고래',3,800,null,300,500,'바다에 떨어진 별을 삼켜 몸속에서 빛난다. 낚이면 바다가 잠시 밝아진다.',6],
-  ['떨어진 첫 번째 별',4,2800,null,8,12,'세상에서 가장 먼저 떨어진 별이 물고기가 된 것. 손바닥에 올리면 따뜻하다.',7]]},
+  ['떨어진 첫 번째 별',4,2800,null,8,12,'세상에서 가장 먼저 떨어진 별이 물고기가 된 것. 손바닥에 올리면 따뜻하다.',7],
+  ['혜성 청어',0,38,null,12,20,'꼬리가 길게 빛난다. 떼 지어 지나가면 별똥별 같다.',0],
+  ['소라별',1,100,null,6,12,'소라 껍데기 안에 작은 별이 산다. 껍데기를 바꿀 때마다 별도 옮긴다.',9],
+  ['별자리 해마',1,110,'night',10,16,'등의 점을 이으면 별자리가 된다. 해마다 다른 별자리다.',4],
+  ['달무리 복어',2,240,'night',20,30,'부풀면 보름달처럼 환해진다. 어부들은 등불 대신 쓴다.',7],
+  ['은하수 장어',2,260,null,100,150,'몸을 따라 은하수가 흐른다. 꼬리 끝에서 별이 떨어진다.',2],
+  ['바다의 등대',3,900,'night',60,90,'머리에 빛나는 돌을 이고 다닌다. 길 잃은 배가 따라간다.',6]]},
  {name:'심연의 우물',price:100000,fish:[
   ['눈 없는 아귀',0,50,null,30,50,'빛이 없는 곳에서 눈이 퇴화했다. 소리로 미끼를 찾는다.',1],
   ['장님게',0,55,null,12,20,'눈이 없고 집게가 유난히 길다. 벽을 더듬어 다닌다.',9],
@@ -273,7 +285,15 @@ const SPOTS=[
   ['우물지기',3,1100,null,150,250,'우물 바닥에 사는 거대한 메기. 누가 떨어뜨린 동전을 다 기억한다.',6],
   ['잊힌 이름',3,1200,'dawn',40,60,'이름을 잃은 자들이 변한 것이라 한다. 새벽에만 수면으로 올라와 이름을 찾는다.',3],
   ['밑바닥의 뱀',4,4500,'night',600,900,'리바이어던의 그림자라고도 한다. 밤에 우물 벽을 타고 오른다.',13],
-  ['리바이어던',4,4200,null,800,1200,'우물이 바다와 이어져 있다는 증거. 꼬리만 낚여도 전설이 된다.',6]]},
+  ['리바이어던',4,4200,null,800,1200,'우물이 바다와 이어져 있다는 증거. 꼬리만 낚여도 전설이 된다.',6],
+  ['창백한 송사리',0,48,null,5,9,'색이 없다. 랜턴 빛에 속이 비친다.',0],
+  ['우물 달팽이',0,52,null,6,12,'벽을 타고 오른다. 껍데기에 누군가의 이름이 새겨져 있다.',11],
+  ['쇠사슬 뱀장어',1,145,null,80,140,'쇠사슬처럼 마디가 있다. 옛 두레박 줄이었다고 한다.',2],
+  ['두레박 게',1,150,null,10,18,'낡은 두레박을 집으로 쓴다. 끌어올리면 안에서 물이 쏟아진다.',9],
+  ['동전 가오리',2,350,null,60,100,'등에 동전이 박혀 있다. 소원이 이뤄진 적은 없다.',5],
+  ['깊은 곳의 해마',2,340,null,12,20,'눈이 없고 귀가 크다. 소리로 본다.',4],
+  ['우물 아래 성가대',3,1150,'night',30,50,'여러 마리가 한 몸처럼 움직이며 낮게 노래한다. 가사는 아무도 못 알아듣는다.',0],
+  ['열쇠지기',3,1200,null,40,60,'입에 녹슨 열쇠를 물고 있다. 무엇을 여는지 아무도 모른다.',6]]},
 ];
 SPOTS.forEach((s,si)=>s.fish=s.fish.map((f,fi)=>({id:si+'-'+fi,spot:si,name:f[0],r:f[1],price:f[2]*2,time:f[3],min:f[4],max:f[5],lore:f[6],shape:f[7],hue:(si*71+fi*53+20)%360})));
 const allFish=()=>SPOTS.flatMap(s=>s.fish);
@@ -441,7 +461,7 @@ function renderTimer(){
   }
   const ex=document.createElement('button');ex.className='btn small';ex.textContent='펼치기';ex.onclick=()=>{S.compact=false;save();renderAll()};cc.append(ex);
 }
-function slotEl(opts){const s=document.createElement('button');s.className='slot'+(opts.cls?' '+opts.cls:'');s.setAttribute('aria-pressed',!!opts.sel);const cv=document.createElement('canvas');cv.width=opts.fish?24:16;cv.height=16;opts.draw(cv.getContext('2d'));s.append(cv);if(opts.cnt!=null){const c=document.createElement('span');c.className='cnt';c.textContent=opts.cnt;s.append(c)}if(opts.title)s.title=opts.title;s.onclick=opts.onclick;return s}
+function slotEl(opts){const s=document.createElement('button');s.className='slot'+(opts.cls?' '+opts.cls:'');s.setAttribute('aria-pressed',!!opts.sel);if(opts.fish)s.classList.add('fish');const cv=document.createElement('canvas');cv.width=opts.fish?96:16;cv.height=opts.fish?64:16;opts.draw(cv.getContext('2d'));s.append(cv);if(opts.cnt!=null){const c=document.createElement('span');c.className='cnt';c.textContent=opts.cnt;s.append(c)}if(opts.title)s.title=opts.title;s.onclick=opts.onclick;return s}
 function itemDesc(it){const pc=v=>Math.round(v*100)+'%';
   if(it.cat==='rod')return `던지는 속도 +${pc(it.v)}`;if(it.cat==='net')return `두 마리 확률 ${pc(it.v)}`;if(it.cat==='contract')return `판매가 +${pc(it.v)}`;if(it.cat==='bait')return `희귀 확률 +${pc(it.v)} · 한 마리당 1개`;
   if(it.cat==='lantern')return `밤·새벽 희귀 확률 +${pc(it.v)}`;if(it.cat==='tank')return it.newTank?'새 어항 1개':`어항 자리 +${it.v}`;
@@ -486,10 +506,10 @@ function renderPane(){
   }else if(tab==='tank'){
     const sec=document.createElement('div');sec.className='sec';sec.textContent=`${S.tankSel+1}번 어항 ${curTank().length} / ${tankCap()}`;p.append(sec);
     if(S.tanks.length>1){const sw=document.createElement('div');sw.className='cats';S.tanks.forEach((t,i)=>{const b=document.createElement('button');b.textContent=`${i+1}번 어항 · ${t.length}`;b.setAttribute('aria-selected',i===S.tankSel);b.onclick=()=>{S.tankSel=i;save();renderPane()};sw.append(b)});p.append(sw)}
-    const tc=document.createElement('canvas');tc.id='tankCanvas';tc.width=144;tc.height=56;tc.style.cssText='width:100%;max-width:432px;aspect-ratio:144/56;image-rendering:pixelated;border:2px solid var(--bronze3);background:#0a1a26;display:block';p.append(tc);
+    const tc=document.createElement('canvas');tc.id='tankCanvas';tc.width=288;tc.height=112;tc.style.cssText='width:100%;max-width:432px;aspect-ratio:144/56;image-rendering:pixelated;border:2px solid var(--bronze3);background:#0a1a26;display:block';p.append(tc);
     if(!curTank().length){const e=document.createElement('div');e.className='hint';e.textContent='귀항할 때 물고기를 눌러 어항에 넣을 수 있어요. 어항 속 물고기는 팔리지 않고 여기서 헤엄쳐요.';p.append(e)}
     const list=document.createElement('div');list.className='haul';
-    curTank().forEach((c,i)=>{const f=fishById(c.id);const d=document.createElement('div');d.className='f in';const cv=document.createElement('canvas');cv.width=24;cv.height=16;drawFish(cv.getContext('2d'),f,0,0,1);
+    curTank().forEach((c,i)=>{const f=fishById(c.id);const d=document.createElement('div');d.className='f in';const cv=document.createElement('canvas');cv.width=96;cv.height=64;drawFishHD(cv.getContext('2d'),f,0,0,1);
       const n=document.createElement('span');n.className='r'+f.r;n.textContent=f.name;const cm=document.createElement('span');cm.className='hint';cm.textContent=c.cm+'cm · '+new Date(c.at).toLocaleDateString('ko-KR',{month:'numeric',day:'numeric'});
       const b=document.createElement('button');b.className='btn small';b.textContent='풀어주기';b.onclick=()=>{curTank().splice(i,1);save();renderPane()};d.append(cv,n,cm,b);list.append(d)});
     p.append(list);
@@ -499,12 +519,12 @@ function renderPane(){
     const wrap=document.createElement('div');wrap.className='shopGrid';const left=document.createElement('div');left.style.cssText='display:flex;flex-direction:column;gap:8px';
     SPOTS.forEach((s,si)=>{const open=S.maps.includes(si);const t=document.createElement('div');t.className='hint';t.style.cssText='font-family:var(--display);color:var(--bronze2)';t.textContent=s.name+(open?'':' · 미개방');left.append(t);
       const g=document.createElement('div');g.className='grid';
-      s.fish.forEach(f=>{const got=S.codex[f.id];g.append(slotEl({fish:true,cls:'r'+f.r+(got?'':' unk'),sel:codexSel===f.id,draw:ctx=>drawFish(ctx,f,0,0,1),title:got?f.name:'???',onclick:()=>{codexSel=f.id;renderPane()}}))});left.append(g)});
+      s.fish.forEach(f=>{const got=S.codex[f.id];g.append(slotEl({fish:true,cls:'r'+f.r+(got?'':' unk'),sel:codexSel===f.id,draw:ctx=>drawFishHD(ctx,f,0,0,1),title:got?f.name:'???',onclick:()=>{codexSel=f.id;renderPane()}}))});left.append(g)});
     wrap.append(left);
     const f=codexSel?fishById(codexSel):allFish().find(x=>S.codex[x.id]);
     const right=document.createElement('div');
-    if(f){const got=S.codex[f.id];const c=document.createElement('div');c.className='card';c.style.gridTemplateColumns='144px 1fr';
-      const art=document.createElement('div');art.className='art';art.style.cssText='width:144px;height:108px';const cv=document.createElement('canvas');cv.width=32;cv.height=24;cv.style.cssText='width:144px;height:108px';if(got)drawFish(cv.getContext('2d'),f,4,4,1);else{const x=cv.getContext('2d');x.fillStyle='#2a2434';x.font='16px DotGothic16, monospace';x.textAlign='center';x.fillText('?',16,17)}art.append(cv);
+    if(f){const got=S.codex[f.id];const c=document.createElement('div');c.className='card';c.style.gridTemplateColumns='1fr';
+      const art=document.createElement('div');art.className='art';art.style.cssText='width:200px;height:144px;justify-self:center';const cv=document.createElement('canvas');cv.width=96;cv.height=68;cv.style.cssText='width:192px;height:136px';if(got)drawFishHD(cv.getContext('2d'),f,0,2,1);else{const x=cv.getContext('2d');x.fillStyle='#2a2434';x.font='40px DotGothic16, monospace';x.textAlign='center';x.fillText('?',48,46)}art.append(cv);
       const info=document.createElement('div');
       info.innerHTML=got?`<h3 class="r${f.r}">${f.name}</h3><div class="kv"><span>등급</span><span class="r${f.r}">${RAR[f.r]}</span><span>서식지</span><span>${SPOTS[f.spot].name}</span><span>시간대</span><span>${f.time?TIMES[f.time]+'에만':'언제나'}</span><span>크기</span><span>${f.min}~${f.max}cm</span><span>기본가</span><span class="gold">${f.price} G</span><span>잡은 수</span><span>${got.n}마리</span><span>최고 기록</span><span>${got.best}cm${got.best>=f.max-Math.round((f.max-f.min)*0.1)?' ★':''}</span></div>`
         :`<h3 class="r${f.r}">???</h3><div class="kv"><span>등급</span><span class="r${f.r}">${RAR[f.r]}</span><span>서식지</span><span>${SPOTS[f.spot].name}</span><span>시간대</span><span>${f.time?TIMES[f.time]+'에만':'언제나'}</span></div>`;
@@ -565,7 +585,7 @@ function overlay(html,win){const o=document.createElement('div');o.className='ov
 function showCharSelect(){
   const o=overlay(`<h2>견습 어부를 고르세요</h2><div class="chars" id="chars"></div><div class="row" style="justify-content:flex-end"><button class="btn primary" id="charOk">이 사람으로</button></div>`);
   let pick=S.char||CHARS[0].id;const list=o.querySelector('#chars');
-  CHARS.forEach(c=>{const b=document.createElement('button');b.setAttribute('aria-pressed',c.id===pick);const cv=document.createElement('canvas');cv.width=32;cv.height=64;cv.style.cssText='width:64px;height:128px';drawSprite(cv.getContext('2d'),heroSprite(c.id),0,0);b.append(cv);const d=document.createElement('div');d.innerHTML=`<div class="n">${c.name}</div><div class="d">${c.desc}</div>`;b.append(d);b.onclick=()=>{pick=c.id;list.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b))};list.append(b)});
+  CHARS.forEach(c=>{const b=document.createElement('button');b.setAttribute('aria-pressed',c.id===pick);const cv=document.createElement('canvas');cv.width=64;cv.height=128;cv.style.cssText='width:64px;height:128px;image-rendering:pixelated';cv.getContext('2d').drawImage(heroCanvas(c.id,2),0,0);b.append(cv);const d=document.createElement('div');d.innerHTML=`<div class="n">${c.name}</div><div class="d">${c.desc}</div>`;b.append(d);b.onclick=()=>{pick=c.id;list.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b))};list.append(b)});
   o.querySelector('#charOk').onclick=()=>{S.char=pick;save();o.remove();renderAll();audio.unlock()};
 }
 // ---------- save code (copy / paste) ----------
@@ -611,7 +631,7 @@ function showHaul(haul,bonusRate,sec,done,newIds,recs){
   if(S.tanks.length>1&&haul.length){const ts=document.createElement('select');S.tanks.forEach((t,i)=>{const op=document.createElement('option');op.value=i;op.textContent=`${i+1}번 어항 (${t.length}/${tankCap()})`;if(i===S.tankSel)op.selected=true;ts.append(op)});ts.onchange=()=>{S.tankSel=+ts.value;save()};const wrapSel=document.createElement('div');wrapSel.className='row';wrapSel.innerHTML='<span class="hint">넣을 어항</span>';wrapSel.append(ts);list.before(wrapSel)}
   const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;const seen=new Set();
   const sum=()=>{const g=sorted.filter(c=>!c.tank).reduce((a,c)=>a+c.price,0);const b=Math.round(g*bonusRate);o.querySelector('#haulGold').textContent='+'+g.toLocaleString()+' G';const hb=o.querySelector('#haulBonus');if(hb)hb.textContent='+'+b.toLocaleString()+' G';return g+b};
-  sorted.forEach((c,i)=>{const f=fishById(c.id);const d=document.createElement('button');d.className='f';d.type='button';const cv=document.createElement('canvas');cv.width=24;cv.height=16;drawFish(cv.getContext('2d'),f,0,0,1);
+  sorted.forEach((c,i)=>{const f=fishById(c.id);const d=document.createElement('button');d.className='f';d.type='button';const cv=document.createElement('canvas');cv.width=96;cv.height=64;drawFishHD(cv.getContext('2d'),f,0,0,1);
     const n=document.createElement('span');n.className='r'+f.r;n.style.textAlign='left';n.textContent=f.name;const cm=document.createElement('span');cm.className='hint';cm.textContent=c.cm+'cm · '+c.price+'G';const tg=document.createElement('span');tg.className='tag';const base=newIds.includes(c.id)&&!seen.has(c.id)?'NEW':(recs.includes(c.id)&&c.cm===S.codex[c.id].best&&!seen.has('r'+c.id)?'기록':'');seen.add(c.id);if(base==='기록')seen.add('r'+c.id);tg.textContent=base;
     d.append(cv,n,cm,tg);d.onclick=()=>{if(!c.tank){const used=curTank().length+sorted.filter(x=>x.tank).length;if(used>=tankCap()){toast('어항이 가득 찼어요');return}}c.tank=!c.tank;d.classList.toggle('tanked',c.tank);tg.textContent=c.tank?'어항':base;sum()};
     list.append(d);setTimeout(()=>{d.classList.add('in');if(f.r>=2)audio.rare()},reduced?0:120+i*200)});
@@ -621,345 +641,1085 @@ function showHaul(haul,bonusRate,sec,done,newIds,recs){
 
 // ---------- pixel art ----------
 const OUT='#0b0a0e';
-function drawSprite(g,sp,x,y,scale=1){const{rows,pal}=sp;for(let j=0;j<rows.length;j++){const r=rows[j];for(let i=0;i<r.length;i++){const ch=r[i];if(ch==='.')continue;g.fillStyle=ch==='O'?OUT:(pal[ch]||'#f0f');g.fillRect(x+i*scale,y+j*scale,scale,scale)}}}
-// hero sprites 32x64: muted palette, dithered shading, light from the upper left. One full sprite per class.
-const HERO_PAL={
- common:{S:'#a8866a',s:'#6e5540',E:'#0b0a0e',L:'#4a3424',l:'#2e2016',G:'#8a7232',g:'#5c4a1e',k:'#3a2f12','1':'#8e949c','2':'#6b7179','3':'#4c5159','4':'#33373d','5':'#1c1f24'},
- knight:{R:'#5a211d',r:'#3d1613',q:'#26100e',h:'#6e2a25',B:'#223450',b:'#17243a',n:'#0f1828'},
- mage:{A:'#2a2a52',a:'#1c1c3a',z:'#101024',R:'#3a2c5a',r:'#281e40',q:'#18122a',B:'#2f2550',b:'#201838',n:'#140f26',C:'#4f8a8a',W:'#8a857a',w:'#5a564e',V:'#6a6060'},
- rogue:{A:'#2c3a34',a:'#1c2822',z:'#111a16',R:'#2c3a34',r:'#1c2822',q:'#111a16',B:'#4a3a2a',b:'#33281c',n:'#201812',M:'#6b7179',m:'#4c5159',N:'#4a8a4a'},
- bard:{A:'#4a1f2a',a:'#32141c',z:'#1e0c11',R:'#4a1f2a',r:'#32141c',q:'#1e0c11',B:'#3a2f4a',b:'#281f34',n:'#181220',W:'#8a857a',H:'#6a3a24',T:'#5a3f2a',t:'#3a2819'},
- druid:{A:'#2f3f24',a:'#1f2b18',z:'#12190e',R:'#2f3f24',r:'#1f2b18',q:'#12190e',B:'#5a4a32',b:'#3e3322',n:'#261f14',N:'#5a4030',m:'#3a2a1c',W:'#8a857a',w:'#5a564e',V:'#4a7a3a'},
-};
-const HERO_ROWS={
-knight:[
-'...............hR...............',
-'..............hRrr..............',
-'.............hRrqr..............',
-'.............Rrqr...............',
-'............ORrqO...............',
-'..........OO2323OO..............',
-'........OO12232334OO............',
-'.......O122323233444O...........',
-'.......O1232323344544O..........',
-'......O12323233445445O..........',
-'......O123232334454554O.........',
-'......O122OOOOOOOO4545O.........',
-'......O23O55555555O455O.........',
-'......O23O5E555E55O545O.........',
-'......O32O55555555O455O.........',
-'......O232OOOOOOOO4545O.........',
-'......O232323344545454O.........',
-'......O3232334445454544O........',
-'.......O23233444545455O.........',
-'.......O3334444545555O..........',
-'........OO34445455OO............',
-'..........OOOOOOOO..............',
-'.......OOOO34SSs3OOOO...........',
-'....OOO1232OOOOOO33434OO........',
-'...O12323232O1223O3434545O......',
-'..O123232323OBbBbO343454545O....',
-'..O232323234OBbGGbBO34545454O...',
-'..O232323434OBGGGGbO45454545O...',
-'..O323234344OBbGGbBO45454545O...',
-'..O323234344OBbBbBbO45454545O...',
-'..OO32343444OBbGBGbO45454545O...',
-'.ORqOO344454ObBbBbBO4545OOqRO...',
-'.ORrROOOOOOObGGGGbBOOOOOORrRO...',
-'.ORrRrO...ObBbBbBbO...OrRrRrO...',
-'.ORrRrO...OBbBbBbBO...OrRrRrO...',
-'.ORrRrO...ObBbBbBbO...OrRrRrO.SS',
-'.ORrRqO...OLlGGlLlO...OqRrRrOSSs',
-'.ORrRqO...OlLGgLlLO...OqRrRrOSsO',
-'.ORrqqO...ObBbBbBbO...OqqRrROOO.',
-'.ORrqqO...OBbBbBbBO...OqqRrRO...',
-'.ORrqqO...ObBbBbnbO...OqqRrRO...',
-'.ORqqqO...OBbBnbnBO...OqqqRrO...',
-'.ORqqqO...OnbnBnbnO...OqqqRrO...',
-'.ORqqqO...OOOOOOOO...OqqqqRO....',
-'.OrqqqO..O1232OO3234O.OqqqqrO...',
-'.OrqqqO..O2323O.O3234O.OqqqqrO..',
-'.OrqqqO..O23234O.O3245O.OqqqqrO.',
-'.OqqqqO..O32344O.O3345O.OqqqqqO.',
-'.OqqqqO..O32345O.O4345O.OqqqqqO.',
-'.OOOOOO..O33445O.O4455O.OOOOOOO.',
-'.........O34455O.O4555O.........',
-'.........O44555O.O5555O.........',
-'.........O5555O..O5555O.........',
-'.........O2323O..O3234O.........',
-'.........O3232O..O3334O.........',
-'.........O3234O..O3445O.........',
-'........O32344O..O34445O........',
-'........O33445O..O34455O........',
-'.......O334455O..O344555O.......',
-'.......O344555O..O445555O.......',
-'.......O455555O..O555555O.......',
-'.......OOOOOOOO..OOOOOOOO.......',
-'................................',
-'................................'],
-mage:[
-'..................OO............',
-'.................OAaO...........',
-'................OAAazO..........',
-'................OAaazO..........',
-'...............OAAaazO..........',
-'...............OAaaazO..........',
-'..............OAAaaazzO.........',
-'..............OAGGGaazO.........',
-'.............OAAGgGaazzO........',
-'.............OAAGGGaaazO........',
-'............OAAAaaaaazzO........',
-'............OAAaAaaazzzO........',
-'...........OAAAaaaaaazzzO.......',
-'....OOOOOOOAAAaAaaaazzzzOOOOOO..',
-'...OAAAAAAAAAAaaaaaaazzzzzzzzzO.',
-'..OAAaAAaAAaAaAaaaaaaazzzzzzzzzO',
-'..OGGgGGgGGgGgGgggggggkkkkkkkkkO',
-'...OOOOOOOOzzzSSSSSsOOOOOOOOOOO.',
-'..........OWzzSSSsEsVWO.........',
-'..........OWzSSSSsssVWO.........',
-'..........OWWSSSSssVWWO.........',
-'...........OWWWsSsWWWO..........',
-'...........OWWWWWWWwVO..........',
-'...........OWWWWWWwwVO..........',
-'...........OWwWWWwwVVO..........',
-'............OWWWwwVVO...........',
-'............OWwWwwVVO...........',
-'.............OWwwVVO............',
-'.............OWwVVO.............',
-'..........OOOOOwVOOOOO..........',
-'........OORRRROOOORRRRqOO.......',
-'.......ORRRrRROBbBORRrRRqqO.....',
-'......ORRrRRrOBbCbBORrRRrqqO....',
-'......ORRrRRrOBbBbBORrRRrqqO....',
-'.....ORRrRRrROBbBbBORrRRrqqqO...',
-'.....ORRrRRrROBbBbBORrRRrqqqO...',
-'.....ORRrRRrROBCbBbORrRRrqqqO.SS',
-'.....ORRrRrrROBbBbBORrRrrqqqOSSs',
-'.....ORRrRrrROGgGgGORrRrrqqqOSsO',
-'.....ORRrRrrROBbBbBORrRrrqqqOOO.',
-'.....ORrrRrrqOBbBbBOrrRrrqqqO...',
-'.....ORrrRrrqOBbCbBOrrRrrqqqO...',
-'.....ORrrrrrqOBbBbBOrrrrrqqqO...',
-'.....ORrrrrqqOBbBbBOrrrrqqqqO...',
-'.....ORrrrrqqOBbBbBOrrrrqqqqO...',
-'.....OrrrrqqqOBbBbBOrrrqqqqqO...',
-'.....OrrrqqqqOBCbBbOrrqqqqqqO...',
-'.....OrrrqqqqOBbBbBOrrqqqqqqO...',
-'.....OrrqqqqqOBbBbBOrqqqqqqqO...',
-'.....OrrqqqqqOBbBbnOrqqqqqqqO...',
-'.....OrqqqqqqOnbnbnOqqqqqqqqO...',
-'.....OrqqqqqqOnnnnnOqqqqqqqqO...',
-'.....OqqqqqqqOOOOOOOqqqqqqqqO...',
-'.....OqqqqqqqqqqqqqqqqqqqqqqO...',
-'.....OqqqqqqqqqqqqqqqqqqqqqqO...',
-'......OqqqqqqqqqqqqqqqqqqqqO....',
-'......OqqqqqqqqqqqqqqqqqqqqO....',
-'.......OOOOOLLLOOOLLLOOOOOO.....',
-'...........OLlLO.OLlLO..........',
-'...........OllLO.OllLO..........',
-'...........OOOOO.OOOOO..........',
-'................................',
-'................................',
-'................................'],
-rogue:[
-'.........OOOOOOOOO..............',
-'.......OOAAAAAAAAAOO............',
-'......OAAaAAAAAAAAaAO...........',
-'.....OAAaAAaaaaaAAAaAO..........',
-'.....OAaAaaaaaaaaaAAaAO.........',
-'....OAAaaaaaaazzaaaAAaAO........',
-'....OAaaaaaazzzzzaaaAAaAO.......',
-'....OAaaaaazzzzzzzaaAAaaAO......',
-'....OAaaaazzzzzzzzzaAAaaAAO.....',
-'....OAaaazzzzzzzzzzzAAaaaAAO....',
-'....OAaaazzzNzzzzNzzAAaaaAAAO...',
-'....OAaaazzzzzzzzzzzAAaaaAAAAO..',
-'....OAaaazzzzzzzzzzzaAaaaAAAAAO.',
-'....OAaaaazz444444zzaAaaaAAAAAO.',
-'....OAAaaazz4m4m44zzaAaaaAAAAO..',
-'.....OAaaaazz4444zzaAaaaAAAAO...',
-'.....OAAaaaazzzzzzaaAaaaAAAO....',
-'......OAAaaaaaaaaaaAaaaAAO......',
-'.......OAAAaaaaaaaaaaAAOO.......',
-'........OOAAAaaaaaaAOO..........',
-'..........OOOOSSsOOO............',
-'.............OSSsO..............',
-'........OOOOOOSSsOOOOOO.........',
-'.......OAAaAAOssssOAAaAAO.......',
-'......OAAaAAOBbBbBbOAAaAAAO.....',
-'.....OAAaAAOBbBbLbBbOAAaAAAO....',
-'.....OAAaAAOBbBLbBbBOAAaAAAO....',
-'....OAAaAAOBbBbBLbBbOAAaAAAAO...',
-'....OAAaAAOBbBbBbLbBOAAaAAAAO...',
-'....OAaaAAOBbBbBbBLbOAAaaAAAO...',
-'....OAaaAAOBbBbBbBbLOAAaaAAAO...',
-'....OAaaAAOLlLlLlLlLOAAaaAAAO...',
-'....OAaaaAOlLlGGlLlLOAAaaaAAO...',
-'....OAaaaAOBbOmmObBbOAAaaaAAO.SS',
-'....OAaaaAOBbOm1ObBbOAaaaaAAOSSs',
-'....OAaaaAOBbOOOObBbOAaaaaAAOSsO',
-'....OAaaaaOBbBbBbBbBOAaaaaaAOOO.',
-'....OAaaaaOBbBbBbBbBOAaaaaaAO...',
-'....OAaaaaOBbBbBbBbbOAaaaaaAO...',
-'....OAaaazOBbBbBbbnbOaaaaaaAO...',
-'....OAaazzObBbBbnbnbOaaaaazAO...',
-'....OAaazzOnbnbnbnbnOaaaazzAO...',
-'....OOOOOOOOOOOOOOOOOOOOOOOO....',
-'..........OLlLOOLlLO............',
-'..........OLlLO.OLlLO...........',
-'..........OLlLO.OLlLO...........',
-'..........OllLO.OllLO...........',
-'..........OllLO.OllLO...........',
-'..........OlllO.OlllO...........',
-'..........OlllO.OlllO...........',
-'..........OBbBO.OBbBO...........',
-'..........ObBbO.ObBbO...........',
-'..........OBbBO.OBbBO...........',
-'..........ObBbO.ObBbO...........',
-'.........OBbBbO.OBbBbO..........',
-'.........ObBbbO.ObBbbO..........',
-'.........ObbbbO.ObbbbO..........',
-'........ObBbbbO.ObBbbbO.........',
-'........ObbbbnO.ObbbbnO.........',
-'........OnnnnnO.OnnnnnO.........',
-'........OOOOOOO.OOOOOOO.........',
-'................................',
-'................................',
-'................................'],
-bard:[
-'......................OW........',
-'.....................OWWwO......',
-'....................OWWwO.......',
-'...................OWWwO........',
-'..........OOOOOOOOOOWwO.........',
-'........OOAAaAAaAAaAOO..........',
-'.......OAAaAAaAAaAAaAAO.........',
-'......OAaAAaAAaAAaAAaAzO........',
-'......OaaaaaaaaaaaaaaazO........',
-'.......OHHHhHHhHHhHHHO..........',
-'.......OHhHHhHHhHHhHHO..........',
-'........OSSSSSSSsssO............',
-'........OSSSSSSSsssO............',
-'........OSSEESSsEEsO............',
-'........OSSEeSSsEesO............',
-'........OSSSSSSssssO............',
-'........OSSSSSsssssO............',
-'.........OsSSSsssssO............',
-'.........OsSSSssstO.............',
-'..........OsSssttO..............',
-'...........OOsstO...............',
-'..........OOOOssOOOO............',
-'.......OOORRROssOORRROO.........',
-'......ORRrRROBbBbORRrRRO........',
-'.....ORRrRROBbTbBbORRrRRO.......',
-'.....ORRrRRObBbTbBORRrRRO.......',
-'....ORRrRRObBbBbTbBORRrRRO......',
-'....ORRrRRObBbBbBTbORRrRRO......',
-'....ORRrRRObBWbBbBTORRrRRO......',
-'....ORRrRRObBbWbBbBORRrRRO......',
-'....ORRrRRObBbBWbBbORRrRRO......',
-'....ORrrRRObBbBbWbBORrrRRO.SS...',
-'....ORrrRROLlLGGlLlORrrRROSSs...',
-'....ORrrRROlLlGgLlLORrrRROSsO...',
-'....ORrrRrObBbBbBbBORrrRrOOO....',
-'....ORrrRrObBbBbBbBORrrRrO......',
-'....ORrrRrObBbBbBbBORrrRrO......',
-'....ORrrrrObBbBbBbbOrrrRrO......',
-'....ORrrrrObBbBbbnbOrrrRrO......',
-'....ORrrrqOnbnbnbnbOrrrrqO......',
-'....OOOOOOOOOOOOOOOOOOOOOO......',
-'...........OTtTOOTtTO...........',
-'...........OTtTO.OTtTO..........',
-'...........OTtTO.OTtTO..........',
-'...........OttTO.OttTO..........',
-'...........OttTO.OttTO..........',
-'...........OtttO.OtttO..........',
-'...........OtttO.OtttO..........',
-'...........OLlLO.OLlLO..........',
-'...........OLlLO.OLlLO..........',
-'...........OllLO.OllLO..........',
-'...........OllLO.OllLO..........',
-'..........OLllLO.OLllLO.........',
-'..........OlllLO.OlllLO.........',
-'..........OllllO.OllllO.........',
-'.........OLlllLO.OLlllLO........',
-'.........OlllllO.OlllllO........',
-'.........OlllllO.OlllllO........',
-'.........OOOOOOO.OOOOOOO........',
-'................................',
-'................................',
-'................................',
-'................................',
-'................................'],
-druid:[
-'.....O..O...........O..O........',
-'.....ONOONO........ONOONO.......',
-'......ONNmO........ONNmO........',
-'.......ONNmO......ONNmO.........',
-'.......OONNmO....ONNmOO.........',
-'.........ONNmOOOONNmO...........',
-'..........OONNmmNNOO............',
-'.........OOAAaAAaAAOO...........',
-'........OAAaAAaAAaAAaO..........',
-'.......OAAaAAaAAaAAaAaO.........',
-'.......OAaAaAaAaAaAaAaO.........',
-'.......OAaaaaaaaaaaaaaO.........',
-'......OAazzzSSSSSsszzaO.........',
-'......OAazzSSSSSSssszaO.........',
-'......OAazzSSEESsEEszaO.........',
-'......OAazzSSEeSsEeszaO.........',
-'......OAazzSSSSSsssszaO.........',
-'......OAazzWSSSSsssWzaO.........',
-'......OAazzWWSSssWWWzaO.........',
-'......OAazzWWWWWWWwwzaO.........',
-'.......OAaWWWwWWwWwwaO..........',
-'.......OAaWWwWWwWWwwaO..........',
-'.......OOOWwWWwWWwwOOO..........',
-'.......OAAaOWwWwWwOAAaO.........',
-'......OAAaAAOWwwWOAAaAAO........',
-'.....OAAaAAaOBbBbOAAaAAaO.......',
-'.....OAaAAaAOBbVbBOAaAAaAO......',
-'....OAaAAaAAOBbBbBOAaAAaAAO.....',
-'....OAaAAaAAOBVbBbOAaAAaAAO.....',
-'....OAaaAaAAOBbBbBOAaaAaAAO.....',
-'....OAaaAaaAOBbBVbOAaaAaaAO.....',
-'....OAaaAaaAOBbBbBOAaaAaaAO.....',
-'....OAaaaaaAOLlNNlOAaaaaaAO.SS..',
-'....OAaaaaaAOlLNmLOAaaaaaAOSSs..',
-'....OAaaaaaaOBbBbBOAaaaaaaOSsO..',
-'....OAaaaaaaOBVbBbOAaaaaaaOOO...',
-'....OAaaaazzOBbBbBOAaaaazzO.....',
-'....OAaaazzzOBbBVbOAaaazzzO.....',
-'....OAaazzzzOBbBbBOAaazzzzO.....',
-'....OAaazzzzOBbBbbOAaazzzzO.....',
-'....OAazzzzzObBbnbOAazzzzzO.....',
-'....OAazzzzzOnbnbnOAazzzzzO.....',
-'....OOOOOOOOOOOOOOOOOOOOOOO.....',
-'...........OLlLOOLlLO...........',
-'...........OLlLO.OLlLO..........',
-'...........OLlLO.OLlLO..........',
-'...........OllLO.OllLO..........',
-'...........OllLO.OllLO..........',
-'...........OlllO.OlllO..........',
-'...........OlllO.OlllO..........',
-'...........ONmNO.ONmNO..........',
-'...........ONmNO.ONmNO..........',
-'...........OmmNO.OmmNO..........',
-'...........OmmNO.OmmNO..........',
-'..........ONmmNO.ONmmNO.........',
-'..........OmmmNO.OmmmNO.........',
-'..........OmmmmO.OmmmmO.........',
-'.........ONmmmNO.ONmmmNO........',
-'.........OmmmmmO.OmmmmmO........',
-'.........OOOOOOO.OOOOOOO........',
-'................................',
-'................................',
-'................................',
-'................................'],
-};
-function heroSprite(cls){const pal=Object.assign({},HERO_PAL.common,HERO_PAL[cls]||HERO_PAL.knight);return {rows:HERO_ROWS[cls]||HERO_ROWS.knight,pal}}
 
+// ---------- fish v2: 48x32 hand-composed creatures ----------
+// Each species is a list of parts drawn back-to-front. Parts are ellipses/polys/lines/pixels with a
+// material (h,s,l). Shading is computed per part (light from upper-left) with ordered dithering,
+// then optional texture, inner ink edges, an outer outline, and glow halos.
+const FW=48,FH=32;
+const BAYER=[[0,8,2,10],[12,4,14,6],[3,11,1,9],[15,7,13,5]];
+const bay=(x,y)=>BAYER[y&3][x&3]/16;const chk=(x,y)=>((x+y)&1)?0.72:0.28;
+function hsl(h,s,l){return `hsl(${((h%360)+360)%360} ${Math.max(0,Math.min(100,s))}% ${Math.max(0,Math.min(100,l))}%)`}
+function inPoly(pts,x,y){let c=false;for(let i=0,j=pts.length-1;i<pts.length;j=i++){const [xi,yi]=pts[i],[xj,yj]=pts[j];if(((yi>y)!==(yj>y))&&(x<(xj-xi)*(y-yi)/(yj-yi)+xi))c=!c}return c}
+function bbox(pts){let x0=99,y0=99,x1=-99,y1=-99;pts.forEach(([x,y])=>{x0=Math.min(x0,x);y0=Math.min(y0,y);x1=Math.max(x1,x);y1=Math.max(y1,y)});return[x0,y0,x1,y1]}
+const RARITY_OUTLINE=[null,null,null,'#3a2c16','#4a2e5e'];
+function scaleSpec(spec,k){const sc=v=>v*k;const parts=spec.parts.map(p=>{const q=Object.assign({},p);
+    if(p.t==='e'){q.a=[p.a[0]*k,p.a[1]*k,p.a[2]*k,p.a[3]*k]}
+    else if(p.t==='poly'){q.a=p.a.map(([x,y])=>[x*k,y*k])}
+    else if(p.t==='line'){q.a=p.a.map(sc);q.w=Math.max(1,Math.round((p.w||1)*k))}
+    else if(p.t==='curve'){q.a=p.a.map(sc);q.th=(p.th||[2,2]).map(v=>Math.max(0.55,v*k))}
+    else if(p.t==='px'){if(k>=1){q.t='pxk';q.k=k;q.a=p.a.map(([x,y,t])=>[x*k,y*k,t])}else q.a=p.a.map(([x,y,t])=>[Math.round(x*k),Math.round(y*k),t])}
+    if(p.holes)q.holes=p.holes.map(([x,y,r])=>[x*k,y*k,r*k]);
+    if(p.fade)q.fade=p.fade.map(sc);
+    if(p.spec)q.spec=p.spec.map(([x,y,l])=>[x*k,y*k,l*k]);
+    return q});
+  return Object.assign({},spec,{w:(spec.w||FW)*k,h:(spec.h||FH)*k,k:(spec.tk||1)*k,parts,
+    glow:(spec.glow||[]).map(([x,y,r,c,a])=>[x*k,y*k,r*k,c,a]),
+    tint:(spec.tint||[]).map(([x,y,r,h,s,a])=>[x*k,y*k,r*k,h,s,a]),
+    spark:spec.spark?spec.spark.map(([x,y,c])=>[x*k,y*k,c]):spec.spark})}
+function renderFish(spec,r,k){
+  if(k&&k!==1)spec=scaleSpec(spec,k);
+  const K=spec.k||spec.tk||1;
+  const W=spec.w||FW,H=spec.h||FH;
+  const cells=new Array(W*H).fill(null); // {p:partIndex, tone:0..4}
+  const pid=(x,y)=>x<0||y<0||x>=W||y>=H?-1:(cells[y*W+x]?cells[y*W+x].p:-1);
+  spec.parts.forEach((p,pi)=>{
+    const m=p.m; // material {h,s,l}
+    const put=(x,y,tone)=>{if(x<0||y<0||x>=W||y>=H)return;cells[y*W+x]={p:pi,tone,m,p0:p}};
+    // shade: normalized position inside part's ellipse/bbox -> light amount
+    const shadeAt=(nx,ny)=>{const lt=0.5-(nx*(p.lx??0.45)+ny*(p.ly??0.7))*0.5;return Math.max(0,Math.min(0.999,lt+(p.lift||0)))};
+    const toneOf=(x,y,lt)=>{const v=lt*(p.tones||4)+ (p.flat?0:(chk(x,y)-0.5)*0.9);return Math.max(0,Math.min((p.tones||4)-1,Math.floor(v)))};
+    const fadeOk=(x,y)=>{if(!p.fade)return true;const [x0,x1]=p.fade;const t=(x-x0)/(x1-x0);const keep=x1>x0?1-t:1-t; return bay(x,y)<Math.max(0,Math.min(1,keep))};
+    const holeOk=(x,y)=>!p.holes||!p.holes.some(([hx,hy,hr])=>(x-hx)**2+(y-hy)**2<=hr*hr);
+    if(p.t==='e'){const [cx,cy,rx,ry]=p.a;const rot=p.rot||0,cs=Math.cos(rot),sn=Math.sin(rot);
+      for(let y=Math.floor(cy-ry-rx);y<=cy+ry+rx;y++)for(let x=Math.floor(cx-rx-ry);x<=cx+rx+ry;x++){const dx=x+0.5-cx,dy=y+0.5-cy;const ux=(dx*cs+dy*sn)/rx,uy=(-dx*sn+dy*cs)/ry;if(ux*ux+uy*uy>1)continue;if(!fadeOk(x,y)||!holeOk(x,y))continue;put(x,y,toneOf(x,y,shadeAt(ux,uy)))}}
+    else if(p.t==='poly'){const pts=p.a;const [x0,y0,x1,y1]=bbox(pts);const cx=(x0+x1)/2,cy=(y0+y1)/2,rx=Math.max(1,(x1-x0)/2),ry=Math.max(1,(y1-y0)/2);
+      for(let y=Math.floor(y0);y<=y1;y++)for(let x=Math.floor(x0);x<=x1;x++){if(!inPoly(pts,x+0.5,y+0.5))continue;if(!fadeOk(x,y)||!holeOk(x,y))continue;put(x,y,toneOf(x,y,shadeAt((x+0.5-cx)/rx,(y+0.5-cy)/ry)))}}
+    else if(p.t==='line'){const [xa,ya,xb,yb]=p.a;const n=Math.max(Math.abs(xb-xa),Math.abs(yb-ya));for(let i=0;i<=n;i++){const x=Math.round(xa+(xb-xa)*i/n),y=Math.round(ya+(yb-ya)*i/n);if(!fadeOk(x,y))continue;put(x,y,p.tone??2);if(p.w>1){for(let j=0;j<p.w;j++)for(let i=0;i<p.w;i++)put(x+i,y+j,p.tone??2)}}}
+    else if(p.t==='px'){p.a.forEach(([x,y,tone])=>put(x,y,tone??2))}
+    else if(p.t==='pxk'){p.a.forEach(([x,y,tone])=>{for(let j=0;j<p.k;j++)for(let i=0;i<p.k;i++)put(x+i,y+j,tone??2)})}
+    else if(p.t==='curve'){ // quadratic bezier with thickness profile
+      const [xa,ya,xc,yc,xb,yb]=p.a;const n=64;const th=p.th||[2,2];
+      for(let i=0;i<=n;i++){const t=i/n;const x=(1-t)*(1-t)*xa+2*(1-t)*t*xc+t*t*xb,y=(1-t)*(1-t)*ya+2*(1-t)*t*yc+t*t*yb;const r=th[0]+(th[1]-th[0])*t;
+        for(let yy=Math.floor(y-r);yy<=y+r;yy++)for(let xx=Math.floor(x-r);xx<=x+r;xx++){const dx=xx+0.5-x,dy=yy+0.5-y;if(dx*dx+dy*dy>r*r)continue;if(!fadeOk(xx,yy))continue;const lt=0.5-(dy/r)*0.5*0.8;put(xx,yy,toneOf(xx,yy,Math.max(0,Math.min(0.999,lt))))}}}
+  });
+  // textures and ink edges
+  const toneAdj=new Array(W*H).fill(0),cool=new Array(W*H).fill(0);
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){const c=cells[y*W+x];if(!c)continue;const p=c.p0;const X=x,Y=y;x=Math.floor(x/K);y=Math.floor(y/K);
+    if(p.tex==='scales'){const ox=((y>>1)&1)*2;if(((x+ox)&3)===0&&(y&1)===1)toneAdj[Y*W+X]-=1;else if(((x+ox)&3)===2&&(y&1)===0)toneAdj[Y*W+X]+=1}
+    if(p.tex==='rays'&&(((x-(y>>1))%3)+3)%3===0)toneAdj[Y*W+X]-=1;
+    if(p.tex==='plates'&&((x%7===0)||(y%5===0)))toneAdj[Y*W+X]-=1;
+    if(p.tex==='ridges'&&(y%3===0))toneAdj[Y*W+X]-=1;
+    if(p.tex==='web'&&((x+y)%5===0||(x-y+40)%5===0))toneAdj[Y*W+X]-=1;
+    if(p.tex==='scales2'&&(((x>>1)+(y>>1))&1)===0&&((x&1)===0))toneAdj[Y*W+X]-=1;
+    if(p.tex==='stripes'&&(x%6<2))toneAdj[Y*W+X]-=1;
+    if(p.tex==='bands'&&(((x+y)>>1)%5===0))toneAdj[Y*W+X]-=1;
+    if(p.tex==='spots'&&nz(x,y,7)>0.84)toneAdj[Y*W+X]-=2;
+    if(p.tex==='grain'&&nz(x,y,3)>0.7)toneAdj[Y*W+X]-=1;
+    if(p.tex==='cracks'&&nz(x>>1,y,5)>0.9)toneAdj[Y*W+X]-=2;
+    x=X;y=Y;
+    if(p.rim){const beh=(xx,yy)=>{const q=pid(xx,yy);return q<c.p};if(beh(x,y-1)||beh(x-1,y))toneAdj[Y*W+X]+=1}
+    if(spec.water!==false&&p.rim2!==false&&!p.fade){const emp=(xx,yy)=>pid(xx,yy)===-1;if((emp(x,y+1)||emp(x+1,y))&&((x+y)&1))cool[y*W+x]=1}
+    if(p.spec){p.spec.forEach(([sx,sy,ln])=>{if(y>=sy&&y<sy+K&&x>=sx&&x<sx+ln)toneAdj[Y*W+X]+=2})}
+    if(p.ink!==false){ // inner ink: edge of this part against other parts drawn before it or empty
+      const other=(xx,yy)=>{const q=pid(xx,yy);return q!==c.p&&q<c.p}; // only against parts behind (lower index) or empty (-1)
+      if(other(x-1,y)||other(x+1,y)||other(x,y-1)||other(x,y+1))toneAdj[y*W+x]-=(p.inkW??2)}
+  }
+  // compose to canvas
+  const oc=document.createElement('canvas');oc.width=W;oc.height=H;const g=oc.getContext('2d');
+  const img=g.createImageData(W,H),d=img.data;
+  const setPx=(x,y,css)=>{const [r,gg,b]=cssToRgb(css);const i=(y*W+x)*4;d[i]=r;d[i+1]=gg;d[i+2]=b;d[i+3]=255};
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){const c=cells[y*W+x];if(!c)continue;const t=Math.max(-1,Math.min((c.p0.tones||4),c.tone+toneAdj[y*W+x]));const m=c.m;
+    let l=m.l+(t-1.5)*(m.step||8),s=m.s+(t-1.5)*(m.sstep||-3),h=m.h+(t-1.5)*(m.hshift||0);
+    if(cool[y*W+x]){h=h+(205-h)*0.18;l+=5}
+    (spec.tint||[]).forEach(([cx,cy,r,th,ts,amt])=>{const dd=Math.hypot(x+0.5-cx,y+0.5-cy)/r;if(dd>=1)return;const k=(1-dd)*(1-dd)*amt;let dh=((th-h)%360+540)%360-180;h=h+dh*Math.min(1,k*1.6);s=s+(ts-s)*Math.min(1,k*1.2);l=l+k*34});
+    setPx(x,y,hsl(h,s,l))}
+  // outer outline
+  const solid=(x,y)=>x>=0&&y>=0&&x<W&&y<H&&d[(y*W+x)*4+3]>0;
+  const outl=spec.outline||(r!=null&&RARITY_OUTLINE[r])||'#0b0a0e';const [orr,og,ob]=cssToRgb(outl);
+  const mark=[];for(let y=0;y<H;y++)for(let x=0;x<W;x++){if(solid(x,y))continue;if(solid(x-1,y)||solid(x+1,y)||solid(x,y-1)||solid(x,y+1))mark.push([x,y])}
+  mark.forEach(([x,y])=>{const i=(y*W+x)*4;d[i]=orr;d[i+1]=og;d[i+2]=ob;d[i+3]=255});
+  // glows (soft dithered halos outside the outline)
+  (spec.glow||[]).forEach(gl=>{const [cx,cy,r,css,str]=gl;const [rr,gg,bb]=cssToRgb(css);
+    for(let y=Math.floor(cy-r);y<=cy+r;y++)for(let x=Math.floor(cx-r);x<=cx+r;x++){if(x<0||y<0||x>=W||y>=H)continue;const i=(y*W+x)*4;if(d[i+3])continue;const dd=Math.hypot(x+0.5-cx,y+0.5-cy)/r;if(dd>1)continue;const a=Math.pow(1-dd,1.6)*(str||0.8);if(bay(x,y)<a){d[i]=rr;d[i+1]=gg;d[i+2]=bb;d[i+3]=255}}});
+  // sparkles
+  const sparks=spec.spark||(r===3?[[6,5,'hsl(45 50% 80%)'],[43,27,'hsl(45 50% 80%)']]:[]);
+  sparks.forEach(([x,y,css])=>{if(x<0||y<0||x>=W||y>=H)return;const [rr,gg,bb]=cssToRgb(css||'#f4ecd8');const i=(y*W+x)*4;d[i]=rr;d[i+1]=gg;d[i+2]=bb;d[i+3]=255});
+  g.putImageData(img,0,0);return oc;
+}
+let _cc;function cssToRgb(css){if(css[0]==='#'){const n=parseInt(css.slice(1),16);return[(n>>16)&255,(n>>8)&255,n&255]}_cc=_cc||document.createElement('canvas').getContext('2d',{willReadFrequently:true});_cc.fillStyle=css;_cc.fillRect(0,0,1,1);const p=_cc.getImageData(0,0,1,1).data;return[p[0],p[1],p[2]]}
+// materials
+const M=(h,s,l,o={})=>Object.assign({h,s,l},o);
+// eye helper: returns parts (sclera/iris/pupil/glint)
+function eye(x,y,o={}){const sz=o.sz||2;const parts=[];
+  if(sz>=3)parts.push({t:'e',a:[x,y,1.6,1.6],m:M(o.h||40,o.s??20,o.l??78),flat:true,tones:1,ink:false});
+  else parts.push({t:'px',a:[[x-0.5|0,y-0.5|0,2],[x+0.5|0,y-0.5|0,2],[x-0.5|0,y+0.5|0,2],[x+0.5|0,y+0.5|0,2]].slice(0,sz===2?4:1),m:M(o.h||40,o.s??20,o.l??78),ink:false});
+  parts.push({t:'px',a:[[o.px??(x|0),o.py??(y|0),2]],m:M(0,0,o.pl??6),ink:false});
+  if(o.glint!==false)parts.push({t:'px',a:[[(x|0)-1,(y|0)-1,2]],m:M(0,0,96),ink:false});
+  return parts}
+
+// ---------- 96x64 part kits ----------
+// All coordinates are in 96x64 space, creatures face right, light from the upper-left.
+// A kit returns an ordered parts array (back to front) that a species can extend with props.
+const W2=96,H2=64;
+const DEF=(o,d)=>Object.assign({},d,o);
+// fish eye: sclera, iris, slit pupil, glint. r = sclera radius (2..5)
+function fishEye(x,y,r,o={}){const p=[];
+  if(o.hollow){p.push({t:'e',a:[x,y,r,r],m:M(0,0,8),flat:true,tones:1,ink:false});if(o.light!==false)p.push({t:'px',a:[[Math.round(x),Math.round(y),3],[Math.round(x)+1,Math.round(y),3]],m:M(o.h??190,o.s??60,o.l??72),ink:false});return p}
+  p.push({t:'e',a:[x,y,r,r],m:M(o.sh??45,o.ss??15,o.sl??80,{step:6}),ink:o.ink??true});
+  if(r>=2.5)p.push({t:'e',a:[x+r*0.15,y,r*0.62,r*0.68],m:M(o.h??40,o.s??35,o.l??42,{step:8}),ink:false});
+  const px=Math.round(x+r*0.25),py=Math.round(y);
+  p.push({t:'px',a:[[px,py,0],[px,py-1,0],[px,py+1,0]].slice(0,r>=3?3:1),m:M(0,0,6),ink:false});
+  if(o.glint!==false)p.push({t:'px',a:[[Math.round(x-r*0.45),Math.round(y-r*0.45),4]],m:M(0,0,97),ink:false});
+  return p}
+function mouth(x0,y0,x1,y1,mat){return {t:'line',a:[x0,y0,x1,y1],m:mat||M(0,0,12),tone:0,ink:false}}
+// tail fin attached at (x,cy): type fork | fan | round | ragged | whip
+function tail(x,cy,o={}){const len=o.len||14,sp=o.sp||10,m=o.m||M(200,10,36);const ty=o.type||'fork';
+  if(ty==='fork')return[{t:'poly',a:[[x-len,cy-sp],[x+2,cy-4],[x+2,cy+4],[x-len,cy+sp],[x-len*0.45,cy]],m,ink:true,tex:o.tex||'rays',holes:o.holes}];
+  if(ty==='fan')return[{t:'poly',a:[[x-len,cy-sp],[x-len*0.6,cy-sp*0.8],[x+2,cy-4],[x+2,cy+4],[x-len*0.6,cy+sp*0.8],[x-len,cy+sp],[x-len*0.9,cy]],m,ink:true,tex:o.tex||'rays',holes:o.holes}];
+  if(ty==='round')return[{t:'e',a:[x-len*0.5,cy,len*0.55,sp],m,ink:true,tex:o.tex||'rays',holes:o.holes}];
+  if(ty==='ragged')return[{t:'poly',a:[[x-len,cy-sp],[x-len*0.7,cy-sp*0.5],[x-len*0.9,cy-sp*0.2],[x+2,cy-4],[x+2,cy+4],[x-len*0.85,cy+sp*0.3],[x-len*0.6,cy+sp*0.6],[x-len,cy+sp],[x-len*0.4,cy]],m,ink:true,tex:'rays',holes:o.holes||[[x-len*0.6,cy-sp*0.3,1.6],[x-len*0.5,cy+sp*0.4,1.3]]}];
+  if(ty==='whip')return[{t:'curve',a:[x,cy,x-len*0.6,cy+sp*0.4,x-len,cy+sp],th:[2,0.6],m}];
+  return[]}
+// dorsal fin on the back between x0..x1, base at yb, height h: soft | spiny | sail | ragged | low
+function dorsal(x0,x1,yb,h,o={}){const m=o.m||M(200,10,34);const ty=o.type||'soft';const w=x1-x0;
+  if(ty==='soft')return[{t:'poly',a:[[x0,yb+2],[x0+w*0.25,yb-h],[x1-w*0.15,yb-h*0.55],[x1,yb+2]],m,ink:true,tex:'rays',holes:o.holes}];
+  if(ty==='spiny'){const pts=[[x0,yb+2]];const n=o.n||5;for(let i=0;i<n;i++){const t=i/(n-1);pts.push([x0+w*t,yb-h*(1-t*0.5)]);if(i<n-1)pts.push([x0+w*(t+0.5/(n-1)),yb-h*0.35])}pts.push([x1,yb+2]);return[{t:'poly',a:pts,m,ink:true,tex:'rays'}]}
+  if(ty==='sail')return[{t:'poly',a:[[x0,yb+2],[x0+w*0.15,yb-h],[x0+w*0.55,yb-h*0.9],[x1,yb-h*0.3],[x1,yb+2]],m,ink:true,tex:'rays',holes:o.holes}];
+  if(ty==='ragged')return[{t:'poly',a:[[x0,yb+2],[x0+w*0.2,yb-h],[x0+w*0.35,yb-h*0.5],[x0+w*0.5,yb-h*0.9],[x0+w*0.7,yb-h*0.4],[x0+w*0.85,yb-h*0.6],[x1,yb+2]],m,ink:true,tex:'rays',holes:o.holes||[[x0+w*0.4,yb-h*0.3,1.4]]}];
+  if(ty==='low')return[{t:'poly',a:[[x0,yb+2],[x0+w*0.3,yb-h],[x1-w*0.2,yb-h],[x1,yb+2]],m,ink:true,tex:'rays'}];
+  return[]}
+function pectoral(x,y,o={}){const s=o.s||1,m=o.m||M(200,10,34);return[{t:'poly',a:[[x,y],[x+9*s,y+8*s],[x+13*s,y+1*s]],m,ink:true,tex:'rays',holes:o.holes}]}
+function anal(x,y,o={}){const s=o.s||1,m=o.m||M(200,10,32);return[{t:'poly',a:[[x,y],[x+6*s,y+6*s],[x+12*s,y]],m,ink:true,tex:'rays'}]}
+// generic fish body. o: cx,cy,rx,ry,rot,m,tex, back(bool), belly(bool), bellyM, gill, headM
+function fishBody(o){const {cx,cy,rx,ry}=o;const m=o.m||M(200,14,44,{step:7});const p=[];
+  p.push({t:'e',a:[cx,cy,rx,ry],m,rot:o.rot||0,tex:o.tex||'scales',rim:true,spec:o.spec});
+  if(o.back!==false)p.push({t:'e',a:[cx-rx*0.1,cy-ry*0.5,rx*0.82,ry*0.42],m:o.backM||M(m.h,m.s+4,Math.max(8,m.l-14)),rot:o.rot||0,ink:false,lift:-0.1,tex:o.tex||'scales'});
+  if(o.belly!==false)p.push({t:'e',a:[cx-rx*0.05,cy+ry*0.5,rx*0.7,ry*0.38],m:o.bellyM||M(m.h,Math.max(0,m.s-6),Math.min(92,m.l+16)),rot:o.rot||0,ink:false,lift:0.1});
+  if(o.gill!==false)p.push({t:'curve',a:[cx+rx*0.52,cy-ry*0.6,cx+rx*0.42,cy,cx+rx*0.52,cy+ry*0.6],th:[0.7,0.7],m:M(m.h,m.s,Math.max(6,m.l-22)),ink:false});
+  return p}
+// crab: carapace, legs, two claws (pose: 'up' | 'down' | 'low' | 'point')
+function crabKit(o){const cx=o.cx||48,cy=o.cy||36,rx=o.rx||22,ry=o.ry||12;const m=o.m||M(200,10,40,{step:7});const lm=o.legM||M(m.h,m.s,m.l-10);const p=[];
+  const legs=[[-14,8,-22,20],[-8,10,-14,22],[8,10,14,22],[14,8,22,20]];legs.forEach(([ax,ay,bx,by])=>{p.push({t:'line',a:[cx+ax,cy+ay,cx+bx,cy+by],m:lm,tone:1,w:2});p.push({t:'line',a:[cx+bx,cy+by,cx+bx+(bx>0?2:-2),cy+by+4],m:lm,tone:0})});
+  p.push({t:'e',a:[cx,cy,rx,ry],m,tex:o.tex||'grain',rim:true});
+  p.push({t:'poly',a:[[cx-rx*0.8,cy-2],[cx+rx*0.8,cy-2],[cx+rx*0.65,cy-ry*0.75],[cx-rx*0.65,cy-ry*0.75]],m:M(m.h,m.s,m.l+8),ink:false,lift:0.1});
+  const pose=o.pose||'up';const cm=o.clawM||M(m.h,m.s,m.l+4,{step:7});
+  const claw=(sx,dir)=>{ // sx: shoulder x, dir -1 left / +1 right
+    if(pose==='up'){p.push({t:'curve',a:[sx,cy-2,sx+dir*10,cy-10,sx+dir*14,cy-20],th:[3,2],m:cm});p.push({t:'poly',a:[[sx+dir*11,cy-21],[sx+dir*20,cy-24],[sx+dir*19,cy-16],[sx+dir*12,cy-15]],m:cm,ink:true});p.push({t:'px',a:[[Math.round(sx+dir*17),cy-20,0]],m:M(m.h,m.s,m.l-16)})}
+    else if(pose==='low'){p.push({t:'e',a:[sx+dir*8,cy+4,7,4.5],m:cm,rot:dir*0.2,rim:true});p.push({t:'poly',a:[[sx+dir*13,cy+1],[sx+dir*22,cy+3],[sx+dir*20,cy+8],[sx+dir*13,cy+8]],m:cm,ink:true})}
+    else if(pose==='point'){p.push({t:'curve',a:[sx,cy-2,sx+dir*14,cy-6,sx+dir*22,cy-18],th:[3,1.6],m:cm});p.push({t:'poly',a:[[sx+dir*19,cy-19],[sx+dir*27,cy-23],[sx+dir*26,cy-15],[sx+dir*20,cy-14]],m:cm,ink:true})}
+    else {p.push({t:'e',a:[sx+dir*10,cy-4,7,5],m:cm,rot:-dir*0.5,rim:true});p.push({t:'poly',a:[[sx+dir*14,cy-10],[sx+dir*24,cy-8],[sx+dir*22,cy-2],[sx+dir*14,cy-2]],m:cm,ink:true})}};
+  claw(cx-rx*0.75,-1);claw(cx+rx*0.75,1);
+  if(o.eyes!==false){[cx-5,cx+5].forEach(ex=>{p.push({t:'line',a:[ex,cy-ry+2,ex,cy-ry-4],m:M(m.h,m.s,m.l-8),tone:1});p.push({t:'px',a:[[ex,cy-ry-5,0],[ex,cy-ry-6,0]],m:M(0,0,8)});p.push({t:'px',a:[[ex-1,cy-ry-6,4]],m:M(0,0,90),ink:false})})}
+  return p}
+// shrimp: arched body with segments, legs, antennae, rostrum
+function shrimpKit(o){const m=o.m||M(60,30,44,{step:7});const x0=o.x0||24,x1=o.x1||72,cy=o.cy||32;const p=[];const lm=M(m.h,m.s,m.l-10);
+  for(let i=0;i<5;i++){const x=x0+8+i*9;p.push({t:'line',a:[x,cy+8,x-3+i,cy+20],m:lm,tone:1,w:1})}
+  p.push(...tail(x0+2,cy+2,{type:'fan',len:14,sp:9,m:M(m.h,m.s,m.l-4)}));
+  p.push({t:'curve',a:[x0,cy+2,(x0+x1)/2,cy-12,x1,cy],th:[4.5,6.5],m,tex:o.tex||'bands',rim:true});
+  for(let i=1;i<6;i++){const t=i/6;const x=x0+(x1-x0)*t,y=cy+2+(-14)*4*t*(1-t)-2;p.push({t:'px',a:[[Math.round(x),Math.round(y)-4,0],[Math.round(x),Math.round(y)-3,0]],m:M(m.h,m.s,m.l-18)})}
+  p.push({t:'e',a:[x1+4,cy+2,9,6.5],m,rim:true});
+  p.push({t:'poly',a:[[x1+10,cy-2],[x1+24,cy-8],[x1+22,cy+2]],m:M(m.h,m.s,m.l-4),ink:true});
+  p.push({t:'line',a:[x1+8,cy-4,x1+24,cy-22],m:M(m.h,m.s,m.l-6),tone:1},{t:'line',a:[x1+10,cy-2,x1+26,cy-18],m:M(m.h,m.s,m.l-6),tone:1});
+  p.push({t:'line',a:[x1+2,cy+7,x1+10,cy+16],m:lm,tone:1},{t:'line',a:[x1+6,cy+7,x1+14,cy+14],m:lm,tone:1});
+  p.push(...fishEye(x1+5,cy,2,{sh:0,ss:0,sl:10,glint:true}));
+  return p}
+// turtle: shell, rim, legs, head, beak, heavy lid
+function turtleKit(o){const cx=o.cx||42,cy=o.cy||34,rx=o.rx||28,ry=o.ry||15;const m=o.m||M(95,16,30,{step:7});const sk=o.skinM||M(85,16,34,{step:7});const p=[];
+  p.push({t:'e',a:[cx-rx*0.75,cy+ry*0.65,8,4.5],m:sk,rot:0.5,rim:true},{t:'e',a:[cx+rx*0.85,cy+ry*0.75,8,4.5],m:sk,rot:-0.4,rim:true});
+  p.push({t:'px',a:[[cx-rx*0.75-8|0,cy+ry*0.65+4|0,0],[cx-rx*0.75-6|0,cy+ry*0.65+5|0,0],[cx+rx*0.85+6|0,cy+ry*0.75+5|0,0],[cx+rx*0.85+8|0,cy+ry*0.75+4|0,0]],m:M(0,0,10)});
+  p.push({t:'e',a:[cx,cy,rx,ry],m,tex:o.tex||'plates',rim:true});
+  p.push({t:'poly',a:[[cx-rx,cy+2],[cx+rx,cy+2],[cx+rx*0.95,cy+ry*0.55],[cx-rx*0.95,cy+ry*0.55]],m:M(m.h,m.s-4,m.l-6),tex:'grain',ink:true});
+  p.push({t:'e',a:[cx+rx+8,cy+4,12,7.5],m:sk,tex:'grain',rim:true});
+  p.push({t:'poly',a:[[cx+rx+14,cy],[cx+rx+24,cy+4],[cx+rx+22,cy+10],[cx+rx+12,cy+10]],m:M(sk.h,sk.s,sk.l-4),ink:true});
+  p.push(...fishEye(cx+rx+11,cy+1,2.6,{h:50,s:30,l:45}));
+  p.push({t:'poly',a:[[cx+rx+7,cy-2],[cx+rx+15,cy-2],[cx+rx+15,cy],[cx+rx+7,cy]],m:M(sk.h,sk.s,sk.l-14),ink:false});
+  return p}
+// jellyfish: bell with rim, tentacles
+function jellyKit(o){const cx=o.cx||48,cy=o.cy||24,rx=o.rx||24,ry=o.ry||17;const m=o.m||M(285,38,40,{step:7});const tm=o.tentM||M(m.h,m.s,m.l+10);const p=[];
+  const n=o.n||5;for(let i=0;i<n;i++){const t=(i+0.5)/n;const x=cx-rx*0.7+rx*1.4*t;p.push({t:'curve',a:[x,cy+ry*0.6,x+(t-0.5)*10,cy+ry+14,x+(t-0.5)*22,H2-1],th:[1.6,0.6],m:tm,ink:false,fade:o.fadeT||[cy+ry+6,H2]})}
+  p.push({t:'e',a:[cx,cy,rx,ry],m,tex:o.tex||'grain',rim:true,holes:o.holes});
+  p.push({t:'poly',a:[[cx-rx,cy+ry*0.35],[cx+rx,cy+ry*0.35],[cx+rx*0.92,cy+ry*0.8],[cx-rx*0.92,cy+ry*0.8]],m:M(m.h,m.s-6,m.l-8),ink:true});
+  for(let i=0;i<6;i++){const x=cx-rx*0.8+rx*1.6*(i+0.5)/6;p.push({t:'px',a:[[Math.round(x),Math.round(cy+ry*0.75),3]],m:M(m.h,m.s+10,m.l+28),ink:false})}
+  return p}
+// eel / serpent: two S curves and a head
+function eelKit(o){const m=o.m||M(265,22,17,{step:6});const y0=o.y0||48,y1=o.y1||12,y2=o.y2||40,hy=o.hy||30;const th=o.th||[2.4,7];const p=[];
+  p.push({t:'curve',a:[6,y0,28,y1,52,hy+2],th:[th[0],th[1]],m,tex:o.tex||'ridges'});
+  p.push({t:'curve',a:[52,hy+2,72,y2+16,84,hy],th:[th[1],th[1]*0.85],m,tex:o.tex||'ridges'});
+  p.push({t:'e',a:[84,hy-2,11,6.5],m:M(m.h,m.s,m.l+2,{step:6}),rot:-0.2,rim:true});
+  p.push(mouth(80,hy+1,95,hy-1,M(m.h,m.s,Math.max(4,m.l-10))));
+  return p}
+// octopus: mantle + arms
+function octoKit(o){const cx=o.cx||58,cy=o.cy||26;const m=o.m||M(258,32,32,{step:7});const am=M(m.h,m.s,m.l-4,{step:7});const p=[];
+  const arms=[[cx-8,cy+14,cx-30,cy+18,cx-46,cy+6],[cx-6,cy+18,cx-28,cy+30,cx-46,cy+26],[cx-2,cy+20,cx-12,cy+36,cx-30,cy+38],[cx+6,cy+20,cx+14,cy+36,cx+34,cy+36],[cx+10,cy+16,cx+28,cy+26,cx+38,cy+18],[cx-12,cy+8,cx-30,cy-4,cx-44,cy-12]];
+  arms.forEach(a=>p.push({t:'curve',a,th:[4.4,1.2],m:am}));
+  arms.forEach(a=>{for(let i=1;i<4;i++){const t=i/4;const x=(1-t)*(1-t)*a[0]+2*(1-t)*t*a[2]+t*t*a[4],y=(1-t)*(1-t)*a[1]+2*(1-t)*t*a[3]+t*t*a[5];p.push({t:'px',a:[[Math.round(x),Math.round(y)+1,3]],m:M(m.h,m.s-10,m.l+20),ink:false})}});
+  p.push({t:'e',a:[cx,cy,20,18],m,tex:o.tex||'spots',rim:true});
+  p.push({t:'e',a:[cx,cy-8,14,8],m:M(m.h,m.s-4,m.l+6),lift:0.15,ink:false});
+  p.push(...fishEye(cx+13,cy+2,3.4,{h:45,s:50,l:60}));
+  return p}
+// ray: diamond wings, tail, back
+function rayKit(o){const cx=o.cx||52,cy=o.cy||30;const m=o.m||M(215,18,36,{step:7});const p=[];
+  p.push({t:'curve',a:[cx-26,cy+2,cx-42,cy+10,cx-50,cy+26],th:[2.4,0.6],m:M(m.h,m.s,m.l-6)});
+  p.push({t:'poly',a:[[cx-28,cy],[cx-4,cy-26],[cx+38,cy],[cx-4,cy+24]],m,tex:o.tex||'grain',rim:true});
+  p.push({t:'poly',a:[[cx-22,cy],[cx-4,cy-20],[cx+18,cy],[cx-4,cy+18]],m:M(m.h,m.s-2,m.l+4),ink:false,lift:0.05});
+  p.push({t:'line',a:[cx-4,cy-24,cx-4,cy+22],m:M(m.h,m.s,m.l-10),tone:0,ink:false});
+  p.push({t:'px',a:[[cx+10,cy-6,1],[cx+10,cy-5,0],[cx+14,cy-6,1],[cx+14,cy-5,0]],m:M(0,0,10)});
+  return p}
+// starfish: 5 arms with bumps
+function starKit(o){const cx=o.cx||48,cy=o.cy||32;const m=o.m||M(270,30,40,{step:7});const R=o.R||28,r=o.r||7;const p=[];
+  for(let i=0;i<5;i++){const a=-Math.PI/2+i*2*Math.PI/5,a1=a-0.35,a2=a+0.35;p.push({t:'poly',a:[[cx+Math.cos(a1)*r,cy+Math.sin(a1)*r],[cx+Math.cos(a)*R,cy+Math.sin(a)*R],[cx+Math.cos(a2)*r,cy+Math.sin(a2)*r]],m,ink:true,tex:o.tex||'grain'})}
+  p.push({t:'e',a:[cx,cy,r+2,r+1],m:M(m.h,m.s,m.l+4,{step:7}),rim:true,tex:o.tex||'spots'});
+  for(let i=0;i<5;i++){const a=-Math.PI/2+i*2*Math.PI/5;for(let k=1;k<=2;k++){const d=r+4+k*7;p.push({t:'px',a:[[Math.round(cx+Math.cos(a)*d),Math.round(cy+Math.sin(a)*d),0]],m:M(m.h,m.s,m.l-14)})}}
+  return p}
+// seahorse: curled body, head, snout, tail
+function seahorseKit(o){const m=o.m||M(262,24,34,{step:7});const p=[];
+  p.push({t:'curve',a:[54,56,44,64,38,50],th:[3.2,2],m:M(m.h,m.s,m.l-4),tex:'ridges'});
+  p.push({t:'curve',a:[58,20,70,40,54,56],th:[7.6,3.6],m,tex:'ridges',rim:true});
+  for(let i=0;i<5;i++){const y=26+i*6;p.push({t:'line',a:[54+i*1.5,y,66+i*0.8,y],m:M(m.h,m.s,m.l+12),tone:3,ink:false})}
+  p.push({t:'e',a:[60,18,8.4,6.8],m:M(m.h,m.s,m.l+2,{step:7}),rim:true});
+  p.push({t:'e',a:[72,20,8,3],m:M(m.h,m.s,m.l-2),rot:0.15});
+  p.push(...fishEye(63,17,2.6,{h:190,s:60,l:60}));
+  return p}
+// a complete generic fish in one call; species add props on top
+function simpleFish(o){const cx=o.cx??50,cy=o.cy??34,rx=o.rx??26,ry=o.ry??12;const m=o.m||M(200,14,44,{step:7});const fm=o.finM||M(m.h,m.s,Math.max(8,m.l-10));const p=[];
+  p.push(...tail(cx-rx+3,cy,DEF(o.tail,{len:14,sp:11,m:fm})));
+  if(o.dorsal!==false)p.push(...dorsal(cx-rx*0.45,cx+rx*0.45,cy-ry+1,o.dh??10,DEF(o.dorsal,{m:fm})));
+  if(o.anal!==false)p.push(...anal(cx-rx*0.2,cy+ry-2,DEF(o.anal,{m:fm})));
+  p.push(...fishBody(DEF(o.body,{cx,cy,rx,ry,m,tex:o.tex})));
+  if(o.pectoral!==false)p.push(...pectoral(cx+rx*0.25,cy+ry*0.2,DEF(o.pectoral,{m:fm})));
+  if(o.head)p.push({t:'e',a:[cx+rx*0.7,cy,rx*0.38,ry*0.85],m:o.head.m||M(m.h,m.s,m.l+4,{step:7}),rim:true});
+  if(o.mouth!==false)p.push(mouth(cx+rx*0.78,cy+ry*0.3,cx+rx+1,cy+ry*0.15,M(m.h,m.s,Math.max(4,m.l-24))));
+  if(o.eye!==false)p.push(...fishEye(cx+rx*0.72,cy-ry*0.25,o.eyeR??3,o.eye||{}));
+  return p}
+const bubbles=(x,y,n=3,m)=>Array.from({length:n},(_,i)=>({t:'px',a:[[x+i*2,y-i*5,3]],m:m||M(200,20,72),ink:false}));
+const dots=(pts,m,tone=0)=>({t:'px',a:pts.map(([x,y])=>[x,y,tone]),m});
+
+// species at 96x64 (tk:2 keeps texture patterns at the coarse size). Facing right.
+const S96=(parts,extra)=>Object.assign({w:96,h:64,tk:2,parts},extra||{});
+const FISH3={};
+// ================= 안개 호수 =================
+Object.assign(FISH3,{
+ // 이끼송어: moss grows on its back from the rocks it feeds on
+ '0-0':S96([
+   ...simpleFish({cx:50,cy:34,rx:26,ry:11,m:M(195,18,42,{step:7}),tail:{type:'fork'},dorsal:{type:'soft'},eye:{h:40,s:25,l:45}}),
+   dots([[32,30],[40,32],[48,30],[56,32],[64,30],[36,38],[44,38],[52,38],[60,36]],M(195,16,28)),
+   {t:'e',a:[44,24,10,3.4],m:M(100,35,34),tex:'grain',rim:true},{t:'e',a:[60,24,6,2.6],m:M(100,32,32),tex:'grain',rim:true},
+   {t:'px',a:[[42,20,3],[62,21,3],[50,21,3]],m:M(100,40,48)},
+ ]),
+ // 안개피라미: a sliver of fish whose tail dissolves into mist
+ '0-1':S96([
+   {t:'line',a:[4,24,16,28],m:M(205,10,62),tone:3,fade:[16,2],ink:false},{t:'line',a:[2,40,14,36],m:M(205,10,62),tone:3,fade:[14,0],ink:false},
+   ...tail(26,32,{type:'fork',len:16,sp:12,m:M(205,12,42)}).map(q=>Object.assign(q,{fade:[22,8]})),
+   ...dorsal(38,60,24,9,{type:'ragged',m:M(205,12,40)}),
+   ...fishBody({cx:54,cy:33,rx:26,ry:8.5,m:M(205,14,50,{step:7}),tex:'scales',spec:[[40,27,16]]}).map(q=>Object.assign(q,{fade:[30,22]})),
+   ...pectoral(56,36,{m:M(205,12,42)}),
+   mouth(76,36,86,34,M(205,8,30)),
+   ...fishEye(72,30,2.8,{sh:200,ss:10,sl:88,h:200,s:10,l:60,glint:false}),
+ ],{glow:[[72,30,5,'hsl(205 30% 80%)',0.35]]}),
+ // 갈대새우: striped like a reed stem, lives among the roots
+ '0-2':S96([
+   {t:'line',a:[6,48,6,62],m:M(90,25,30),tone:1,w:2},{t:'line',a:[12,44,12,62],m:M(90,25,30),tone:1,w:2},{t:'line',a:[88,50,88,62],m:M(90,25,30),tone:1},
+   ...shrimpKit({m:M(62,30,44,{step:7}),x0:22,x1:66,cy:30,tex:'bands'}),
+ ]),
+ // 안개게
+ '0-3':S96([
+   ...crabKit({cx:48,cy:36,rx:22,ry:12,m:M(200,10,40,{step:7}),pose:'up'}),
+   dots([[36,30],[46,28],[56,30],[42,38],[52,38]],M(200,8,28)),
+   {t:'px',a:[[26,22,3],[40,24,3]],m:M(200,20,72),ink:false},
+ ]),
+ // 은빛잉어: mirror scales; said to have escaped the old castle's pond
+ '0-4':S96([
+   ...simpleFish({cx:48,cy:34,rx:27,ry:14,m:M(210,10,54,{step:9}),finM:M(210,10,40),tail:{type:'fan',len:16,sp:13},dorsal:{type:'sail'},dh:12,body:{spec:[[36,24,18],[46,28,8]],backM:M(210,12,36)},eye:{h:40,s:30,l:50}}),
+   {t:'px',a:[[38,26,4],[52,24,4],[64,30,4],[42,34,4],[58,36,4],[32,32,4]],m:M(210,10,98),ink:false},
+   dots([[37,28],[51,26],[63,32],[41,36],[57,38]],M(210,12,30)),
+   {t:'line',a:[74,40,80,46],m:M(210,8,38),tone:1,ink:false},                                                      // barbel
+ ]),
+ // 유령잉어: translucent; lantern light shows the bones
+ '0-5':S96([
+   ...simpleFish({cx:50,cy:34,rx:26,ry:13,m:M(190,16,52,{step:6}),finM:M(190,15,46),tex:'grain',tail:{type:'fork'},dorsal:{type:'soft'},body:{holes:[[40,30,2.4],[58,36,2],[48,40,1.8]],belly:false,back:false},eye:{sh:190,ss:30,sl:92,h:190,s:30,l:80,glint:false}}),
+   {t:'line',a:[28,33,68,33],m:M(190,10,80),tone:3,ink:false},
+   ...[34,42,50,58].map(x=>({t:'line',a:[x,26,x,40],m:M(190,10,76),tone:3,ink:false})),
+   {t:'e',a:[72,33,6,4],m:M(190,10,70),ink:false,lift:0.1},                                                        // skull through the skin
+ ],{glow:[[50,34,20,'hsl(190 30% 70%)',0.1]]}),
+ // 늪거북
+ '0-6':S96([
+   ...turtleKit({cx:40,cy:36,rx:28,ry:14,m:M(95,16,27,{step:7}),skinM:M(85,16,34,{step:7})}),
+   {t:'line',a:[22,44,20,56],m:M(100,25,26),tone:1},{t:'line',a:[54,44,56,58],m:M(100,25,26),tone:1},
+   {t:'e',a:[28,28,8,4],m:M(100,32,32),tex:'grain',lift:0.05,rim:true},{t:'e',a:[54,26,7,3.5],m:M(100,30,30),tex:'grain',rim:true},
+   {t:'poly',a:[[34,24],[34,8],[38,4],[44,5],[48,12],[48,24]],m:M(30,8,36,{step:6}),tex:'cracks',rim:true},
+   {t:'poly',a:[[34,8],[38,4],[44,5],[48,12],[46,14],[42,10],[36,12]],m:M(30,8,44),ink:false},
+   {t:'px',a:[[43,14,0],[43,15,0],[43,16,0],[36,18,0],[37,18,0]],m:M(30,8,18)},
+   {t:'px',a:[[39,13,3],[39,12,3]],m:M(38,70,62),ink:false},
+   {t:'px',a:[[62,30,3],[58,34,3],[66,34,3],[60,40,3],[33,34,3]],m:M(60,10,62)},
+ ],{tint:[[39,13,8,38,60,0.45]]}),
+ // 검은 메기: the thing that cries under the dock at night
+ '0-7':S96([
+   ...simpleFish({cx:48,cy:36,rx:28,ry:12,m:M(250,12,19,{step:6}),finM:M(250,10,15),tex:'grain',tail:{type:'fan',len:14,sp:12},dorsal:{type:'low'},dh:7,eye:false,mouth:false,head:{m:M(250,12,20,{step:6})}}),
+   {t:'e',a:[74,36,13,9],m:M(250,12,20,{step:6}),rim:true},                                                        // broad flat head
+   mouth(70,42,92,40,M(250,8,6)),{t:'px',a:[[72,44,1],[80,44,1],[88,43,1]],m:M(250,8,30)},
+   {t:'line',a:[88,34,94,18],m:M(250,10,30),tone:2,ink:false},{t:'line',a:[90,40,94,56],m:M(250,10,30),tone:2,ink:false},{t:'line',a:[84,32,78,16],m:M(250,10,28),tone:2,ink:false},
+   ...fishEye(70,31,1.8,{sh:40,ss:20,sl:62,glint:false}),...fishEye(82,31,1.8,{sh:40,ss:20,sl:62,glint:false}),
+   {t:'line',a:[82,33,82,38],m:M(200,30,66),tone:3,ink:false},{t:'line',a:[70,33,70,37],m:M(200,30,66),tone:3,ink:false},   // tear tracks
+ ]),
+ // 달그림자 뱀장어
+ '0-8':S96([
+   {t:'poly',a:[[16,32],[22,12],[28,28],[36,8],[42,24],[50,10],[54,26]],m:M(265,20,18),fade:[26,8],ink:true,tex:'rays'},
+   ...eelKit({m:M(265,22,16,{step:6}),y0:48,y1:12,y2:44,hy:30,th:[2.4,7]}),
+   {t:'poly',a:[[56,44],[66,60],[72,54]],m:M(265,18,14),ink:true,tex:'rays'},
+   {t:'poly',a:[[28,38],[20,54],[34,48]],m:M(265,18,14),ink:true,tex:'rays',fade:[28,18]},
+   {t:'px',a:[[78,22,3],[77,23,3],[76,24,3],[76,25,3],[77,26,3],[78,27,3],[79,21,2],[79,28,2]],m:M(50,30,86),ink:false},
+   {t:'px',a:[[92,32,2],[88,32,2]],m:M(50,20,80),ink:false},
+   ...fishEye(87,27,2.6,{sh:50,ss:20,sl:92,h:50,s:20,l:88,glint:false}),
+   {t:'px',a:[[32,18,3],[44,16,3],[60,42,3],[72,50,3]],m:M(265,30,40)},
+ ],{glow:[[88,27,8,'hsl(50 40% 80%)',0.45]],tint:[[88,27,12,50,30,0.3]]}),
+ // 익사자의 반지
+ '0-9':S96([
+   ...tail(22,32,{type:'ragged',len:16,sp:14,m:M(185,8,26)}),
+   {t:'curve',a:[12,20,18,36,10,50],th:[0.8,0.8],m:M(120,20,24),ink:false},
+   ...dorsal(32,60,20,12,{type:'ragged',m:M(185,8,28)}),
+   ...fishBody({cx:48,cy:34,rx:26,ry:15,m:M(185,12,33,{step:7}),tex:'grain',bellyM:M(170,10,42),gill:false}),
+   ...[32,40,48,56].map(x=>({t:'line',a:[x,24,x+2,44],m:M(60,12,58),tone:3,ink:false})),
+   ...pectoral(50,42,{m:M(185,8,28),holes:[[58,48,1.4]]}),
+   {t:'e',a:[70,32,12,9],m:M(185,10,35,{step:7}),rim:true},
+   mouth(72,38,84,36,M(185,10,16)),
+   ...fishEye(74,29,4,{sh:60,ss:8,sl:70,h:60,s:8,l:62,glint:false}),
+   {t:'e',a:[66,22,5,5],m:M(45,65,52,{step:10}),holes:[[66,22,2.8]],ink:true},
+   {t:'px',a:[[63,19,4],[64,18,4]],m:M(45,60,88),ink:false},
+   ...bubbles(88,30,3),
+ ]),
+ // 호수의 주인: the oldest carp; a lily pad grows on its back
+ '0-10':S96([
+   ...simpleFish({cx:48,cy:34,rx:29,ry:16,m:M(85,18,34,{step:7}),finM:M(85,16,28),tail:{type:'fan',len:18,sp:16,holes:[[8,26,1.6]]},dorsal:{type:'ragged',holes:[[40,14,1.8]]},dh:16,eyeR:4,eye:{h:45,s:60,l:50,sh:45,ss:30,sl:78}}),
+   dots([[34,26],[36,28],[38,30],[54,42],[56,44],[24,34],[26,36]],M(85,14,16)),                                  // old scars
+   {t:'e',a:[42,20,8,3.2],m:M(100,35,32),tex:'grain',rim:true},
+   {t:'e',a:[58,18,10,4.4],m:M(110,40,30),ink:true},{t:'px',a:[[60,15,4],[61,15,4],[60,16,4]],m:M(330,40,72),ink:false},
+   {t:'line',a:[82,40,90,50],m:M(85,14,34),tone:1,ink:false},{t:'line',a:[74,42,78,52],m:M(85,14,34),tone:1,ink:false},
+ ],{glow:[[69,30,6,'hsl(45 50% 60%)',0.3]]}),
+ // 안개의 심장: dawn mist curdled into a beating heart
+ '0-11':S96([
+   {t:'curve',a:[40,40,20,52,6,40],th:[5,1.6],m:M(210,20,70),fade:[28,4]},{t:'curve',a:[44,20,24,12,10,20],th:[4,1.2],m:M(210,20,72),fade:[28,6]},
+   {t:'e',a:[40,26,14,13],m:M(212,22,68,{step:6}),tex:'grain',rim:true},{t:'e',a:[58,26,14,13],m:M(212,22,68,{step:6}),tex:'grain',rim:true},
+   {t:'poly',a:[[27,30],[71,30],[49,56]],m:M(212,22,66,{step:6}),tex:'grain',ink:false},
+   {t:'curve',a:[66,18,78,10,86,16],th:[3.2,1],m:M(210,18,76),fade:[70,88],ink:false},{t:'curve',a:[62,40,76,48,86,44],th:[3.2,1],m:M(210,18,76),fade:[68,88],ink:false},
+   {t:'line',a:[44,38,48,44],m:M(38,60,78),tone:3,ink:false},{t:'line',a:[56,38,52,44],m:M(38,60,78),tone:3,ink:false},
+   {t:'e',a:[50,32,6.8,8],m:M(38,85,74,{step:9}),lift:0.1},{t:'px',a:[[48,28,4],[49,28,4],[48,29,4],[50,30,4]],m:M(40,80,95),ink:false},
+   ...fishEye(63,25,2.4,{sh:40,ss:60,sl:92,glint:false}),
+ ],{outline:'#4a2e5e',glow:[[50,32,18,'hsl(40 70% 70%)',0.4]],tint:[[50,32,16,38,70,0.4]],spark:[[18,12],[86,52],[26,56]]}),
+});
+// ================= 요정의 샘 =================
+Object.assign(FISH3,{
+ // 꽃잎송사리: fins split like petals
+ '1-0':S96([
+   ...simpleFish({cx:52,cy:34,rx:22,ry:8,m:M(90,20,52,{step:6}),finM:M(335,35,58),tail:{type:'fan',len:16,sp:13},dorsal:{type:'sail'},dh:12,anal:{s:1.2},pectoral:{s:1.1},eye:{h:40,s:20,l:50}}),
+   {t:'poly',a:[[16,18],[24,28],[12,30]],m:M(335,30,62),ink:true,tex:'rays'},{t:'poly',a:[[16,50],[24,40],[12,38]],m:M(335,30,62),ink:true,tex:'rays'},
+   {t:'px',a:[[22,22,4],[20,46,4],[50,18,4],[18,34,4]],m:M(335,40,88),ink:false},
+ ]),
+ // 이슬구피: one drop of dew inside, never dries
+ '1-1':S96([
+   ...simpleFish({cx:52,cy:34,rx:20,ry:9,m:M(45,28,50,{step:7}),finM:M(45,25,44),tail:{type:'fork',len:14,sp:10},dorsal:{type:'soft'},eye:{h:40,s:20,l:45}}),
+   {t:'e',a:[48,34,6,7],m:M(195,45,68,{step:6}),ink:true},{t:'px',a:[[46,30,4],[47,30,4]],m:M(195,40,97),ink:false},{t:'px',a:[[50,38,3]],m:M(195,40,85),ink:false},
+   {t:'px',a:[[58,16,3],[64,10,3]],m:M(195,40,80),ink:false},
+ ],{glow:[[48,34,8,'hsl(195 50% 75%)',0.3]]}),
+ // 수정새우: clear as glass, heart visible
+ '1-2':S96([
+   ...shrimpKit({m:M(190,22,70,{step:6}),x0:22,x1:66,cy:30,tex:'grain'}),
+   {t:'px',a:[[58,26,2],[59,26,2],[58,27,2],[59,27,2],[60,27,2],[59,28,2]],m:M(350,70,55),ink:false},{t:'px',a:[[61,27,0],[63,28,0],[65,28,0],[56,27,0],[54,28,0]],m:M(350,50,40),ink:false},
+ ]),
+ // 마나 해마: grown from crystal, rune on the belly
+ '1-3':S96([
+   {t:'poly',a:[[50,26],[40,24],[38,36],[44,46],[54,44]],m:M(258,24,34),ink:false,tex:'rays',fade:[50,38]},
+   ...seahorseKit({m:M(262,24,34,{step:7})}),
+   {t:'poly',a:[[54,20],[60,6],[64,20]],m:M(195,55,58,{step:9}),ink:true,rim:true},{t:'poly',a:[[66,26],[78,18],[74,30]],m:M(195,50,54,{step:9}),ink:true,rim:true},{t:'poly',a:[[70,38],[82,40],[72,48]],m:M(195,45,50,{step:9}),ink:true,rim:true},
+   {t:'px',a:[[60,10,4],[76,20,4],[80,40,4]],m:M(195,60,88),ink:false},
+   {t:'px',a:[[62,36,3],[64,40,3],[62,44,3],[64,32,3],[60,40,3]],m:M(190,70,75),ink:false},{t:'px',a:[[78,20,3]],m:M(190,60,80),ink:false},
+ ],{glow:[[62,38,10,'hsl(190 60% 70%)',0.3],[60,10,6,'hsl(190 60% 70%)',0.3]],tint:[[62,38,12,190,50,0.3]]}),
+ // 반딧불 열목어: follows fireflies; belly glows yellow
+ '1-4':S96([
+   ...simpleFish({cx:50,cy:34,rx:26,ry:11,m:M(150,20,36,{step:7}),finM:M(150,18,30),tail:{type:'fork'},dorsal:{type:'soft'},body:{bellyM:M(55,80,58)},eye:{h:55,s:40,l:45}}),
+   dots([[34,30],[42,28],[50,28],[58,30]],M(150,18,24)),
+ ],{glow:[[48,40,14,'hsl(55 80% 60%)',0.3]],tint:[[48,40,16,55,70,0.3]],spark:[[18,14,'hsl(55 90% 75%)'],[80,10,'hsl(55 90% 75%)'],[88,50,'hsl(55 90% 75%)'],[26,54,'hsl(55 90% 75%)']]}),
+ // 꽃게요정: a crab that snips petals; a leaf sprouts from its back
+ '1-5':S96([
+   ...crabKit({cx:48,cy:36,rx:22,ry:12,m:M(335,28,46,{step:7}),pose:'point'}),
+   {t:'px',a:[[38,30,4],[48,28,4],[58,30,4],[44,38,4],[54,38,4]],m:M(50,60,88),ink:false},
+   {t:'poly',a:[[40,26],[48,14],[56,26]],m:M(110,30,40),ink:true},{t:'px',a:[[48,18,4],[47,20,3]],m:M(330,40,72),ink:false},
+   {t:'poly',a:[[90,8],[95,2],[94,12]],m:M(330,40,66),ink:true},
+ ]),
+ // 별꽃불가사리: five arms whose tips glow at night
+ '1-6':S96([
+   ...starKit({cx:48,cy:32,m:M(270,30,40,{step:7}),R:29,r:7}),
+   ...[0,1,2,3,4].map(i=>{const a=-Math.PI/2+i*2*Math.PI/5;const x=Math.round(48+Math.cos(a)*27),y=Math.round(32+Math.sin(a)*27);return {t:'px',a:[[x,y,4],[x-1,y,4],[x,y-1,4],[x,y+1,4]],m:M(55,85,88),ink:false}}),
+ ],{glow:[0,1,2,3,4].map(i=>{const a=-Math.PI/2+i*2*Math.PI/5;return [48+Math.cos(a)*27,32+Math.sin(a)*27,7,'hsl(55 70% 70%)',0.45]})}),
+ // 이끼거북: small flowers grow on its shell; fairies rest there
+ '1-7':S96([
+   ...turtleKit({cx:42,cy:36,rx:27,ry:14,m:M(105,30,30,{step:7}),skinM:M(100,20,36,{step:7}),tex:'grain'}),
+   {t:'e',a:[32,26,8,4],m:M(110,40,36),tex:'grain',rim:true},{t:'e',a:[54,26,8,4],m:M(110,40,36),tex:'grain',rim:true},
+   {t:'px',a:[[28,20,4],[38,18,4],[50,18,4],[60,20,4],[44,22,4]],m:M(335,55,72),ink:false},{t:'px',a:[[28,19,4],[50,17,4]],m:M(50,70,88),ink:false},
+   {t:'line',a:[44,20,46,10],m:M(110,30,34),tone:1,ink:false},{t:'px',a:[[46,9,3],[47,10,3],[45,10,3]],m:M(110,40,50)},
+ ],{spark:[[62,12,'hsl(55 80% 85%)'],[66,16,'hsl(55 80% 85%)']]}),
+ // 세계수 뿌리잉어: bark skin with a knot, roots trailing from the belly
+ '1-8':S96([
+   ...simpleFish({cx:50,cy:34,rx:28,ry:14,m:M(32,32,36,{step:7}),finM:M(30,28,28),tex:'plates',tail:{type:'fan',len:16,sp:14},dorsal:{type:'ragged'},dh:12,eye:{h:110,s:50,l:40}}),
+   {t:'e',a:[42,30,10,6],m:M(32,28,30),ink:false,tex:'ridges',rot:0.2},{t:'e',a:[42,30,5,3],m:M(32,28,38),ink:false,tex:'ridges',rot:0.2},{t:'px',a:[[42,30,0],[41,30,0]],m:M(32,28,20)},
+   {t:'line',a:[56,26,72,27],m:M(32,24,28),tone:0,ink:false},{t:'line',a:[56,40,72,38],m:M(32,24,28),tone:0,ink:false},
+   {t:'curve',a:[30,44,22,54,14,62],th:[2,0.6],m:M(30,30,26)},{t:'curve',a:[42,46,38,56,28,63],th:[2,0.6],m:M(30,30,26)},
+   {t:'px',a:[[60,18,3],[64,16,3],[68,18,3]],m:M(110,45,45)},
+ ]),
+ // 샘의 뱀: circles the spring once at dusk
+ '1-9':S96([
+   {t:'poly',a:[[20,16],[28,4],[36,16],[44,6],[52,20]],m:M(15,40,30),ink:true,tex:'rays',fade:[28,16]},
+   ...eelKit({m:M(20,45,38,{step:7}),tex:'scales',y0:40,y1:8,y2:40,hy:26,th:[2,6]}),
+   {t:'line',a:[95,27,96,22],m:M(350,60,50),tone:2,ink:false},
+   {t:'px',a:[[12,34,4],[28,16,4],[44,28,4],[60,46,4],[76,44,4]],m:M(45,70,80),ink:false},
+   ...fishEye(88,24,2.4,{h:40,s:60,l:50}),
+ ],{glow:[[88,24,5,'hsl(30 60% 70%)',0.25]]}),
+ // 샘의 수호자: hunched, long grasping fingers, two green eyes
+ '1-10':S96([
+   ...tail(14,34,{type:'fork',len:12,sp:12,m:M(160,25,22)}),
+   ...dorsal(30,66,20,9,{type:'spiny',n:5,m:M(160,25,20)}),
+   {t:'e',a:[40,36,22,13],m:M(160,28,26,{step:7}),tex:'scales',rim:true},{t:'e',a:[56,26,18,12],m:M(160,28,27,{step:7}),tex:'scales',rim:true},
+   ...[[48,46,40,60,54,64],[58,48,56,62,70,64],[66,46,72,60,84,62],[72,42,84,54,94,54]].map(a=>({t:'curve',a,th:[2.6,1],m:M(160,25,24)})),
+   {t:'e',a:[78,30,14,10],m:M(160,28,29,{step:7}),rim:true},
+   {t:'poly',a:[[70,34],[94,32],[92,42],[72,42]],m:M(160,26,24),ink:true},
+   ...[[68,20,76,8,88,16],[72,20,84,12,94,20],[66,22,72,12,78,14]].map(a=>({t:'curve',a,th:[1.6,0.6],m:M(110,30,30)})),
+   mouth(74,34,92,34,M(160,20,8)),
+   {t:'px',a:[[76,36,4],[80,36,4],[84,36,4],[88,35,4],[78,32,4],[86,32,4]],m:M(50,10,88),ink:false},
+   ...fishEye(79,26,3.4,{h:120,s:70,l:50,sh:120,ss:50,sl:70}),...fishEye(89,26,2.4,{h:120,s:70,l:50,sh:120,ss:50,sl:70}),
+ ],{glow:[[80,26,8,'hsl(120 60% 55%)',0.35],[89,26,6,'hsl(120 60% 55%)',0.3]]}),
+ // 요정여왕의 눈물: a tear with something small curled inside
+ '1-11':S96([
+   {t:'curve',a:[44,32,20,20,8,32],th:[3,0.8],m:M(170,30,70),fade:[28,6],ink:false},{t:'curve',a:[44,36,20,48,8,36],th:[3,0.8],m:M(170,30,70),fade:[28,6],ink:false},
+   {t:'poly',a:[[24,32],[60,12],[60,52]],m:M(185,35,62,{step:6}),tex:'grain',rim:true},{t:'e',a:[62,32,20,20],m:M(185,35,62,{step:6}),tex:'grain',rim:true},
+   {t:'e',a:[64,26,12,8],m:M(185,25,76),lift:0.1,ink:false},
+   {t:'curve',a:[66,24,74,36,62,42],th:[2.8,1.6],m:M(320,40,55,{step:7})},{t:'e',a:[66,24,3.6,3.6],m:M(320,40,58)},{t:'px',a:[[66,24,0]],m:M(320,30,20)},
+   {t:'px',a:[[54,18,4],[52,20,4],[53,19,4]],m:M(185,30,96),ink:false},
+   {t:'poly',a:[[76,16],[88,6],[84,22]],m:M(185,30,72),fade:[78,90],ink:false,tex:'rays'},{t:'poly',a:[[76,48],[88,58],[84,42]],m:M(185,30,72),fade:[78,90],ink:false,tex:'rays'},
+ ],{outline:'#4a2e5e',glow:[[62,32,24,'hsl(185 50% 70%)',0.3]],spark:[[16,16],[88,50],[28,54],[92,12]]}),
+ // 달빛 송사리 (새 종): scales turn silver when the moon is up
+ '1-12':S96([
+   ...simpleFish({cx:52,cy:34,rx:20,ry:7.5,m:M(215,14,58,{step:8}),finM:M(215,12,46),tail:{type:'fork',len:13,sp:9},dorsal:{type:'soft'},dh:7,body:{spec:[[40,30,14]]},eye:{h:50,s:20,l:40}}),
+   {t:'e',a:[50,22,5,5],m:M(50,18,78,{step:5}),ink:false,holes:[[52,21,4]]},                                     // a crescent above it
+   {t:'px',a:[[38,32,4],[46,30,4],[56,32,4],[62,30,4]],m:M(215,10,96),ink:false},
+ ],{glow:[[50,22,6,'hsl(50 30% 85%)',0.3]]}),
+ // 요정 등불고기 (새 종): a small lamp burns on its tail
+ '1-13':S96([
+   ...simpleFish({cx:52,cy:34,rx:22,ry:9,m:M(30,30,36,{step:7}),finM:M(30,25,30),tail:{type:'fan',len:12,sp:9},dorsal:{type:'soft'},eye:{h:45,s:60,l:55}}),
+   {t:'line',a:[20,30,18,40],m:M(30,25,30),tone:1},
+   {t:'poly',a:[[12,40],[24,40],[26,54],[10,54]],m:M(30,10,30,{step:6}),ink:true},{t:'px',a:[[13,42,1],[23,42,1],[13,52,1],[23,52,1]],m:M(30,10,18)},
+   {t:'px',a:[[17,46,4],[18,46,4],[17,47,4],[18,48,3],[19,47,3]],m:M(40,85,72),ink:false},
+   {t:'px',a:[[60,26,4],[66,30,4],[48,28,4]],m:M(45,50,80),ink:false},
+ ],{glow:[[18,47,10,'hsl(40 70% 65%)',0.5]],tint:[[18,47,16,40,60,0.35]]}),
+});
+// ================= 잉걸불 협곡 =================
+Object.assign(FISH3,{
+ // 재송어: ash-grey, smoke follows it
+ '2-0':S96([
+   {t:'curve',a:[24,28,12,20,4,8],th:[3,0.8],m:M(20,4,40),fade:[20,2],ink:false},{t:'curve',a:[24,32,10,34,2,28],th:[2.4,0.8],m:M(20,4,36),fade:[18,0],ink:false},
+   ...simpleFish({cx:52,cy:34,rx:26,ry:11,m:M(20,10,44,{step:7}),finM:M(20,8,34),tail:{type:'fork'},dorsal:{type:'soft'},eye:{h:40,s:20,l:40}}),
+   dots([[36,30],[44,28],[52,28],[60,30],[40,36],[48,38],[56,36]],M(20,8,28)),
+   {t:'px',a:[[42,32,3],[56,32,3],[48,34,3]],m:M(20,70,55),ink:false},
+ ],{glow:[[48,33,8,'hsl(20 60% 50%)',0.12]]}),
+ // 숯빛 메기: charcoal body, cracks glowing, whiskers singed
+ '2-1':S96([
+   ...simpleFish({cx:48,cy:36,rx:28,ry:12,m:M(20,12,17,{step:6}),finM:M(20,10,13),tex:'cracks',tail:{type:'fan',len:14,sp:12},dorsal:{type:'low'},dh:7,eye:false,mouth:false}),
+   {t:'px',a:[[32,30,3],[44,40,3],[56,28,3],[62,40,3],[38,36,3]],m:M(20,80,50),ink:false},
+   {t:'e',a:[74,36,13,9],m:M(20,12,18,{step:6}),rim:true},mouth(70,42,92,40,M(20,8,5)),
+   {t:'line',a:[88,34,94,18],m:M(20,10,26),tone:2,ink:false},{t:'line',a:[90,40,94,56],m:M(20,10,26),tone:2,ink:false},{t:'px',a:[[94,18,3],[94,56,3]],m:M(20,80,55),ink:false},
+   ...fishEye(70,31,1.8,{sh:40,ss:20,sl:55,glint:false}),...fishEye(82,31,1.8,{sh:40,ss:20,sl:55,glint:false}),
+ ],{glow:[[44,40,6,'hsl(20 70% 50%)',0.25],[56,28,6,'hsl(20 70% 50%)',0.25]]}),
+ // 잿더미게: half buried in ash
+ '2-2':S96([
+   {t:'e',a:[48,50,40,6],m:M(20,4,26),ink:false,tex:'grain',fade:[48,92]},
+   ...crabKit({cx:48,cy:38,rx:24,ry:10,m:M(20,6,36,{step:6}),pose:'low'}),
+   {t:'e',a:[48,32,22,5],m:M(20,4,50),ink:false,lift:0.1,tex:'grain'},
+   {t:'px',a:[[36,38,3],[56,40,3]],m:M(20,80,50),ink:false},
+   {t:'px',a:[[28,20,3],[44,14,3],[66,12,3],[80,8,3],[60,18,3]],m:M(20,4,55),ink:false},
+ ]),
+ // 용암 복어: swollen, cooled crust, molten underside, spines
+ '2-3':S96([
+   ...tail(26,32,{type:'fan',len:12,sp:10,m:M(10,50,30)}),
+   {t:'e',a:[50,32,26,22],m:M(8,55,28,{step:7}),tex:'cracks',rim:true},
+   {t:'e',a:[48,38,18,10],m:M(20,80,50),ink:false,lift:0.1,tex:'web'},
+   {t:'px',a:[[36,20,3],[48,16,3],[60,20,3],[32,32,3],[66,32,3],[40,44,3],[58,46,3]],m:M(30,90,70),ink:false},
+   ...[[28,16],[38,8],[50,6],[62,8],[72,16],[24,28],[76,28],[26,44],[74,44],[36,54],[50,58],[64,54]].map(([x,y])=>({t:'poly',a:[[x-2,y+3],[x,y-3],[x+2,y+3]],m:M(30,20,60),ink:true})),
+   ...pectoral(58,46,{m:M(10,50,30)}),
+   mouth(70,38,80,38,M(10,40,12)),{t:'px',a:[[74,40,4],[78,40,4]],m:M(50,10,90),ink:false},
+   ...fishEye(67,26,3,{h:50,s:40,l:50,sh:50,ss:40,sl:85}),
+ ],{glow:[[48,38,18,'hsl(20 80% 55%)',0.3]],tint:[[48,38,22,20,70,0.25]]}),
+ // 용암새우: shell black and cracked like cooled lava
+ '2-4':S96([
+   ...shrimpKit({m:M(10,25,22,{step:6}),x0:22,x1:66,cy:30,tex:'cracks'}),
+   {t:'px',a:[[36,24,3],[46,22,3],[56,22,3],[66,26,3],[40,30,3],[60,30,3]],m:M(25,90,60),ink:false},
+ ],{glow:[[48,26,16,'hsl(25 80% 55%)',0.15]]}),
+ // 불씨해파리: an ember drifting, trailing threads of heat
+ '2-5':S96([
+   ...jellyKit({cx:48,cy:24,rx:22,ry:16,m:M(12,55,30,{step:7}),tentM:M(15,60,42),tex:'cracks'}),
+   {t:'e',a:[48,28,16,8],m:M(20,80,48),lift:0.1,ink:false,tex:'web'},
+   {t:'px',a:[[36,20,4],[44,16,4],[54,18,4],[60,24,4],[42,26,4]],m:M(35,90,72),ink:false},
+   {t:'px',a:[[32,48,4],[48,46,4],[54,50,4],[66,48,4],[30,58,3],[58,58,3]],m:M(30,90,70),ink:false},
+ ],{glow:[[48,26,20,'hsl(25 80% 55%)',0.35]],tint:[[48,26,22,25,70,0.25]]}),
+ // 흑요석 창꼬치: glassy black, obsidian teeth
+ '2-6':S96([
+   ...tail(16,32,{type:'fork',len:12,sp:11,m:M(280,8,14)}),
+   ...dorsal(32,54,22,8,{type:'low',m:M(280,8,12)}),
+   {t:'poly',a:[[16,26],[72,22],[80,32],[72,42],[16,38]],m:M(280,10,18,{step:7}),tex:'scales',rim:true,spec:[[28,26,20],[52,24,16]]},
+   {t:'poly',a:[[16,32],[68,30],[72,38],[16,38]],m:M(280,8,12),ink:false,lift:-0.1},
+   {t:'px',a:[[24,28,4],[40,26,4],[58,26,4]],m:M(280,10,70),ink:false},
+   ...pectoral(52,38,{m:M(280,8,12)}),
+   {t:'poly',a:[[72,24],[96,30],[94,36],[72,40]],m:M(280,10,20,{step:7}),rim:true},
+   mouth(76,34,94,32,M(280,8,4)),
+   {t:'px',a:[[78,36,4],[82,36,4],[86,35,4],[90,34,4],[80,30,4],[88,30,4]],m:M(280,5,85),ink:false},
+   ...fishEye(78,28,2.6,{h:0,s:50,l:50,sh:0,ss:30,sl:70}),
+ ]),
+ // 불꽃 장어: surfaces at sunset; its whole body burns
+ '2-7':S96([
+   {t:'poly',a:[[16,32],[24,12],[28,28],[36,8],[40,24],[48,10],[52,26]],m:M(30,90,60),fade:[24,8],ink:false,tex:'rays'},
+   ...eelKit({m:M(15,80,42,{step:8}),tex:'ridges',y0:48,y1:12,y2:44,hy:30,th:[2.4,7]}),
+   {t:'poly',a:[[56,44],[66,60],[72,54]],m:M(30,90,58),ink:false,tex:'rays',fade:[60,72]},
+   {t:'px',a:[[20,36,4],[32,20,4],[44,28,4],[60,44,4],[72,52,4],[80,36,4]],m:M(45,95,80),ink:false},
+   ...fishEye(87,27,2.6,{sh:50,ss:90,sl:92,glint:false}),
+ ],{glow:[[48,32,28,'hsl(25 90% 55%)',0.18],[88,27,8,'hsl(50 90% 70%)',0.4]]}),
+ // 화산거북: basalt shell with a small cone that steams
+ '2-8':S96([
+   ...turtleKit({cx:42,cy:36,rx:28,ry:15,m:M(10,15,20,{step:7}),skinM:M(10,18,24,{step:7})}),
+   {t:'px',a:[[28,28,3],[38,24,3],[50,24,3],[60,28,3],[34,34,3],[54,34,3]],m:M(25,90,58),ink:false},
+   {t:'poly',a:[[36,22],[42,8],[48,22]],m:M(10,15,18),ink:true},{t:'px',a:[[42,10,4],[42,9,3],[41,10,3]],m:M(30,90,70),ink:false},{t:'px',a:[[44,4,3],[46,2,3],[43,6,3]],m:M(20,5,60),ink:false},
+ ],{glow:[[42,9,6,'hsl(30 80% 60%)',0.4]],tint:[[42,26,20,25,60,0.12]]}),
+ // 해골창꼬치
+ '2-9':S96([
+   ...tail(18,32,{type:'fork',len:14,sp:12,m:M(15,20,24)}),
+   ...dorsal(30,54,22,8,{type:'low',m:M(15,18,22)}),
+   {t:'poly',a:[[18,26],[62,22],[68,32],[62,42],[18,38]],m:M(15,22,30,{step:7}),tex:'scales',rim:true},
+   {t:'poly',a:[[18,32],[60,30],[64,38],[18,38]],m:M(20,16,22),ink:false,lift:-0.1},
+   {t:'px',a:[[28,28,3],[36,26,3],[44,26,3],[52,26,3]],m:M(20,60,55),ink:false},
+   {t:'px',a:[[24,24,2],[32,22,2],[40,22,2],[48,22,2],[56,22,2]],m:M(40,10,60)},
+   ...pectoral(50,38,{m:M(15,18,22)}),
+   {t:'poly',a:[[58,24],[72,18],[84,20],[94,28],[92,34],[76,34],[62,36]],m:M(42,12,64,{step:7}),tex:'cracks',rim:true},
+   {t:'poly',a:[[66,34],[94,34],[92,40],[80,44],[66,40]],m:M(42,10,56,{step:7}),ink:true},
+   {t:'px',a:[[72,34,0],[76,36,0],[80,36,0],[84,36,0],[88,35,0]],m:M(42,10,20)},
+   {t:'px',a:[[74,38,4],[78,38,4],[82,38,4],[86,37,4],[90,36,4],[75,39,4],[83,39,4]],m:M(45,8,92),ink:false},
+   {t:'e',a:[72,26,5,4.4],m:M(40,10,10),ink:false},{t:'px',a:[[72,26,4],[71,26,3],[72,27,3],[73,25,3]],m:M(22,95,62),ink:false},
+   {t:'px',a:[[82,24,0],[84,22,0],[80,26,0]],m:M(40,10,36)},
+ ],{glow:[[72,26,8,'hsl(20 85% 55%)',0.5]],tint:[[72,26,10,20,70,0.25]]}),
+ // 잠든 용의 새끼: asleep, coiled, belly glowing
+ '2-10':S96([
+   {t:'curve',a:[40,48,16,60,8,40],th:[5,1.8],m:M(10,45,30,{step:7}),tex:'scales'},{t:'poly',a:[[8,40],[2,32],[4,48]],m:M(10,40,26),ink:true},
+   {t:'poly',a:[[28,24],[44,4],[64,18],[56,26]],m:M(5,35,20,{step:6}),ink:true,tex:'rays',fade:[44,26]},
+   {t:'line',a:[28,24,44,4],m:M(5,30,32),tone:3,ink:false},{t:'line',a:[44,4,64,18],m:M(5,30,32),tone:3,ink:false},{t:'line',a:[44,4,52,24],m:M(5,30,28),tone:2,ink:false},
+   {t:'e',a:[48,36,26,14],m:M(10,45,34,{step:7}),tex:'scales',rim:true},
+   {t:'e',a:[50,42,18,5.6],m:M(30,62,52),lift:0.2,ink:false,tex:'ridges'},
+   {t:'px',a:[[28,26,2],[36,24,2],[44,24,2],[52,24,2],[60,26,2]],m:M(10,30,18)},
+   {t:'e',a:[76,28,13,8],m:M(10,45,36,{step:7}),rim:true},{t:'poly',a:[[82,26],[94,28],[92,34],[80,34]],m:M(10,40,32),ink:true},{t:'px',a:[[92,30,0]],m:M(10,30,12)},
+   {t:'poly',a:[[68,22],[62,10],[72,20]],m:M(35,15,42),ink:true},{t:'poly',a:[[74,20],[70,8],[78,20]],m:M(35,15,42),ink:true},
+   {t:'px',a:[[76,26,0],[78,28,0],[80,28,0],[82,26,0]],m:M(10,30,10)},mouth(82,32,92,32,M(10,30,14)),
+   {t:'px',a:[[90,24,3],[94,18,3],[92,12,3]],m:M(20,30,70),ink:false},
+   ...pectoral(60,44,{m:M(10,35,24)}),
+   {t:'px',a:[[36,50,1],[38,52,0],[42,50,1],[44,52,0]],m:M(35,15,38)},
+ ],{glow:[[50,42,14,'hsl(30 70% 55%)',0.35]],tint:[[50,42,18,30,60,0.3]]}),
+ // 심장불 살라만더: a finned lizard with a visible beating heart
+ '2-11':S96([
+   {t:'curve',a:[44,44,20,56,8,36],th:[4.4,1.4],m:M(5,70,34,{step:7}),tex:'scales'},
+   {t:'px',a:[[12,38,4],[20,50,4],[30,54,4]],m:M(40,95,80),ink:false},
+   {t:'e',a:[52,34,24,12],m:M(5,70,38,{step:7}),tex:'scales',rim:true},
+   {t:'poly',a:[[32,24],[40,12],[52,16],[64,12],[72,24]],m:M(30,90,60),ink:false,tex:'rays',fade:[52,40]},
+   {t:'line',a:[36,42,30,54],m:M(5,60,30),tone:1,w:2},{t:'line',a:[64,44,70,56],m:M(5,60,30),tone:1,w:2},
+   {t:'px',a:[[28,56,0],[30,56,0],[32,56,0],[68,58,0],[70,58,0],[72,58,0]],m:M(5,50,20)},
+   {t:'e',a:[50,34,6.4,7.2],m:M(0,0,10),ink:false},{t:'px',a:[[48,32,4],[50,32,4],[48,34,4],[50,34,4],[52,34,3],[50,36,3],[49,35,4]],m:M(355,90,60),ink:false},{t:'px',a:[[48,30,4]],m:M(40,90,90),ink:false},
+   {t:'e',a:[78,30,12,8],m:M(5,70,40,{step:7}),rim:true},mouth(82,36,92,34,M(5,60,16)),
+   {t:'px',a:[[72,24,2],[76,22,2],[80,22,2]],m:M(5,60,24)},
+   ...fishEye(83,28,2.6,{sh:45,ss:90,sl:92,glint:false}),
+ ],{outline:'#4a2e5e',glow:[[50,34,16,'hsl(355 80% 55%)',0.45],[84,28,6,'hsl(45 80% 70%)',0.3]],tint:[[50,34,18,355,70,0.35]],spark:[[16,20,'hsl(40 90% 80%)'],[88,52,'hsl(40 90% 80%)']]}),
+ // 재가오리 (새 종): slides under the ash; a footprint on its back
+ '2-12':S96([
+   ...rayKit({cx:50,cy:30,m:M(20,8,34,{step:7}),tex:'grain'}),
+   {t:'e',a:[44,24,5,3],m:M(20,6,24),ink:false,rot:0.3},{t:'e',a:[44,32,5,3],m:M(20,6,24),ink:false,rot:-0.3},{t:'px',a:[[40,20,0],[42,19,0],[46,19,0],[48,20,0]],m:M(20,6,22)},
+   {t:'e',a:[62,30,14,10],m:M(20,4,46),ink:false,lift:0.05,tex:'grain',fade:[52,80]},
+ ]),
+ // 숯불 달팽이 (새 종): an ember turns inside the shell
+ '2-13':S96([
+   {t:'e',a:[52,46,26,9],m:M(15,25,22,{step:6}),tex:'grain',rim:true},                                           // foot
+   {t:'e',a:[76,40,10,6],m:M(15,25,24,{step:6}),rim:true},{t:'line',a:[82,36,90,22],m:M(15,25,26),tone:1},{t:'line',a:[78,36,84,24],m:M(15,25,26),tone:1},{t:'px',a:[[90,21,3],[84,23,3]],m:M(25,80,60),ink:false},
+   {t:'e',a:[44,30,20,16],m:M(10,20,20,{step:7}),tex:'cracks',rim:true},
+   {t:'curve',a:[60,30,52,16,38,22],th:[3,1.4],m:M(10,15,14)},{t:'curve',a:[38,22,30,34,42,40],th:[1.6,0.8],m:M(10,15,14)},
+   {t:'px',a:[[34,30,4],[46,26,4],[54,34,4],[42,38,4],[50,20,4]],m:M(28,90,62),ink:false},
+   {t:'e',a:[46,30,6,5],m:M(25,85,55),ink:false,lift:0.1},
+ ],{glow:[[46,30,14,'hsl(25 80% 55%)',0.3]],tint:[[46,30,18,25,70,0.25]]}),
+ // 용암 거머리 (새 종): drinks hot blood from the rock seams
+ '2-14':S96([
+   {t:'curve',a:[6,40,30,10,50,34],th:[2,5.6],m:M(5,50,26,{step:6}),tex:'ridges'},{t:'curve',a:[50,34,70,52,86,30],th:[5.6,5],m:M(5,50,27,{step:6}),tex:'ridges'},
+   {t:'e',a:[88,30,8,6],m:M(5,50,30,{step:6}),rim:true},{t:'e',a:[92,31,3.5,3],m:M(0,0,8),ink:false},{t:'px',a:[[90,29,4],[94,29,4],[90,33,4],[94,33,4]],m:M(50,10,88),ink:false},
+   {t:'px',a:[[20,24,3],[34,16,3],[48,32,3],[62,46,3],[76,42,3]],m:M(25,90,60),ink:false},
+   {t:'e',a:[10,38,4,3],m:M(5,50,28),ink:true},
+ ],{glow:[[48,32,20,'hsl(10 70% 45%)',0.12]]}),
+ // 잿빛 재판관 (새 종): wears a wig of ash; cuts the lines of liars
+ '2-15':S96([
+   ...simpleFish({cx:48,cy:36,rx:28,ry:15,m:M(20,10,38,{step:7}),finM:M(20,8,30),tail:{type:'fan',len:16,sp:14},dorsal:false,dh:0,eyeR:3.4,eye:{h:0,s:0,l:20,sh:40,ss:10,sl:78}}),
+   {t:'e',a:[66,20,16,7],m:M(20,4,62,{step:6}),tex:'ridges',rim:true},{t:'e',a:[52,22,6,5],m:M(20,4,60),tex:'ridges',ink:true},{t:'e',a:[80,24,6,6],m:M(20,4,60),tex:'ridges',ink:true},   // wig
+   {t:'poly',a:[[58,42],[74,42],[72,52],[60,52]],m:M(0,0,12),ink:true},{t:'poly',a:[[60,42],[72,42],[66,50]],m:M(40,5,88),ink:false},                                               // black robe and white bands
+   {t:'line',a:[22,48,30,56],m:M(30,25,30),tone:1},{t:'e',a:[32,58,4,3],m:M(30,25,34),ink:true},                                                                                   // gavel
+   mouth(76,42,88,40,M(20,8,12)),
+ ]),
+});
+// ================= 별이 진 바다 =================
+Object.assign(FISH3,{
+ // 별모래 정어리: never alone
+ '3-0':S96([
+   {t:'e',a:[22,16,14,4],m:M(225,18,30,{step:5}),fade:[32,8],ink:false},{t:'e',a:[20,50,14,4],m:M(225,18,30,{step:5}),fade:[30,6],ink:false},{t:'px',a:[[28,16,3],[26,50,3]],m:M(50,50,80),ink:false},
+   ...simpleFish({cx:56,cy:33,rx:24,ry:7,m:M(225,22,46,{step:7}),finM:M(225,20,34),tail:{type:'fork',len:12,sp:9},dorsal:{type:'soft'},dh:7,body:{spec:[[44,29,14]]},eye:{h:40,s:20,l:45}}),
+   {t:'px',a:[[40,30,4],[48,28,4],[56,30,4],[64,28,4],[72,30,4],[52,34,4],[68,34,4]],m:M(50,70,90),ink:false},
+ ],{spark:[[10,32,'hsl(50 60% 85%)'],[90,48,'hsl(50 60% 85%)']]}),
+ // 별게: a scholar crab pointing at the sky
+ '3-1':S96([
+   ...crabKit({cx:48,cy:36,rx:22,ry:12,m:M(228,26,30,{step:7}),pose:'point'}),
+   {t:'px',a:[[36,30,4],[46,26,4],[58,28,4],[62,38,4],[42,40,4]],m:M(50,70,92),ink:false},
+   {t:'line',a:[36,30,46,26],m:M(50,30,55),tone:2,ink:false},{t:'line',a:[46,26,58,28],m:M(50,30,55),tone:2,ink:false},{t:'line',a:[58,28,62,38],m:M(50,30,55),tone:2,ink:false},
+   {t:'px',a:[[92,6,4],[91,6,4],[92,5,4],[92,7,4]],m:M(50,70,95),ink:false},
+ ],{spark:[[92,6,'hsl(50 70% 95%)']]}),
+ // 은하새우: leaps and draws a galaxy
+ '3-2':S96([
+   {t:'curve',a:[10,54,20,26,38,16],th:[3,0.6],m:M(270,40,55),fade:[28,8],ink:false},{t:'px',a:[[14,48,4],[20,36,4],[30,22,4],[12,42,3],[26,28,3]],m:M(280,50,90),ink:false},
+   ...shrimpKit({m:M(265,32,44,{step:7}),x0:28,x1:70,cy:30,tex:'bands'}),
+   {t:'px',a:[[42,22,4],[52,20,4],[62,22,4],[58,28,4]],m:M(280,50,92),ink:false},
+ ],{glow:[[22,34,12,'hsl(275 50% 65%)',0.25]]}),
+ // 성운 해파리: colours turn slowly inside it
+ '3-3':S96([
+   ...jellyKit({cx:48,cy:24,rx:24,ry:17,m:M(285,38,40,{step:7}),tentM:M(290,35,52),holes:[[40,22,2.4],[58,18,2]]}),
+   {t:'e',a:[44,26,12,8],m:M(330,55,55),ink:false,lift:0.1,tex:'spots'},{t:'e',a:[56,30,10,6],m:M(200,55,50),ink:false,lift:0.1,tex:'spots'},
+   {t:'px',a:[[36,18,4],[50,14,4],[62,22,4],[42,32,4],[54,34,4],[30,28,4]],m:M(50,60,95),ink:false},
+ ],{glow:[[48,26,24,'hsl(290 50% 60%)',0.2]]}),
+ // 유성 날치: leaps at night with a burning trail
+ '3-4':S96([
+   {t:'curve',a:[4,52,16,44,28,40],th:[1.2,2.8],m:M(35,80,62),fade:[24,0],ink:false},{t:'px',a:[[8,56,4],[14,48,4],[20,50,4]],m:M(40,90,80),ink:false},
+   ...tail(26,38,{type:'fork',len:12,sp:10,m:M(215,25,30)}),
+   {t:'poly',a:[[40,34],[28,12],[60,8],[72,26]],m:M(215,22,24,{step:6}),ink:true,tex:'rays',fade:[44,28]},
+   {t:'line',a:[40,34,28,12],m:M(215,20,38),tone:3,ink:false},{t:'line',a:[40,34,60,8],m:M(215,20,38),tone:3,ink:false},
+   ...fishBody({cx:58,cy:38,rx:22,ry:7,m:M(215,25,36,{step:7}),spec:[[48,34,16]]}),
+   {t:'poly',a:[[48,44],[40,56],[64,48]],m:M(215,22,24),ink:true,tex:'rays',fade:[44,38]},
+   {t:'e',a:[76,38,11,6],m:M(215,20,40,{step:6}),rim:true},mouth(80,42,88,41,M(215,15,14)),
+   ...fishEye(79,36,2.6,{h:40,s:40,l:48,sh:40,ss:30,sl:88}),
+   {t:'px',a:[[62,12,4],[44,16,4]],m:M(40,60,90),ink:false},
+ ],{glow:[[12,50,10,'hsl(35 80% 60%)',0.4]]}),
+ // 은하 문어: a constellation on every arm
+ '3-5':S96([
+   ...octoKit({cx:58,cy:26,m:M(258,32,32,{step:7})}),
+   {t:'px',a:[[50,16,4],[66,12,4],[72,24,4],[54,30,4],[44,24,4],[62,34,4]],m:M(45,60,90),ink:false},
+   {t:'line',a:[50,16,66,12],m:M(45,30,60),tone:2,ink:false},{t:'line',a:[66,12,72,24],m:M(45,30,60),tone:2,ink:false},
+ ],{glow:[[66,12,6,'hsl(45 60% 85%)',0.4]]}),
+ // 달빛 가오리: carries a moon on its back
+ '3-6':S96([
+   ...rayKit({cx:50,cy:30,m:M(215,18,34,{step:7})}),
+   {t:'e',a:[52,28,7.2,7.2],m:M(50,18,74,{step:6}),rim:true},{t:'px',a:[[54,26,1],[50,30,1],[55,31,1]],m:M(50,10,62),ink:false},
+   {t:'px',a:[[38,26,4],[42,38,4],[68,20,4],[76,32,4],[62,42,4]],m:M(50,30,92),ink:false},
+ ],{glow:[[52,28,18,'hsl(50 30% 85%)',0.35]],tint:[[52,28,18,50,20,0.3]]}),
+ // 달거북: shell brightens as the moon fills
+ '3-7':S96([
+   ...turtleKit({cx:42,cy:36,rx:28,ry:15,m:M(50,15,70,{step:7}),skinM:M(225,15,30,{step:7})}),
+   {t:'px',a:[[26,30,1],[36,26,1],[50,24,1],[58,32,1],[32,38,1],[48,38,1]],m:M(50,10,56)},
+   {t:'poly',a:[[42,20],[56,20],[60,30],[48,34],[38,30]],m:M(225,18,30),ink:false,lift:-0.2},
+ ],{glow:[[36,32,24,'hsl(50 30% 85%)',0.25]]}),
+ // 바다불가사리: a piece of fallen star, hardened
+ '3-8':S96([
+   ...starKit({cx:48,cy:32,m:M(40,45,52,{step:7}),R:29,r:7,tex:'grain'}),
+   {t:'px',a:[[48,32,4],[47,31,4],[49,31,4]],m:M(45,70,95),ink:false},
+   dots([[24,24],[38,40],[72,32]],M(40,40,34)),
+ ],{glow:[[48,32,12,'hsl(45 70% 70%)',0.35]]}),
+ // 유령선원: a drowned sailor turned fish, pipe still lit
+ '3-9':S96([
+   ...tail(20,36,{type:'ragged',len:14,sp:13,m:M(150,18,34)}).map(q=>Object.assign(q,{fade:[20,4]})),
+   ...fishBody({cx:44,cy:38,rx:24,ry:12,m:M(150,20,38,{step:6}),tex:'grain'}),
+   ...dorsal(30,54,27,9,{type:'ragged',m:M(150,16,30)}),
+   ...pectoral(46,44,{m:M(150,16,30)}),
+   {t:'poly',a:[[52,26],[74,26],[74,50],[52,50],[56,38]],m:M(215,28,22,{step:6}),ink:true,tex:'grain'},            // navy coat
+   {t:'poly',a:[[66,26],[74,26],[74,34],[64,32]],m:M(215,22,32),ink:true},                                            // collar
+   {t:'px',a:[[61,32,3],[61,38,3],[61,44,3]],m:M(45,60,58),ink:false},                                                 // buttons
+   {t:'e',a:[80,36,12,9],m:M(150,18,42,{step:6}),rim:true},                                                            // head
+   {t:'poly',a:[[66,28],[72,18],[92,18],[96,28]],m:M(220,18,15,{step:6}),ink:true},{t:'poly',a:[[64,28],[96,28],[96,30],[66,30]],m:M(220,18,24),ink:false},{t:'px',a:[[82,22,3],[84,20,3]],m:M(45,50,60),ink:false},
+   ...fishEye(82,36,3.6,{hollow:true,h:150,s:80,l:78}),
+   mouth(84,42,92,42,M(150,20,18)),{t:'line',a:[90,42,94,46],m:M(25,20,28),tone:1,ink:false},{t:'px',a:[[94,46,1],[94,47,1],[93,47,1],[95,47,1]],m:M(25,20,30)},{t:'px',a:[[94,45,3]],m:M(20,80,60),ink:false},
+   {t:'px',a:[[92,36,3],[90,30,2]],m:M(150,20,70),ink:false},
+ ],{outline:'#1c3a2e',glow:[[82,36,10,'hsl(150 60% 60%)',0.5],[94,45,5,'hsl(20 70% 55%)',0.4]],tint:[[82,36,12,150,50,0.3]]}),
+ // 별고래: swallowed a fallen star
+ '3-10':S96([
+   ...tail(10,32,{type:'fork',len:10,sp:14,m:M(220,22,26)}),
+   {t:'e',a:[52,32,38,17],m:M(222,24,26,{step:7}),tex:'grain',rim:true},
+   {t:'e',a:[56,40,30,8],m:M(222,14,36),lift:0.1,ink:false,tex:'ridges'},
+   {t:'poly',a:[[40,18],[48,10],[56,18]],m:M(222,20,22),ink:true},{t:'poly',a:[[52,44],[62,56],[72,48]],m:M(222,20,22),ink:true,tex:'rays'},
+   {t:'poly',a:[[48,18],[51,27],[60,30],[51,33],[48,42],[45,33],[36,30],[45,27]],m:M(45,85,60,{step:9}),lift:0.15,ink:false},{t:'e',a:[48,30,3.6,3.6],m:M(45,80,92),ink:false},
+   {t:'px',a:[[24,26,3],[32,22,3],[66,20,3],[76,26,3],[28,38,3],[72,38,3],[60,22,3]],m:M(45,50,78),ink:false},
+   ...fishEye(84,29,2,{sh:0,ss:0,sl:10,glint:true}),mouth(72,36,90,34,M(222,16,14)),
+   ...bubbles(92,24,2),
+ ],{glow:[[48,30,18,'hsl(45 70% 65%)',0.35]],tint:[[48,30,20,45,60,0.4]]}),
+ // 떨어진 첫 번째 별: the first star that fell
+ '3-11':S96([
+   {t:'curve',a:[40,32,20,24,4,32],th:[3.2,0.8],m:M(45,70,70),fade:[28,4],ink:false},{t:'curve',a:[40,36,20,44,4,36],th:[3.2,0.8],m:M(45,70,70),fade:[28,4],ink:false},
+   {t:'poly',a:[[56,8],[62,24],[80,26],[66,36],[70,54],[56,44],[42,54],[46,36],[32,26],[50,24]],m:M(45,80,66,{step:8}),tex:'grain',rim:true},
+   {t:'e',a:[56,32,8,7],m:M(45,70,88),ink:false,lift:0.1},{t:'px',a:[[54,30,4],[56,30,4],[55,29,4]],m:M(45,50,99),ink:false},
+   {t:'poly',a:[[76,26],[94,20],[88,32]],m:M(45,60,74),ink:false,fade:[80,94],tex:'rays'},{t:'poly',a:[[66,38],[82,48],[70,48]],m:M(45,60,74),ink:false,fade:[70,84],tex:'rays'},
+   ...fishEye(67,27,2.4,{sh:220,ss:60,sl:40,h:220,s:60,l:30,glint:false}),
+ ],{outline:'#4a2e5e',glow:[[56,32,26,'hsl(45 80% 70%)',0.3]],spark:[[12,16],[88,52],[20,52],[92,10],[48,4]]}),
+ // 혜성 청어 (새 종): a long glowing tail
+ '3-12':S96([
+   {t:'curve',a:[30,36,16,40,2,52],th:[2.6,0.6],m:M(195,60,70),fade:[24,2],ink:false},{t:'px',a:[[8,48,4],[16,42,4],[22,40,3]],m:M(195,70,92),ink:false},
+   ...simpleFish({cx:58,cy:33,rx:24,ry:7,m:M(205,22,48,{step:7}),finM:M(205,20,36),tail:{type:'fork',len:12,sp:9},dorsal:{type:'soft'},dh:7,eye:{h:40,s:20,l:45}}),
+   {t:'px',a:[[44,30,4],[56,28,4],[68,30,4]],m:M(195,60,92),ink:false},
+ ],{glow:[[14,44,8,'hsl(195 60% 70%)',0.3]]}),
+ // 소라별 (새 종): a hermit with a star in its shell
+ '3-13':S96([
+   {t:'line',a:[60,46,56,58],m:M(225,20,28),tone:1,w:2},{t:'line',a:[68,46,70,58],m:M(225,20,28),tone:1,w:2},{t:'line',a:[76,44,84,56],m:M(225,20,28),tone:1,w:2},
+   {t:'e',a:[40,32,24,18],m:M(228,22,28,{step:7}),tex:'cracks',rim:true},
+   {t:'curve',a:[60,30,48,16,32,24],th:[3.4,1.6],m:M(228,18,20)},{t:'curve',a:[32,24,26,38,42,44],th:[1.8,0.8],m:M(228,18,20)},
+   {t:'poly',a:[[40,22],[43,30],[51,31],[45,36],[47,44],[40,39],[33,44],[35,36],[29,31],[37,30]],m:M(50,80,70,{step:8}),ink:false,lift:0.15},
+   {t:'e',a:[70,40,12,7],m:M(225,24,36,{step:7}),rim:true},{t:'poly',a:[[78,34],[92,30],[94,38],[82,42]],m:M(225,22,38),ink:true},{t:'px',a:[[90,33,0],[88,35,0]],m:M(225,20,18)},
+   ...fishEye(74,37,2,{h:50,s:40,l:60}),{t:'line',a:[76,34,84,22],m:M(225,20,32),tone:1,ink:false},
+ ],{glow:[[40,33,14,'hsl(50 70% 70%)',0.3]]}),
+ // 별자리 해마 (새 종): dots on its back make a constellation
+ '3-14':S96([
+   ...seahorseKit({m:M(225,24,30,{step:7})}),
+   {t:'px',a:[[56,24,4],[62,30,4],[60,38,4],[66,44,4],[58,50,4]],m:M(50,70,92),ink:false},
+   {t:'line',a:[56,24,62,30],m:M(50,30,55),tone:2,ink:false},{t:'line',a:[62,30,60,38],m:M(50,30,55),tone:2,ink:false},{t:'line',a:[60,38,66,44],m:M(50,30,55),tone:2,ink:false},{t:'line',a:[66,44,58,50],m:M(50,30,55),tone:2,ink:false},
+   {t:'poly',a:[[54,20],[52,8],[60,16]],m:M(225,22,26),ink:true,tex:'rays'},
+ ],{spark:[[30,14,'hsl(50 60% 85%)'],[84,52,'hsl(50 60% 85%)']]}),
+ // 달무리 복어 (새 종): swells into a full moon
+ '3-15':S96([
+   ...tail(26,32,{type:'fan',len:12,sp:10,m:M(215,18,32)}),
+   {t:'e',a:[52,32,25,22],m:M(50,16,72,{step:7}),tex:'grain',rim:true},
+   {t:'px',a:[[40,22,1],[56,18,1],[64,30,1],[44,40,1],[58,44,1],[36,32,1]],m:M(50,10,58)},
+   ...[[30,16],[42,8],[56,6],[68,10],[76,22],[26,30],[78,34],[30,46],[74,48],[44,56],[60,58]].map(([x,y])=>({t:'poly',a:[[x-2,y+3],[x,y-3],[x+2,y+3]],m:M(50,10,80),ink:true})),
+   ...pectoral(60,44,{m:M(215,18,32)}),mouth(72,38,80,38,M(50,10,30)),
+   ...fishEye(68,26,3,{h:220,s:40,l:35}),
+ ],{glow:[[52,32,30,'hsl(50 30% 85%)',0.25]]}),
+ // 은하수 장어 (새 종): the milky way runs along its body
+ '3-16':S96([
+   ...eelKit({m:M(240,30,18,{step:6}),tex:'grain',y0:48,y1:12,y2:44,hy:30,th:[2.4,7]}),
+   {t:'curve',a:[8,46,28,14,52,30],th:[1.6,2.4],m:M(260,40,48),ink:false,lift:0.1},{t:'curve',a:[52,30,72,58,84,28],th:[2.4,2],m:M(260,40,48),ink:false,lift:0.1},
+   {t:'px',a:[[14,40,4],[22,26,4],[32,16,4],[44,24,4],[56,36,4],[66,50,4],[76,46,4],[82,32,4],[8,52,3],[4,58,3]],m:M(50,60,95),ink:false},
+   ...fishEye(87,27,2.4,{h:50,s:60,l:70,sh:50,ss:40,sl:90}),
+ ],{glow:[[48,32,30,'hsl(260 50% 60%)',0.12],[6,56,6,'hsl(50 60% 85%)',0.4]]}),
+ // 바다의 등대 (새 종): carries a shining stone; lost ships follow it
+ '3-17':S96([
+   ...simpleFish({cx:48,cy:40,rx:28,ry:12,m:M(215,22,26,{step:7}),finM:M(215,20,20),tex:'grain',tail:{type:'fan',len:16,sp:13},dorsal:false,eyeR:2.6,eye:{h:45,s:40,l:50}}),
+   {t:'poly',a:[[56,30],[70,30],[66,10],[60,10]],m:M(40,10,46,{step:6}),tex:'plates',rim:true},{t:'poly',a:[[58,10],[68,10],[68,6],[58,6]],m:M(40,10,40),ink:true},
+   {t:'poly',a:[[57,16],[69,16],[69,12],[57,12]],m:M(45,80,72),ink:false},{t:'px',a:[[63,14,4],[62,14,4]],m:M(45,80,96),ink:false},
+   {t:'poly',a:[[69,12],[94,6],[94,20]],m:M(45,70,70),fade:[70,94],ink:false},                                   // beam
+   {t:'px',a:[[58,8,0],[62,8,0],[66,8,0]],m:M(40,10,20)},
+   {t:'e',a:[76,40,11,8],m:M(215,22,28,{step:7}),rim:true},mouth(78,46,90,44,M(215,15,10)),{t:'px',a:[[80,47,4],[84,47,4],[88,46,4]],m:M(50,10,88),ink:false},
+ ],{glow:[[63,14,14,'hsl(45 70% 70%)',0.5]],tint:[[63,14,20,45,60,0.3]]}),
+});
+// ================= 심연의 우물 =================
+Object.assign(FISH3,{
+ // 눈 없는 아귀: a lantern stolen from a drowned fisher
+ '4-0':S96([
+   ...tail(14,34,{type:'fork',len:12,sp:11,m:M(230,8,22)}),
+   {t:'curve',a:[52,18,60,2,76,6],th:[1.4,1],m:M(230,8,24)},
+   {t:'poly',a:[[72,4],[82,4],[84,18],[70,18]],m:M(30,10,30,{step:6}),ink:true},{t:'px',a:[[76,10,4],[77,12,4],[76,12,3],[78,10,3]],m:M(40,80,70),ink:false},{t:'px',a:[[74,6,1],[80,6,1],[74,16,1],[80,16,1]],m:M(30,10,18)},
+   {t:'e',a:[48,36,28,18],m:M(230,10,24,{step:6}),tex:'grain',rim:true},
+   {t:'e',a:[40,26,8,5],m:M(230,10,28),ink:false},{t:'e',a:[58,24,6,4],m:M(230,10,28),ink:false},
+   {t:'poly',a:[[58,32],[94,30],[90,44],[60,50]],m:M(230,8,16),ink:true},
+   {t:'px',a:[[64,34,4],[70,34,4],[76,33,4],[82,32,4],[88,32,4],[66,46,4],[74,46,4],[82,44,4]],m:M(50,10,88),ink:false},
+   mouth(62,32,90,32,M(230,8,10)),
+   {t:'poly',a:[[34,20],[42,10],[50,20]],m:M(230,8,20),ink:true,tex:'rays'},{t:'poly',a:[[42,50],[52,62],[62,52]],m:M(230,8,20),ink:true,tex:'rays'},
+   {t:'px',a:[[52,26,0],[54,26,0],[56,26,0]],m:M(230,8,14)},
+ ],{glow:[[76,11,10,'hsl(40 70% 65%)',0.5]],tint:[[76,11,16,40,60,0.35]]}),
+ // 장님게: claws grown long to feel the walls
+ '4-1':S96([
+   ...crabKit({cx:48,cy:38,rx:22,ry:12,m:M(230,8,30,{step:6}),pose:'point',eyes:false}),
+   {t:'px',a:[[58,24,1],[64,24,1]],m:M(230,6,24)},dots([[40,34],[50,36],[58,32]],M(230,8,16)),
+ ]),
+ // 뼈새우: shell only, and still it moves
+ '4-2':S96([
+   ...shrimpKit({m:M(45,8,56,{step:7}),x0:22,x1:66,cy:30,tex:'grain'}),
+   {t:'e',a:[44,22,0,0],m:M(0,0,0)},
+   dots([[34,24],[36,30],[44,22],[46,28],[54,24],[56,30]],M(45,8,24)),
+   {t:'e',a:[72,29,3,3],m:M(45,8,8),ink:false},{t:'px',a:[[72,29,3]],m:M(195,60,70),ink:false},
+ ],{glow:[[72,29,6,'hsl(195 50% 60%)',0.3]]}),
+ // 침묵의 뱀장어: the water goes quiet when it passes
+ '4-3':S96([
+   ...eelKit({m:M(230,10,14,{step:5}),y0:46,y1:14,y2:40,hy:30,th:[2,6]}),
+   {t:'poly',a:[[20,38],[30,50],[38,38]],m:M(230,8,12),ink:true,tex:'rays',fade:[30,16]},
+   {t:'px',a:[[12,30,2],[24,42,2],[36,30,2],[52,16,2],[68,16,2]],m:M(230,20,30)},
+   {t:'px',a:[[88,28,2],[88,29,0]],m:M(230,5,40)},
+ ],{outline:'#06060a'}),
+ // 검은 물 해파리: darker than the well
+ '4-4':S96([
+   ...jellyKit({cx:48,cy:24,rx:24,ry:17,m:M(240,12,8,{step:4}),tentM:M(240,10,10)}),
+   {t:'px',a:[[30,14,3],[26,20,3],[70,18,3],[66,12,3],[40,8,3],[58,8,3]],m:M(200,20,40),ink:false},
+ ],{outline:'#2a2a3a'}),
+ // 심연의 눈
+ '4-5':S96([
+   ...tail(26,32,{type:'fork',len:14,sp:12,m:M(230,14,16)}),
+   {t:'curve',a:[40,52,32,62,20,60],th:[2,0.8],m:M(230,14,18),ink:false},{t:'curve',a:[52,54,52,64,40,62],th:[2,0.8],m:M(230,14,18),ink:false},
+   {t:'e',a:[50,32,26,22],m:M(230,16,20,{step:6}),tex:'grain',rim:true},
+   {t:'poly',a:[[38,10],[46,2],[54,10]],m:M(230,14,18),ink:true,tex:'rays'},
+   ...pectoral(70,42,{m:M(230,14,18)}),
+   {t:'e',a:[54,32,17,17],m:M(50,12,80,{step:7})},{t:'e',a:[56,32,11,11],m:M(190,45,40,{step:8}),tex:'rays'},{t:'e',a:[58,32,5,6.5],m:M(0,0,6),flat:true,tones:1,ink:false},
+   {t:'px',a:[[48,24,4],[49,24,4],[48,25,4],[50,23,4]],m:M(0,0,97),ink:false},
+   {t:'line',a:[38,18,44,22],m:M(0,60,45),tone:2,ink:false},{t:'line',a:[40,46,46,42],m:M(0,60,45),tone:2,ink:false},{t:'line',a:[66,16,62,22],m:M(0,60,45),tone:2,ink:false},
+ ],{glow:[[56,32,22,'hsl(190 50% 50%)',0.25]],tint:[[56,32,20,190,40,0.2]]}),
+ // 우물거북: shell covered in scrape marks
+ '4-6':S96([
+   ...turtleKit({cx:42,cy:36,rx:28,ry:15,m:M(230,10,28,{step:7}),skinM:M(230,10,24,{step:7}),tex:'grain'}),
+   ...[[24,26,36,30],[40,22,54,26],[32,36,44,40],[52,32,64,34]].map(a=>({t:'line',a,m:M(230,8,40),tone:3,ink:false})),
+   ...[[20,32,28,38],[48,26,58,22]].map(a=>({t:'line',a,m:M(230,8,18),tone:0,ink:false})),
+ ],{glow:[[80,37,6,'hsl(190 40% 60%)',0.25]]}),
+ // 심연의 해골: grins; every tooth in place
+ '4-7':S96([
+   ...tail(10,32,{type:'ragged',len:10,sp:12,m:M(45,10,40)}),
+   {t:'line',a:[22,32,52,32],m:M(45,10,62),tone:2,w:2},
+   ...[28,36,44].map(x=>({t:'line',a:[x,22,x,42],m:M(45,10,60),tone:2,ink:false,w:2})),
+   {t:'poly',a:[[28,22],[34,10],[46,12],[52,22]],m:M(45,10,50),ink:true,tex:'rays',holes:[[40,16,1.8]]},
+   {t:'poly',a:[[50,18],[72,16],[88,22],[92,32],[84,40],[68,42],[52,40]],m:M(45,12,70,{step:7}),tex:'cracks',rim:true},
+   {t:'poly',a:[[60,40],[92,36],[90,46],[72,50],[60,48]],m:M(45,12,62,{step:7}),ink:true},
+   mouth(62,42,90,38,M(45,10,20)),
+   {t:'px',a:[[64,44,4],[68,44,4],[72,43,4],[76,43,4],[80,42,4],[84,41,4],[88,40,4]],m:M(45,8,96),ink:false},{t:'px',a:[[66,40,4],[70,40,4],[74,39,4],[78,39,4],[82,38,4],[86,37,4]],m:M(45,8,92),ink:false},
+   {t:'e',a:[72,26,6,5.2],m:M(45,10,10),ink:false},{t:'px',a:[[72,26,4],[73,26,3],[72,27,3]],m:M(190,70,70),ink:false},
+   {t:'px',a:[[82,28,0],[84,26,0],[80,30,0]],m:M(45,10,40)},{t:'px',a:[[56,20,0],[58,18,0],[66,16,0]],m:M(45,10,45)},
+ ],{glow:[[72,26,10,'hsl(190 60% 60%)',0.4]],tint:[[72,26,12,190,50,0.25]]}),
+ // 우물지기: the giant catfish that remembers every coin
+ '4-8':S96([
+   ...simpleFish({cx:46,cy:36,rx:32,ry:15,m:M(230,12,22,{step:6}),finM:M(230,10,16),tex:'grain',tail:{type:'fan',len:14,sp:14},dorsal:{type:'low'},dh:8,eye:false,mouth:false}),
+   {t:'px',a:[[28,28,4],[40,38,4],[54,26,4],[62,38,4],[36,44,4]],m:M(45,70,62),ink:false},{t:'px',a:[[30,28,2],[42,38,2],[56,26,2]],m:M(45,60,45),ink:false},
+   {t:'e',a:[76,34,16,11],m:M(230,12,24,{step:6}),rim:true},mouth(70,42,94,40,M(230,8,6)),
+   {t:'line',a:[88,34,94,14],m:M(230,10,34),tone:2,ink:false},{t:'line',a:[92,40,94,60],m:M(230,10,34),tone:2,ink:false},{t:'line',a:[84,32,76,12],m:M(230,10,32),tone:2,ink:false},
+   ...fishEye(83,31,3.6,{h:45,s:50,l:50,sh:45,ss:30,sl:78}),
+ ],{glow:[[84,31,8,'hsl(45 50% 60%)',0.3]]}),
+ // 잊힌 이름: rises at dawn to look for its name
+ '4-9':S96([
+   ...tail(26,32,{type:'fork',len:14,sp:11,m:M(200,12,46)}).map(q=>Object.assign(q,{fade:[26,10]})),
+   ...fishBody({cx:50,cy:32,rx:24,ry:12,m:M(200,14,50,{step:6}),tex:'grain',gill:false}).map(q=>Object.assign(q,{fade:[36,24],holes:[[44,30,2.8],[56,36,2]]})),
+   ...dorsal(38,62,21,9,{type:'soft',m:M(200,12,44)}).map(q=>Object.assign(q,{fade:[48,36]})),
+   {t:'e',a:[72,30,12,9],m:M(200,14,54,{step:6}),rim:true},
+   {t:'px',a:[[70,28,1],[71,28,1],[76,28,1],[77,28,1]],m:M(200,10,30)},{t:'line',a:[70,34,78,34],m:M(200,10,30),tone:1,ink:false},{t:'px',a:[[74,35,0]],m:M(200,10,24)},
+   {t:'px',a:[[82,26,3],[86,20,3],[88,14,3],[92,8,3]],m:M(200,20,80),ink:false},
+   ...pectoral(52,40,{m:M(200,12,44)}),
+ ],{outline:'#2a3040',glow:[[72,30,12,'hsl(200 30% 75%)',0.2]]}),
+ // 밑바닥의 뱀: the Leviathan's shadow
+ '4-10':S96([
+   {t:'poly',a:[[12,32],[18,12],[24,28],[32,8],[38,24],[46,10],[52,26]],m:M(250,22,12),ink:true,tex:'rays',fade:[24,8]},
+   ...eelKit({m:M(250,25,14,{step:5}),tex:'scales',y0:52,y1:12,y2:46,hy:26,th:[2.4,6.8]}),
+   {t:'poly',a:[[52,40],[60,58],[68,52]],m:M(250,20,11),ink:true,tex:'rays'},
+   {t:'px',a:[[86,30,3],[92,30,3],[88,24,3]],m:M(300,40,60),ink:false},{t:'line',a:[94,26,96,22],m:M(300,60,55),tone:2,ink:false},
+   {t:'px',a:[[16,28,3],[28,18,3],[40,26,3],[56,44,3],[72,44,3]],m:M(300,50,45)},
+   ...fishEye(87,23,2.6,{sh:300,ss:80,sl:72,h:300,s:60,l:50,glint:false}),
+ ],{outline:'#4a2e5e',glow:[[88,23,10,'hsl(300 70% 60%)',0.45]],tint:[[88,23,12,300,50,0.3]],spark:[[8,12,'hsl(300 60% 80%)'],[72,60,'hsl(300 60% 80%)']]}),
+ // 리바이어던: only the head fits in the frame
+ '4-11':S96([
+   {t:'poly',a:[[0,12],[16,4],[32,12],[24,24]],m:M(215,18,16,{step:6}),ink:true,tex:'rays'},
+   {t:'poly',a:[[0,20],[92,14],[96,38],[84,44],[0,42]],m:M(215,20,21,{step:7}),tex:'scales',rim:true},
+   {t:'poly',a:[[0,46],[20,48],[40,46],[60,48],[80,46],[92,48],[88,60],[0,60]],m:M(215,16,25,{step:6}),tex:'ridges',rim:true},
+   ...[[12,42,18,54,24,42],[32,42,38,56,44,42],[54,42,60,54,66,42],[76,42,82,54,88,42]].map(([a,b,c,d,e,f])=>({t:'poly',a:[[a,b],[c,d],[e,f]],m:M(50,10,86,{step:6}),ink:true})),
+   ...[[24,50,28,44,32,50],[46,50,50,44,54,50],[68,50,72,44,76,50]].map(([a,b,c,d,e,f])=>({t:'poly',a:[[a,b],[c,d],[e,f]],m:M(50,10,80,{step:6}),ink:true})),
+   dots([[8,24],[24,22],[44,20],[76,22],[16,32],[36,30],[80,32]],M(215,15,12)),
+   {t:'e',a:[58,28,11,7.6],m:M(50,70,58,{step:8}),rim:true},{t:'px',a:[[60,26,0],[60,28,0],[60,30,0],[58,28,0],[62,28,0],[60,27,0],[60,29,0]],m:M(0,0,6),ink:false},{t:'px',a:[[54,24,4],[55,24,4]],m:M(50,40,96),ink:false},
+   {t:'line',a:[44,20,72,20],m:M(215,15,10),tone:0,ink:false,w:2},
+   {t:'px',a:[[90,30,3],[94,24,3],[92,18,3]],m:M(215,30,65),ink:false},
+ ],{outline:'#4a2e5e',glow:[[58,28,14,'hsl(50 60% 60%)',0.45]],tint:[[58,28,16,50,50,0.3]]}),
+ // 창백한 송사리 (새 종): no colour; the lantern shows through
+ '4-12':S96([
+   ...simpleFish({cx:52,cy:34,rx:20,ry:7,m:M(220,6,62,{step:6}),finM:M(220,6,52),tail:{type:'fork',len:12,sp:8},dorsal:{type:'soft'},dh:6,body:{holes:[[48,34,2]]},eye:{sh:0,ss:0,sl:85,h:0,s:0,l:70,glint:false}}),
+   {t:'line',a:[36,34,66,34],m:M(220,6,78),tone:3,ink:false},{t:'px',a:[[50,32,3],[50,36,3],[49,34,3]],m:M(350,40,60),ink:false},
+ ]),
+ // 우물 달팽이 (새 종): a name carved into its shell
+ '4-13':S96([
+   {t:'e',a:[52,46,26,9],m:M(230,10,26,{step:6}),tex:'grain',rim:true},{t:'e',a:[76,40,10,6],m:M(230,10,28,{step:6}),rim:true},
+   {t:'line',a:[82,36,90,22],m:M(230,10,30),tone:1},{t:'line',a:[78,36,84,24],m:M(230,10,30),tone:1},{t:'px',a:[[90,21,0],[84,23,0]],m:M(230,10,14)},
+   {t:'e',a:[44,30,20,16],m:M(230,8,34,{step:7}),tex:'grain',rim:true},
+   {t:'curve',a:[60,30,52,16,38,22],th:[3,1.4],m:M(230,8,22)},{t:'curve',a:[38,22,30,34,42,40],th:[1.6,0.8],m:M(230,8,22)},
+   {t:'px',a:[[34,34,0],[36,34,0],[38,34,0],[40,34,0],[34,36,0],[38,36,0],[44,34,0],[46,34,0],[46,36,0],[50,34,0],[52,34,0],[52,36,0]],m:M(230,8,16)},          // carved letters
+ ]),
+ // 쇠사슬 뱀장어 (새 종): segmented like a chain, once a bucket rope
+ '4-14':S96([
+   ...eelKit({m:M(220,8,26,{step:6}),tex:'plates',y0:48,y1:12,y2:44,hy:30,th:[2.4,6]}),
+   ...[[14,40],[22,26],[32,16],[44,20],[56,32],[66,46],[76,42]].map(([x,y])=>({t:'e',a:[x,y,3,2.2],m:M(220,8,34),ink:true,holes:[[x,y,1.2]]})),
+   {t:'px',a:[[86,28,0],[90,28,0],[88,32,0]],m:M(220,8,10)},
+ ]),
+ // 두레박 게 (새 종): lives in an old bucket
+ '4-15':S96([
+   {t:'line',a:[30,44,26,56],m:M(230,10,26),tone:1,w:2},{t:'line',a:[38,46,36,58],m:M(230,10,26),tone:1,w:2},{t:'line',a:[62,46,66,58],m:M(230,10,26),tone:1,w:2},{t:'line',a:[70,44,76,56],m:M(230,10,26),tone:1,w:2},
+   {t:'poly',a:[[28,20],[72,20],[66,48],[34,48]],m:M(30,22,30,{step:6}),tex:'plates',rim:true},{t:'poly',a:[[26,18],[74,18],[74,24],[26,24]],m:M(215,6,34),ink:true},{t:'poly',a:[[32,40],[68,40],[68,44],[32,44]],m:M(215,6,30),ink:true},
+   {t:'curve',a:[26,20,50,2,74,20],th:[1.4,1.4],m:M(215,6,36)},
+   {t:'e',a:[50,46,20,6],m:M(230,10,32,{step:6}),tex:'grain',rim:true},
+   {t:'curve',a:[32,44,20,38,14,26],th:[3,1.6],m:M(230,10,34)},{t:'poly',a:[[10,20],[18,20],[16,28],[10,28]],m:M(230,10,34),ink:true},
+   {t:'curve',a:[68,44,80,38,86,26],th:[3,1.6],m:M(230,10,36)},{t:'poly',a:[[82,20],[90,20],[90,28],[84,28]],m:M(230,10,36),ink:true},
+   {t:'px',a:[[46,38,0],[46,37,0],[54,38,0],[54,37,0]],m:M(0,0,8)},{t:'px',a:[[45,36,4],[53,36,4]],m:M(0,0,90),ink:false},
+   {t:'px',a:[[40,52,3],[58,54,3],[48,56,3]],m:M(200,20,60),ink:false},
+ ]),
+ // 동전 가오리 (새 종): coins in its back; no wish ever granted
+ '4-16':S96([
+   ...rayKit({cx:50,cy:30,m:M(230,10,26,{step:7}),tex:'grain'}),
+   ...[[40,22],[56,18],[64,30],[44,38],[52,30]].map(([x,y])=>({t:'e',a:[x,y,3,2.4],m:M(45,55,50,{step:8}),ink:true})),
+   {t:'px',a:[[39,21,4],[55,17,4],[63,29,4]],m:M(45,60,85),ink:false},
+ ],{glow:[[52,28,16,'hsl(45 40% 55%)',0.12]]}),
+ // 깊은 곳의 해마 (새 종): no eyes, big ears, sees by sound
+ '4-17':S96([
+   ...seahorseKit({m:M(230,10,30,{step:7})}),
+   {t:'poly',a:[[56,14],[46,2],[60,8]],m:M(230,10,34),ink:true},{t:'poly',a:[[62,12],[64,0],[70,8]],m:M(230,10,34),ink:true},
+   {t:'px',a:[[62,17,0],[63,17,0],[64,17,0]],m:M(230,8,18)},
+   {t:'px',a:[[80,14,3],[86,10,3],[84,18,3],[90,14,3]],m:M(230,10,50)},                                            // sound rings
+ ]),
+ // 우물 아래 성가대 (새 종): several that move as one, singing low
+ '4-18':S96([
+   ...[[20,20],[18,44],[36,12],[34,52]].map(([x,y])=>({t:'e',a:[x,y,10,4],m:M(210,10,34,{step:5}),fade:[x+8,x-10],ink:false})),
+   ...[[20,20],[18,44],[36,12],[34,52]].map(([x,y])=>({t:'px',a:[[x+6,y-1,3]],m:M(210,20,70),ink:false})),
+   ...simpleFish({cx:56,cy:32,rx:22,ry:8,m:M(210,14,42,{step:6}),finM:M(210,12,34),tex:'grain',tail:{type:'fork',len:12,sp:9},dorsal:{type:'soft'},eye:{sh:210,ss:20,sl:90,h:210,s:20,l:70,glint:false}}),
+   {t:'e',a:[76,34,2.4,3.2],m:M(0,0,8),ink:false},                                                                  // open singing mouth
+   {t:'px',a:[[84,24,3],[88,18,3],[90,28,3],[94,22,3]],m:M(210,20,60)},                                            // notes of nothing
+ ],{outline:'#2a3040',glow:[[56,32,22,'hsl(210 30% 60%)',0.12]]}),
+ // 열쇠지기 (새 종): a rusted key in its mouth
+ '4-19':S96([
+   ...simpleFish({cx:46,cy:34,rx:28,ry:14,m:M(230,12,24,{step:7}),finM:M(230,10,18),tex:'grain',tail:{type:'fan',len:16,sp:14},dorsal:{type:'spiny',n:6},dh:12,eyeR:3.4,eye:{h:45,s:50,l:50,sh:45,ss:30,sl:78}}),
+   {t:'line',a:[76,40,94,40],m:M(30,40,32),tone:2,w:2},{t:'e',a:[92,40,4,4],m:M(30,40,34),ink:true,holes:[[92,40,1.6]]},{t:'px',a:[[80,42,2],[80,43,2],[84,42,2],[84,43,2]],m:M(30,40,30)},
+   {t:'px',a:[[88,38,3]],m:M(30,60,55),ink:false},
+ ],{glow:[[66,30,6,'hsl(45 50% 60%)',0.25]]}),
+});
+
+// hero v2: 32x64, facing right, light from the upper-left lantern. Same engine and tone as the fish.
+// Anchor: feet on y≈61, rod hand around (29,38) so the game's rod/line still attach.
+const HW=32,HH=64;
+// shared pieces
+const SKIN=(l=44)=>M(28,22,l,{step:7});
+const SHADOW_FACE=(x,y,w,h)=>({t:'e',a:[x,y,w,h],m:M(0,0,9),flat:true,tones:1,ink:false});
+const EYE_GLINT=(x,y,h,s,l)=>[{t:'px',a:[[x,y,3]],m:M(h,s,l),ink:false}];
+const FACE=(h,sl,l,o={})=>[
+  {t:'e',a:[16,8.6,5.2,1.6],m:M(0,0,9),flat:true,tones:1,ink:false},                          // thin brow shadow under the hat
+  {t:'e',a:[19.5,12.5,1.3,1.3],m:SKIN(30),ink:false},                                           // ear
+  {t:'px',a:[[14,11,0],[15,11,0],[18,11,0],[19,11,0]],m:M(28,20,26),ink:false},                 // eye sockets (shade)
+  {t:'px',a:[[15,12,0],[18,12,0]],m:M(0,0,8),ink:false},                                        // eyes
+  {t:'px',a:[[15,12,2]],m:M(h,sl,l),ink:false},                                                 // a little light in the near eye
+  {t:'px',a:[[17,13,0],[17,14,0]],m:M(28,22,32),ink:false},                                     // nose
+  {t:'px',a:[[17,15,0],[16,15,0]],m:M(28,22,26),ink:false},
+  {t:'line',a:[15,16,18,16],m:M(28,20,28),tone:0,ink:false},                                     // mouth
+  {t:'px',a:[[13,14,0],[19,14,0]],m:M(28,22,36),ink:false},                                     // cheek shade
+];
+const HAND=(x,y)=>({t:'e',a:[x,y,1.6,1.4],m:SKIN(42),ink:true});
+function boots(mat){return[
+  {t:'poly',a:[[10,52],[15,52],[15,61],[9,62]],m:mat,ink:true,tex:'grain'},            // back leg
+  {t:'poly',a:[[16,52],[21,52],[22,62],[16,62]],m:mat,ink:true,tex:'grain'},            // front leg
+  {t:'px',a:[[9,61,0],[10,61,0],[16,61,0],[17,61,0]],m:M(0,0,6)},                        // soles
+]}
+const HERO2={
+ // 도적: hood low, scarf over the mouth, one pale eye. Coin purse and a knife he says is for cutting line.
+ rogue:{w:HW,h:HH,parts:[
+   ...boots(M(25,20,20)),
+   {t:'poly',a:[[9,20],[23,20],[26,56],[4,58],[7,40]],m:M(150,12,22,{step:6}),tex:'grain',rim:true},          // cloak, blown slightly left
+   {t:'poly',a:[[4,58],[8,52],[10,58]],m:M(150,12,22),ink:false},                                             // ragged hem
+   {t:'poly',a:[[12,22],[21,22],[22,44],[12,44]],m:M(28,25,26,{step:6}),tex:'grain',rim:true},                 // leather vest
+   {t:'line',a:[13,30,22,30],m:M(28,20,16),tone:0,ink:false},                                                   // strap
+   {t:'line',a:[12,40,22,40],m:M(28,20,14),tone:0,ink:false},                                                   // belt
+   {t:'px',a:[[17,40,4]],m:M(45,50,55),ink:false},                                                              // buckle
+   {t:'e',a:[11,44,2.4,2.8],m:M(40,30,34),ink:true,tex:'grain'},                                                // coin purse
+   {t:'px',a:[[10,42,0],[12,42,0]],m:M(40,30,20)},
+   {t:'line',a:[22,41,24,48],m:M(215,8,60),tone:3},                                                             // knife blade
+   {t:'px',a:[[22,40,0],[21,40,0]],m:M(28,20,18)},                                                               // its grip
+   {t:'poly',a:[[20,24],[24,26],[30,36],[27,39],[22,32]],m:M(150,12,24,{step:6}),ink:true,tex:'grain'},        // right arm to the rod
+   HAND(28.5,38),
+   {t:'poly',a:[[10,24],[13,26],[12,42],[9,42]],m:M(150,12,20),ink:true,tex:'grain'},                            // back arm
+   {t:'poly',a:[[9,17],[23,17],[25,22],[7,22]],m:M(150,10,30),ink:true},                                        // scarf wrapped high
+   {t:'e',a:[16,12,5,6.5],m:SKIN(42),rim:true},                                                                // head
+   {t:'e',a:[16,10.5,5,3.6],m:M(0,0,9),flat:true,tones:1,ink:false},                                             // upper face lost in the hood
+   {t:'px',a:[[16,14,0]],m:M(28,22,30),ink:false},{t:'line',a:[15,16,18,16],m:M(28,20,26),tone:0,ink:false},
+   {t:'poly',a:[[9,14],[9,5],[14,2],[20,2],[24,6],[24,14],[20,9],[12,9]],m:M(150,12,20,{step:6}),tex:'grain',rim:true}, // hood
+   {t:'poly',a:[[9,14],[12,9],[20,9],[24,14],[22,16],[10,16]],m:M(150,10,12),ink:false},                       // hood's inner dark
+   ...EYE_GLINT(18,12,120,40,78),
+  ],glow:[[18,12,2,'hsl(120 40% 70%)',0.35]]},
+ // 마법사: a bent, wide-brimmed hat; long ash beard; staff with a crystal that lights the left side.
+ mage:{w:HW,h:HH,parts:[
+   ...boots(M(255,10,16)),
+   {t:'curve',a:[4,16,3,38,5,61],th:[0.9,0.9],m:M(30,25,28)},                                                    // staff, held in the back hand
+   {t:'poly',a:[[2,10],[5,4],[8,10],[5,16]],m:M(195,55,56,{step:9}),ink:true,rim:true},                          // crystal
+   {t:'px',a:[[5,6,4]],m:M(195,60,90),ink:false},
+   {t:'poly',a:[[8,20],[24,20],[27,58],[5,58]],m:M(255,22,22,{step:6}),tex:'grain',rim:true},                    // robe
+   {t:'px',a:[[8,55,3],[12,56,3],[16,55,3],[20,56,3],[24,55,3]],m:M(195,50,60),ink:false},                      // runes on the hem
+   {t:'line',a:[9,30,23,30],m:M(255,18,14),tone:0,ink:false},                                                    // sash
+   {t:'poly',a:[[20,24],[24,26],[30,36],[27,39],[22,32]],m:M(255,22,24,{step:6}),ink:true,tex:'grain'},          // sleeve to the rod
+   HAND(28.5,38),
+   {t:'poly',a:[[8,24],[12,26],[10,42],[6,40]],m:M(255,22,20),ink:true,tex:'grain'},                              // back sleeve
+   HAND(5.5,40),
+   {t:'poly',a:[[11,18],[21,18],[20,34],[16,38],[12,34]],m:M(40,8,62,{step:7}),tex:'grain',rim:true},             // long beard
+   {t:'e',a:[16,13,5,6],m:SKIN(44),rim:true},
+   ...FACE(195,50,85),
+   {t:'poly',a:[[1,12],[31,12],[29,15],[3,15]],m:M(255,20,16,{step:6}),ink:true,tex:'grain'},                     // brim
+   {t:'poly',a:[[9,12],[12,1],[20,0],[22,4],[24,12]],m:M(255,20,18,{step:6}),tex:'grain',rim:true},               // crown, bent tip
+   {t:'poly',a:[[20,0],[26,2],[22,4]],m:M(255,20,16),ink:true},
+   {t:'px',a:[[10,13,4],[22,13,4]],m:M(45,50,55),ink:false},                                                      // a worn band
+  ],glow:[[5,8,5,'hsl(195 60% 65%)',0.45]],tint:[[5,8,10,195,50,0.25]]},
+ // 기사: a dented helm with a dark visor slit, chainmail, a torn wine tabard, round shield on the back.
+ knight:{w:HW,h:HH,parts:[
+   ...boots(M(215,6,22)),
+   {t:'e',a:[7,32,5,7],m:M(30,28,28,{step:6}),tex:'plates',ink:true,rim:true},                                    // shield on the back
+   {t:'e',a:[7,32,5,7],m:M(215,6,30),ink:false,holes:[[7,32,4]]},                                                 // iron rim
+   {t:'px',a:[[7,32,3],[7,31,3]],m:M(215,6,52),ink:false},                                                         // boss
+   {t:'poly',a:[[9,20],[23,20],[25,52],[7,52]],m:M(215,6,30,{step:7}),tex:'scales',rim:true},                     // chainmail body
+   {t:'poly',a:[[11,22],[21,22],[22,50],[18,54],[14,50],[10,50]],m:M(355,32,24,{step:6}),tex:'grain',holes:[[14,48,1.2],[20,46,1]]}, // torn tabard
+   {t:'line',a:[11,36,22,36],m:M(28,25,18),tone:0,ink:false},                                                     // belt
+   {t:'px',a:[[16,36,4]],m:M(45,45,50),ink:false},
+   {t:'e',a:[10,22,4,3],m:M(215,8,38,{step:7}),ink:true,rim:true},                                                // pauldrons
+   {t:'e',a:[22,22,4,3],m:M(215,8,40,{step:7}),ink:true,rim:true},
+   {t:'poly',a:[[21,24],[25,26],[30,36],[27,39],[22,32]],m:M(215,6,30,{step:7}),ink:true,tex:'scales'},           // mail sleeve
+   HAND(28.5,38),
+   {t:'poly',a:[[9,24],[13,26],[12,44],[8,44]],m:M(215,6,28),ink:true,tex:'scales'},
+   {t:'poly',a:[[11,17],[21,17],[22,21],[10,21]],m:M(215,6,32),ink:true,tex:'scales'},                            // coif at the neck
+   {t:'e',a:[16,11,6,7],m:M(215,8,40,{step:7}),rim:true,tex:'grain'},                                             // helm
+   {t:'poly',a:[[11,10],[22,10],[22,13],[11,13]],m:M(0,0,8),flat:true,tones:1,ink:false},                         // visor slit
+   {t:'px',a:[[14,11,3],[18,11,3]],m:M(45,30,70),ink:false},                                                        // two glints inside
+   {t:'px',a:[[13,6,0],[14,7,0],[20,5,0],[21,6,0],[12,15,0]],m:M(215,8,24)},                                      // dents
+   {t:'poly',a:[[15,3],[17,3],[17,8],[15,8]],m:M(215,8,46),ink:true},                                              // crest ridge
+   {t:'px',a:[[16,2,2],[16,1,2]],m:M(355,30,30)},                                                                   // torn plume
+  ]},
+ // 음유시인: feathered cap, scarf trailing left, a lute slung on the back.
+ bard:{w:HW,h:HH,parts:[
+   ...boots(M(25,25,22)),
+   {t:'e',a:[7,36,5,7],m:M(30,38,36,{step:6}),tex:'grain',ink:true,rim:true},                                      // lute body
+   {t:'line',a:[7,29,9,18],m:M(30,35,30),tone:1},                                                                   // lute neck
+   {t:'px',a:[[8,18,0],[9,17,0]],m:M(30,30,22)},
+   {t:'line',a:[6,33,6,40],m:M(40,10,70),tone:3,ink:false},{t:'line',a:[8,32,8,41],m:M(40,10,70),tone:3,ink:false}, // strings
+   {t:'px',a:[[7,37,0]],m:M(30,30,14)},                                                                             // sound hole
+   {t:'poly',a:[[10,20],[22,20],[24,44],[8,44]],m:M(280,16,26,{step:6}),tex:'grain',rim:true},                     // doublet
+   {t:'px',a:[[16,24,3],[16,28,3],[16,32,3],[16,36,3]],m:M(45,45,55),ink:false},                                   // buttons
+   {t:'poly',a:[[9,44],[23,44],[22,52],[10,52]],m:M(25,25,30,{step:6}),tex:'grain',rim:true},                      // breeches
+   {t:'poly',a:[[20,24],[24,26],[30,36],[27,39],[22,32]],m:M(280,16,28,{step:6}),ink:true,tex:'grain'},            // sleeve to rod
+   HAND(28.5,38),
+   {t:'poly',a:[[10,24],[13,26],[12,42],[9,42]],m:M(280,16,24),ink:true,tex:'grain'},
+   {t:'curve',a:[14,19,6,22,1,30],th:[1.6,0.6],m:M(20,45,38,{step:6}),tex:'grain'},                                  // scarf trailing in the wind
+   {t:'poly',a:[[10,17],[22,17],[23,21],[9,21]],m:M(20,45,40),ink:true},
+   {t:'e',a:[16,12,5,6.5],m:SKIN(46),rim:true},
+   ...FACE(40,30,88),
+   {t:'poly',a:[[8,9],[10,3],[22,3],[25,9],[22,8],[11,8]],m:M(340,28,26,{step:6}),tex:'grain',rim:true},            // cap
+   {t:'poly',a:[[7,9],[25,9],[24,11],[8,11]],m:M(340,28,20),ink:true},                                               // brim
+   {t:'curve',a:[20,4,26,0,31,2],th:[1.1,0.4],m:M(40,20,72),ink:false},                                             // feather
+  ]},
+ // 드루이드: antler crown, moss on the shoulders, a long beard, a crow that never leaves.
+ druid:{w:HW,h:HH,parts:[
+   {t:'poly',a:[[10,54],[15,54],[15,62],[9,62]],m:SKIN(34),ink:true},                                               // bare feet in wrappings
+   {t:'poly',a:[[16,54],[21,54],[22,62],[16,62]],m:SKIN(36),ink:true},
+   {t:'line',a:[10,57,15,57],m:M(40,15,50),tone:3,ink:false},{t:'line',a:[16,58,22,58],m:M(40,15,50),tone:3,ink:false},
+   {t:'poly',a:[[8,20],[24,20],[27,56],[5,56]],m:M(90,18,22,{step:6}),tex:'grain',rim:true},                        // earth robe
+   {t:'line',a:[9,34,23,34],m:M(30,30,26),tone:0,ink:false},                                                        // rope belt
+   {t:'px',a:[[12,34,2],[20,34,2]],m:M(30,30,34)},
+   {t:'curve',a:[6,24,10,30,8,40],th:[0.8,0.4],m:M(100,30,30)},                                                      // trailing ivy
+   {t:'poly',a:[[20,24],[24,26],[30,36],[27,39],[22,32]],m:M(90,18,24,{step:6}),ink:true,tex:'grain'},               // sleeve to rod
+   HAND(28.5,38),
+   {t:'poly',a:[[8,24],[12,26],[10,42],[6,42]],m:M(90,18,20),ink:true,tex:'grain'},
+   {t:'e',a:[10,21,4,2.4],m:M(100,32,28),tex:'grain',rim:true},                                                     // moss on the shoulders
+   {t:'e',a:[22,21,3.5,2.2],m:M(100,32,30),tex:'grain',rim:true},
+   {t:'px',a:[[9,19,4],[23,19,4]],m:M(335,45,70),ink:false},                                                        // tiny flowers in the moss
+   {t:'poly',a:[[11,17],[21,17],[21,36],[16,41],[11,36]],m:M(40,8,58,{step:7}),tex:'grain',rim:true},                // long beard
+   {t:'e',a:[16,12,5,6.5],m:SKIN(40),rim:true},
+   ...FACE(100,40,80),
+   {t:'poly',a:[[10,8],[22,8],[21,10],[11,10]],m:M(40,10,56),ink:false},                                            // hair line
+   {t:'curve',a:[12,8,9,4,6,0],th:[1,0.5],m:M(35,15,42)},                                                            // antlers, branching
+   {t:'line',a:[9,4,7,5],m:M(35,15,40),tone:2},{t:'line',a:[10,2,12,0],m:M(35,15,40),tone:2},
+   {t:'curve',a:[20,8,23,4,27,1],th:[1,0.5],m:M(35,15,44)},
+   {t:'line',a:[23,4,25,5],m:M(35,15,42),tone:2},{t:'line',a:[22,2,20,0],m:M(35,15,42),tone:2},
+   {t:'px',a:[[6,0,0],[27,1,0]],m:M(35,15,30)},
+   {t:'e',a:[6,18,2.6,2],m:M(240,8,10),ink:true},                                                                     // crow on the back shoulder
+   {t:'e',a:[4,16,1.6,1.5],m:M(240,8,12),ink:true},
+   {t:'px',a:[[3,16,4]],m:M(45,60,70),ink:false},                                                                      // crow's eye
+   {t:'px',a:[[2,17,2]],m:M(40,20,40)},                                                                                 // beak
+  ]},
+};
+
+// ---------- fish & hero rendering (v2 engine) ----------
+const fishHD={},fishSD={};
+function fishCanvasHD(f){return fishHD[f.id]||(fishHD[f.id]=renderFish(FISH3[f.id],f.r))}
+function fishCanvasSD(f){return fishSD[f.id]||(fishSD[f.id]=renderFish(FISH3[f.id],f.r,0.5))}
+function drawFish(g,f,x,y,scale=1){const c=fishCanvasSD(f);g.imageSmoothingEnabled=false;g.drawImage(c,x,y,48*scale,32*scale)}
+function drawFishHD(g,f,x,y,scale=1){const c=fishCanvasHD(f);g.imageSmoothingEnabled=false;g.drawImage(c,x,y,96*scale,64*scale)}
+const heroCache={};
+function heroCanvas(cls,k=1){const key=cls+':'+k;return heroCache[key]||(heroCache[key]=renderFish(HERO2[cls]||HERO2.rogue,null,k))}
+function heroSprite(cls){return {__hero:cls}}
+function drawSprite(g,sp,x,y,scale=1){if(sp.__hero){const c=heroCanvas(sp.__hero,1);g.imageSmoothingEnabled=false;g.drawImage(c,x,y,32*scale,64*scale);return}const{rows,pal}=sp;for(let j=0;j<rows.length;j++){const r=rows[j];for(let i=0;i<r.length;i++){const ch=r[i];if(ch==='.')continue;g.fillStyle=ch==='O'?OUT:(pal[ch]||'#f0f');g.fillRect(x+i*scale,y+j*scale,scale,scale)}}}
+// hero sprites 32x64: muted palette, dithered shading, light from the upper left. One full sprite per class.
 const IPAL={W:'#8a6a48',w:'#5a3f2a',x:'#b08a60',L:'#e8dcc0',G:'#d9b05a',g:'#8a6a2a',R:'#9a2f28',r:'#5e1c18',B:'#3a6a9a',b:'#1f3f60',P:'#d8c8a0',p:'#a08a60',S:'#c8ccd4',s:'#7a8088',K:'#3a3a44',k:'#23232a',N:'#5a8a3a',n:'#365a24',V:'#7a4fb0',v:'#4a2f70',Y:'#fff0a0',C:'#7fd8f0',M:'#e08ab0',T:'#2f7a7a',E:'#f3eee2',e:'#0b0a0e'};
 const ITEM_ART={
  // rods: shaft from bottom-left to top-right, handle style and tip ornament differ by rod
@@ -1033,91 +1793,6 @@ function shade(hex,d){const n=parseInt(hex.slice(1),16);const r=Math.max(0,Math.
 // fish sprites 16x12, shape by rarity, color by hue
 // ---------- fish art (24x16) ----------
 // A species is a silhouette plus a pattern, a fin style, an accent and two hues. The outline is added automatically.
-// silhouette chars: F body, T tail, N fin, E eye, D dorsal/crest, '.' empty. Fish face right.
-const FISH_SIL={
- minnow:[
- '........................','........................','........................','..........FFFFFF........','........FFFFFFFFFF......','.TT...FFFFFFFFFFFFEF....','.TTT.FFFFFFFFFFFFFFFF...','.TTTFFFFFFFFFFFFFFFFF...','.TTT.FFFFFFFFFFFFFFF....','.TT...FFFFFFFFFFFFF.....','........FFFFFFFFF.......','..........FFFF..........','........................','........................','........................','........................'],
- round:[
- '........................','..........DDDD..........','.........DDDDDD.........','.......FFFFFFFFFF.......','......FFFFFFFFFFFF......','.TT..FFFFFFFFFFFFFFF....','.TTT.FFFFFFFFFFFFEFF....','.TTTTFFFFFFFFFFFFFFFF...','.TTTTFFFFFFFFFFFFFFFF...','.TTT.FFFFFFFFFFFFFFF....','.TT..FFFFFFFFFFFFFF.....','......FFFFFFFFFFFF......','.......FFFFFFFFFF.......','.........NNNNN..........','........................','........................'],
- eel:[
- '........................','........................','........................','.TT.....................','.TTTT...................','..TTTTT.................','...FFFFFFF..............','....FFFFFFFFFF..........','......FFFFFFFFFFFF......','.........FFFFFFFFFFFF...','............FFFFFFFEFF..','..............FFFFFFFFF.','................FFFFFF..','........................','........................','........................'],
- jelly:[
- '........................','........FFFFFFFF........','......FFFFFFFFFFFF......','.....FFFFFFFFFFFFFF.....','....FFFFFFFFFFFFFFFF....','....FFFFFFFFFFFFFFFF....','....FFFFFFFFFFFFFFFF....','.....FFFFFFFFFFFFFF.....','......FF.FF.FF.FF.......','......TT.TT.TT.TT.......','.......T.TT..T.TT.......','.......T..T..T..T.......','..........T.....T.......','..........T.............','........................','........................'],
- seahorse:[
- '........................','..........FFFF..........','.........FFFFFFF........','.........FFEFFFFFF......','..........FFFF..........','.........FFFF...........','........FFFFF...........','.......NFFFFF...........','.......NFFFFF...........','........FFFF............','........FFFF............','.........FFF............','.........FFF............','........FFF.............','.......TTT..............','........T...............'],
- ray:[
- '........................','........................','...........FF...........','.........FFFFFF.........','.......FFFFFFFFFF.......','.....FFFFFFFFFFFFFF.....','...FFFFFFFFFFFFFFFFFF...','..FFFFFFFFFEFFEFFFFFFF..','...FFFFFFFFFFFFFFFFFF...','.....FFFFFFFFFFFFFF.....','.......FFFFFFFFFF.......','..........FFFF..........','...........TT...........','...........TT...........','............T...........','............T...........'],
- big:[
- '........................','.........DDDDDDD........','........DDDDDDDDD.......','......FFFFFFFFFFFFF.....','.TT..FFFFFFFFFFFFFFFF...','.TTT.FFFFFFFFFFFFFFFFF..','.TTTTFFFFFFFFFFFFFFEFFF.','.TTTTFFFFFFFFFFFFFFFFFF.','.TTTTFFFFFFFFFFFFFFFFFF.','.TTT.FFFFFFFFFFFFFFFFF..','.TT..FFFFFFFFFFFFFFFF...','......FFFFFFFFFFFFF.....','........NNNNNNNN........','.........NNN............','........................','........................'],
- orb:[
- '........................','........................','.........FFFFFF.........','.......FFFFFFFFFF.......','......FFFFFFFFFFFF......','.....FFFFFFFFFFFFFF.....','.....FFFFFFFFEEFFFF.....','.....FFFFFFFFEEFFFF.....','.....FFFFFFFFFFFFFF.....','......FFFFFFFFFFFF......','.......FFFFFFFFFF.......','.........FFFFFF.........','........................','........................','........................','........................'],
- octo:[
- '........................','.........FFFFFF.........','.......FFFFFFFFFF.......','......FFFFFFFFFFFF......','......FFFFEFFEFFFF......','......FFFFFFFFFFFF......','.......FFFFFFFFFF.......','......TT.TTTT.TT.TT.....','.....TT..TT.TT.T..TT....','....TT..TT..TT..T..T....','....T..TT...T...T...T...','.......T....T...T.......','........................','........................','........................','........................'],
- crab:[
- '........................','........................','...FF..............FF...','..FFF..............FFF..','..FF.....FFFFFF.....FF..','...FF..FFFFFFFFFF..FF...','....FFFFFFFFFFFFFFFF....','.....FFFFFEFFFFEFFF.....','.....FFFFFFFFFFFFFF.....','......FFFFFFFFFFFF......','....T..T.T....T.T..T....','...T..T...T..T...T..T...','........................','........................','........................','........................'],
- turtle:[
- '........................','........DDDDDDDD........','......DDDDDDDDDDDD......','.....DDDDDDDDDDDDDD.....','....DDDDDDDDDDDDDDDD....','...FDDDDDDDDDDDDDDDDF...','..FFFDDDDDDDDDDDDDDFFFF.','..FFFFFFFFFFFFFFFFFFFEF.','...FF.FFFFFFFFFFFF.FFFF.','...F...FF......FF...FF..','........................','........................','........................','........................','........................','........................'],
- shrimp:[
- '........................','........................','..............FFFF......','............FFFFFFFF....','..........FFFFFFFFFEFF..','........FFFFFFFFFFFFF...','......FFFFFFFFFFFF......','.....FFFFFFFFFFF........','....FFFFFFFFF...........','....FFFFFFF.............','.....TTTT...............','....T.TT.T..............','...T..TT..T.............','......T.................','........................','........................'],
- skull:[
- '........................','........................','.......FFFFFFFFF........','.....FFFFFFFFFFFFF......','.TT.FFFFFFFFFFFFFFF.....','.TTTFFFFEEFFFFEEFFF.....','.TTTFFFFEEFFFFEEFFFF....','.TTTFFFFFFFFFFFFFFFF....','.TT..FFFFFFFFFFFFFF.....','......FFFFFFFFFFFF......','......F.F.F.F.F.F.......','........................','........................','........................','........................','........................'],
- serpent:[
- '........................','..TT....................','..TTTT..................','...FFFFFF...............','....FFFFFFFFF...........','......FFFFFFFFFFF.......','.........FFFFFFFFFF.....','............FFFFFFFFF...','...........DDFFFFFFFFF..','..........DFFFFFFFEFFF..','...........FFFFFFFFFFFF.','.............FFFFFFFF...','........................','........................','........................','........................'],
- star:[
- '........................','...........FF...........','...........FF...........','..........FFFF..........','..........FFFF..........','...FFFFFFFFFFFFFFFFFF...','....FFFFFFFFFFFFFFFF....','......FFFFFFFFFFFF......','........FFFFFFFF........','.......FFFFFFFFFF.......','......FFFFF..FFFFF......','.....FFFF......FFFF.....','....FFF..........FFF....','........................','........................','........................'],
-};
-// per species: silhouette, pattern, fin style, accent, hue, hue2 (fins/pattern)
-// pattern: plain, belly, stripes, spots, scales, gradient, bands, glow
-const FISH_STYLE={
- '0-0':['minnow','belly',0,150],'0-1':['minnow','plain',1,200],'0-2':['shrimp','bands',0,30],'0-3':['crab','spots',0,210],'0-4':['round','scales',1,45],'0-5':['round','glow',0,190],'0-6':['turtle','spots',0,95],'0-7':['big','gradient',1,230],'0-8':['eel','stripes',0,260],'0-9':['skull','plain',1,40],'0-10':['big','scales',2,40],'0-11':['orb','glow',3,200],
- '1-0':['minnow','spots',1,330],'1-1':['minnow','belly',0,180],'1-2':['shrimp','plain',1,190],'1-3':['seahorse','bands',0,270],'1-4':['minnow','glow',1,55],'1-5':['crab','spots',1,340],'1-6':['star','spots',1,320],'1-7':['turtle','scales',0,110],'1-8':['round','stripes',1,30],'1-9':['serpent','bands',1,150],'1-10':['big','gradient',2,160],'1-11':['orb','glow',3,195],
- '2-0':['minnow','gradient',0,20],'2-1':['big','plain',0,0],'2-2':['crab','plain',0,10],'2-3':['round','spots',1,15],'2-4':['shrimp','bands',0,5],'2-5':['jelly','glow',1,25],'2-6':['eel','stripes',1,250],'2-7':['eel','glow',1,20],'2-8':['turtle','scales',1,10],'2-9':['skull','plain',1,30],'2-10':['serpent','scales',2,0],'2-11':['serpent','glow',3,20],
- '3-0':['minnow','scales',0,215],'3-1':['crab','spots',0,230],'3-2':['shrimp','glow',1,260],'3-3':['jelly','gradient',1,280],'3-4':['minnow','stripes',1,210],'3-5':['octo','spots',1,265],'3-6':['ray','gradient',1,225],'3-7':['turtle','glow',1,55],'3-8':['star','plain',1,45],'3-9':['skull','glow',2,195],'3-10':['big','spots',2,235],'3-11':['orb','glow',3,50],
- '4-0':['round','plain',0,250],'4-1':['crab','plain',0,240],'4-2':['shrimp','plain',1,40],'4-3':['eel','gradient',0,230],'4-4':['jelly','plain',0,260],'4-5':['orb','glow',1,300],'4-6':['turtle','scales',1,220],'4-7':['skull','glow',2,120],'4-8':['big','stripes',2,255],'4-9':['jelly','glow',2,190],'4-10':['serpent','bands',3,280],'4-11':['big','scales',3,200],
-};
-const fishCache={};
-function fishCanvas(f){
-  if(fishCache[f.id])return fishCache[f.id];
-  const [silName,pat,fin,hue]=FISH_STYLE[f.id]||['minnow','plain',0,f.hue];const sil=FISH_SIL[silName];
-  const r=f.r,sat=[34,46,56,64,72][r],lum=[40,46,48,52,56][r];
-  const h2=(hue+(r>=2?40:20))%360;
-  const col=(l,s=sat,hh=hue)=>`hsl(${hh} ${s}% ${l}%)`;
-  const oc=document.createElement('canvas');oc.width=24;oc.height=16;const g=oc.getContext('2d');
-  const px=(x,y,c)=>{g.fillStyle=c;g.fillRect(x,y,1,1)};
-  const rows=sil;let minY=16,maxY=0;for(let y=0;y<16;y++)for(let x=0;x<24;x++)if(rows[y][x]!=='.'){minY=Math.min(minY,y);maxY=Math.max(maxY,y)}
-  for(let y=0;y<16;y++)for(let x=0;x<24;x++){const ch=rows[y][x];if(ch==='.')continue;
-    const k=(y-minY)/Math.max(1,maxY-minY);
-    let c=col(lum);
-    if(ch==='T')c=col(lum-10,sat,h2);else if(ch==='N'||ch==='D')c=col(lum-4,sat+10,h2);
-    else{
-      if(pat==='belly'&&k>0.62)c=col(lum+20,sat-10);
-      if(pat==='gradient')c=col(lum-14+k*30);
-      if(pat==='stripes'&&(x%4===0||x%4===1)&&k>0.15&&k<0.9)c=col(lum-16);
-      if(pat==='bands'&&(x%5<2))c=col(lum-14,sat,h2);
-      if(pat==='spots'&&nz(x,y,f.spot*7+1)>0.78)c=col(lum-18,sat,h2);
-      if(pat==='scales'&&((x+y)%2===0)&&k>0.2&&k<0.85)c=col(lum+9);
-      if(pat==='glow'){c=col(lum+Math.round(Math.sin(x*0.9+y*0.6)*6));if(nz(x,y,f.spot*7+2)>0.86)c=col(lum+30,sat+15,h2)}
-      if(k<0.18&&pat!=='gradient')c=col(lum-10);
-      if(ch==='E'){c=r>=3?col(85,60,h2):'#f3eee2'}
-    }
-    px(x,y,c);
-  }
-  // eye pupil
-  for(let y=0;y<16;y++)for(let x=0;x<24;x++)if(rows[y][x]==='E'&&(x+1>=24||rows[y][x+1]!=='E'))px(x,y,'#0b0a0e');
-  // fin style: 0 none, 1 top spines, 2 trailing streamers, 3 crown/glow dots
-  if(fin>=1)for(let x=4;x<20;x+=3){const y=rows.findIndex(rw=>rw[x]!=='.');if(y>1&&rows[y][x]==='F'){px(x,y-1,col(lum-6,sat+10,h2));if(fin>=2)px(x,y-2,col(lum-2,sat+10,h2))}}
-  if(fin>=2){for(let y=5;y<11;y++)if(rows[y][1]==='T'||rows[y][2]==='T')px(0,y,col(lum-8,sat,h2))}
-  if(fin>=3){[[2,2],[21,2],[2,13],[21,13],[11,0],[12,15]].forEach(([x,y])=>{if(rows[y][x]==='.')px(x,y,col(80,70,h2))})}
-  // outline pass
-  const img=g.getImageData(0,0,24,16),d=img.data,out=new Uint8ClampedArray(d);const a=(x,y)=>x<0||y<0||x>=24||y>=16?0:d[(y*24+x)*4+3];
-  const oc2=r===4?[70,40,90]:[11,10,14];
-  for(let y=0;y<16;y++)for(let x=0;x<24;x++){if(a(x,y))continue;if(a(x-1,y)||a(x+1,y)||a(x,y-1)||a(x,y+1)){const i=(y*24+x)*4;out[i]=oc2[0];out[i+1]=oc2[1];out[i+2]=oc2[2];out[i+3]=255}}
-  img.data.set(out);g.putImageData(img,0,0);
-  // mythic aura sparkles
-  if(r===4){g.fillStyle=col(88,80,h2);[[1,3],[22,12],[20,1],[3,13]].forEach(([x,y])=>g.fillRect(x,y,1,1))}
-  fishCache[f.id]=oc;return oc;
-}
-function drawFish(g,f,x,y,scale){const c=fishCanvas(f);g.imageSmoothingEnabled=false;g.drawImage(c,x,y,24*scale,16*scale)}
 // scene (288x192, 32px tiles)
 const cv=$('scene'),cx=cv.getContext('2d');const W=288,H=192,T=32;
 const C={st:'#44404a',st2:'#302d35',st3:'#56525c',st4:'#625e68',mt:'#201e25',bk:'#4d3f3a',bk2:'#33292a',bk3:'#5f4e47',bk4:'#6c5a50',bk5:'#423632',wa:'#0d1d2c',wa2:'#091521',wa3:'#16314a',wa4:'#2b5068',wd:'#55392a',wd2:'#36241a',wd3:'#6e4e36',wd4:'#86634a',wd5:'#45301f',ir:'#30303a',ir2:'#5a5a66',mo:'#38502e',mo2:'#2a3c22'};
@@ -1273,7 +1948,7 @@ function drawScene(g,t){
   if(bite&&bitePop&&bt<2600){const f=fishById(bitePop.id);const k=Math.min(1,bt/200),fade=bt>2200?1-(bt-2200)/400:1;g.globalAlpha=fade;
     const cw=112,chh=80,cx0=172,cy0=8-Math.floor((1-k)*8);
     g.fillStyle='rgba(8,6,12,0.88)';g.fillRect(cx0,cy0,cw,chh);g.fillStyle=TIER[Math.min(5,f.r+1)];g.fillRect(cx0,cy0,cw,2);g.fillRect(cx0,cy0+chh-2,cw,2);g.fillRect(cx0,cy0,2,chh);g.fillRect(cx0+cw-2,cy0,2,chh);
-    drawFish(g,f,cx0+8,cy0+8,4);g.globalAlpha=1;
+    drawFishHD(g,f,cx0+8,cy0+8,1);g.globalAlpha=1;
     if(pop){pop.hidden=false;pop.style.opacity=fade;pop.innerHTML=`<b class="r${f.r}">${f.name}</b><span>${RAR[f.r]} · ${bitePop.cm}cm</span>`}}
   else if(pop&&!pop.hidden)pop.hidden=true;
 }
@@ -1352,7 +2027,7 @@ function frame(t){
 // aquarium: fish drift back and forth in a stone tank
 const tankSwim={};
 function drawTank(g,t){
-  g.fillStyle='#0a1a26';g.fillRect(0,0,144,56);
+  g.setTransform(2,0,0,2,0,0);g.fillStyle='#0a1a26';g.fillRect(0,0,144,56);
   for(let i=0;i<144;i+=3)for(let j=0;j<56;j+=3)if(nz(i,j,9)<0.06){g.fillStyle='#0d2231';g.fillRect(i,j,2,1)}
   g.fillStyle='#14314a';for(let i=0;i<6;i++){const x=(i*31+Math.floor(t/400))%150-4;g.fillRect(x,6+i*8,3,1)}
   g.fillStyle='#3a3340';g.fillRect(0,50,144,6);g.fillStyle='#4a4250';for(let i=0;i<144;i+=7)g.fillRect(i+(i%14?2:0),51,3,1);
@@ -1360,8 +2035,8 @@ function drawTank(g,t){
   g.fillStyle='rgba(120,180,220,0.08)';g.fillRect(0,0,144,2);
   curTank().forEach((c,i)=>{const f=fishById(c.id);const key=S.tankSel+':'+i;const sw=tankSwim[key]||(tankSwim[key]={x:Math.random()*120,y:6+Math.random()*34,dir:1,sp:.08+Math.random()*.1,ph:Math.random()*6});
     sw.x+=sw.dir*sw.sp;if(sw.x>118){sw.dir=-1}if(sw.x<2){sw.dir=1}const y=sw.y+Math.sin(t/900+sw.ph)*2;
-    g.save();if(sw.dir<0){g.translate(Math.floor(sw.x)+24,Math.floor(y));g.scale(-1,1);drawFish(g,f,0,0,1)}else drawFish(g,f,Math.floor(sw.x),Math.floor(y),1);g.restore()});
-  g.fillStyle='rgba(0,0,0,0.35)';g.fillRect(0,0,144,1);g.fillRect(0,0,1,56);g.fillRect(143,0,1,56);
+    g.save();g.setTransform(1,0,0,1,0,0);const fx=Math.floor(sw.x)*2,fy=Math.floor(y)*2;if(sw.dir<0){g.translate(fx+48,fy);g.scale(-1,1);drawFish(g,f,0,0,1)}else drawFish(g,f,fx,fy,1);g.restore()});
+  g.fillStyle='rgba(0,0,0,0.35)';g.fillRect(0,0,144,1);g.fillRect(0,0,1,56);g.fillRect(143,0,1,56);g.setTransform(1,0,0,1,0,0);
 }
 requestAnimationFrame(frame);
 // logic also runs on a plain interval, so catches and the goal still fire while the tab is in the background (rAF pauses there)

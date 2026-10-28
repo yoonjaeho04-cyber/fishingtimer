@@ -75,3 +75,14 @@
 - 2026-10-28 해상도 2배 실험: `renderFish(spec, r, 2)`로 같은 정의를 96×64로 뽑을 수 있게 함(`scaleSpec`: 좌표·두께·구멍·빛 번짐 전부 k배, 질감 무늬는 원래 크기 유지, 명암 디더링만 촘촘해짐). `tools/fishmock/hd.html` → `hd.png`가 12종 비교. 화면 크기는 같고 점 밀도 4배.
   - 바로 쓸 수 있는 곳: 도감 칸·상세, 귀항 창, 입질 팝업(DOM canvas라 CSS 크기만 같게 두면 됨).
   - 장면(헤엄·어항)은 288×192 격자라 그대로는 안 됨. 장면 캔버스를 576×384로 올리고 나머지를 2배로 그리면 가능(레티나에서만 실제 디테일, 1배 모니터는 평균됨). 그러면 캐릭터도 heroes.js를 k=2로 뽑아 같이 올리는 게 맞음(점 밀도 섞임 방지).
+
+### 2026-10-28 물고기 v2·캐릭터 v2 게임 통합 완료
+사용자 결정: 도감·팝업은 96×64, 캐릭터는 얼굴만 고치기, 물고기는 96×64 기준으로 형태 분명하게 다시, 맵 단계가 오를수록 종 수 늘리기.
+- **종 수**: 안개 호수 12 · 요정의 샘 14 · 잉걸불 협곡 16 · 별이 진 바다 18 · 심연의 우물 20 = **80종**. 새 종은 각 낚시터 목록 끝에 붙여서 기존 id(`spot-index`)와 저장 기록이 그대로 유지됨. 새 종 이름·설정은 `SPOTS` 표에 있음(달빛 송사리, 요정 등불고기, 재가오리, 숯불 달팽이, 용암 거머리, 잿빛 재판관, 혜성 청어, 소라별, 별자리 해마, 달무리 복어, 은하수 장어, 바다의 등대, 창백한 송사리, 우물 달팽이, 쇠사슬 뱀장어, 두레박 게, 동전 가오리, 깊은 곳의 해마, 우물 아래 성가대, 열쇠지기).
+- **그리는 방식**: `tools/fishmock/kits.js`의 부품 세트(simpleFish·fishBody·tail·dorsal·pectoral·fishEye·crabKit·shrimpKit·turtleKit·jellyKit·eelKit·octoKit·rayKit·starKit·seahorseKit)를 96×64 좌표로 조합. 종 정의는 `species96.js`(`FISH3`), 캐릭터는 `heroes.js`(`HERO2`). 이 세 파일과 엔진 `fish2.js`가 index.html 안에 그대로 들어가 있음(`const OUT=` 바로 뒤). **고칠 때는 tools 쪽을 고치고 index.html의 같은 블록을 통째로 바꿔 넣을 것.**
+- **해상도**: 같은 정의를 `renderFish(spec, r)`로 96×64, `renderFish(spec, r, 0.5)`로 48×32로 뽑음. 도감 칸·도감 상세·귀항 창·어항 목록·입질 팝업은 96×64(`drawFishHD`), 장면 안 헤엄·어항 수조는 48×32(`drawFish`). 어항 수조 캔버스는 288×112로 올리고 배경은 2배로 그림.
+- **캐릭터**: `heroSprite(cls)`는 `{__hero}`만 돌려주고 `drawSprite`가 `heroCanvas(cls,1)`(32×64)로 그림. 선택 화면은 `heroCanvas(cls,2)`(64×128). 얼굴은 눈썹 그늘+눈 두 점+코+입. 옛 `HERO_ROWS/HERO_PAL/FISH_SIL/FISH_STYLE/fishCanvas`는 삭제.
+- **UI**: `.slot.fish` 104×76, 도감 상세 카드는 세로 배치(그림 192×136 위, 정보 아래), 귀항 줄 96px.
+- 확인: Playwright로 도감(53/80 표시), 어항 탭, 귀항 창, 입질 팝업(리바이어던), 캐릭터 선택, 폰 폭(375px) 도감까지 콘솔 오류 없음. 캡처는 세션에서 사용자에게 전달.
+- 도구: `python3 tools/fishmock/build.py`가 index.html에서 SPOTS·nz·OUT을 뽑아 `old.js`로 만들고, `s96shot.js`(전체 시트), `pick96.js <id...>`(골라 보기), `heroshot.js`(캐릭터 시트+장면 확인). 옛 48×32 도구는 삭제.
+- 다음 할 일: 사용자 피드백 받아 종별 손질 → 폰 화면 켜둠(wake lock) → 2차 의뢰판 시안.

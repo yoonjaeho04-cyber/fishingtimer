@@ -6,13 +6,12 @@ h1{font-size:15px;color:#d9b05a;margin:0 0 4px}.hd{color:#7d7488;font-size:11px;
 .row{display:flex;gap:8px;align-items:flex-end}
 canvas{image-rendering:pixelated;background:#0e1a28;display:block}
 .n{font-size:13px}.n small{color:#7d7488;margin-left:4px}</style>
-<h1>캐릭터 디자인 시안 — 물고기와 같은 엔진·톤</h1><div class="hd">위: 지금(32×64, 2배) · 아래: 새 디자인 4배 / 2배(선택 화면 크기) / 1배(장면 크기)</div>
+<h1>캐릭터 디자인 시안 — 물고기와 같은 엔진·톤</h1><div class="hd">64×128을 2배로 · 아래: 32×64 2배 / 64×128 1배(선택 화면) / 32×64 1배(장면)</div>
 <div class="g" id="g"></div>
-<script src="oldhero.js"></script><script src="fish2.js"></script><script src="heroes.js"></script>
+<script src="old.js"></script><script src="fish2.js"></script><script src="heroes.js"></script>
 <script>
 const CH=[['rogue','도적'],['mage','마법사'],['knight','기사'],['bard','음유시인'],['druid','드루이드']];
 CH.forEach(([id,name])=>{const c=document.createElement('div');c.className='c';const n=document.createElement('div');n.className='n';n.textContent=name;c.append(n);
- const o=document.createElement('canvas');o.width=32;o.height=64;o.style.cssText='width:64px;height:128px';drawSprite(o.getContext('2d'),heroSprite(id),0,0);c.append(o);
- const cv=renderFish(HERO2[id]);const mk=sc=>{const k=document.createElement('canvas');k.width=32;k.height=64;k.style.cssText=`width:${32*sc}px;height:${64*sc}px`;k.getContext('2d').drawImage(cv,0,0);return k};
- const big=mk(4);c.append(big);const r=document.createElement('div');r.className='row';r.append(mk(2),mk(1));c.append(r);g.append(c)});
+ const cv=renderFish(HERO2[id]),cv2=renderFish(HERO2[id],null,2);const mk=(src,w,h,sc)=>{const k=document.createElement('canvas');k.width=w;k.height=h;k.style.cssText=`width:${w*sc}px;height:${h*sc}px`;k.getContext('2d').drawImage(src,0,0);return k};
+ c.append(mk(cv2,64,128,2));const r=document.createElement('div');r.className='row';r.append(mk(cv,32,64,2),mk(cv2,64,128,1),mk(cv,32,64,1));c.append(r);g.append(c)});
 </script>

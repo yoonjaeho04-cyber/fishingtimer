@@ -5,7 +5,17 @@ const HW=32,HH=64;
 const SKIN=(l=44)=>M(28,22,l,{step:7});
 const SHADOW_FACE=(x,y,w,h)=>({t:'e',a:[x,y,w,h],m:M(0,0,9),flat:true,tones:1,ink:false});
 const EYE_GLINT=(x,y,h,s,l)=>[{t:'px',a:[[x,y,3]],m:M(h,s,l),ink:false}];
-const FACE=(h,sl,l)=>[{t:'e',a:[16,9.6,5,1.9],m:M(0,0,9),flat:true,tones:1,ink:false},{t:'px',a:[[14,12,0],[18,12,0]],m:M(0,0,8),ink:false},{t:'px',a:[[19,12,3]],m:M(h,sl,l),ink:false},{t:'px',a:[[16,14,0]],m:M(28,20,30),ink:false},{t:'line',a:[15,16,18,16],m:M(28,20,28),tone:0,ink:false}];
+const FACE=(h,sl,l,o={})=>[
+  {t:'e',a:[16,8.6,5.2,1.6],m:M(0,0,9),flat:true,tones:1,ink:false},                          // thin brow shadow under the hat
+  {t:'e',a:[19.5,12.5,1.3,1.3],m:SKIN(30),ink:false},                                           // ear
+  {t:'px',a:[[14,11,0],[15,11,0],[18,11,0],[19,11,0]],m:M(28,20,26),ink:false},                 // eye sockets (shade)
+  {t:'px',a:[[15,12,0],[18,12,0]],m:M(0,0,8),ink:false},                                        // eyes
+  {t:'px',a:[[15,12,2]],m:M(h,sl,l),ink:false},                                                 // a little light in the near eye
+  {t:'px',a:[[17,13,0],[17,14,0]],m:M(28,22,32),ink:false},                                     // nose
+  {t:'px',a:[[17,15,0],[16,15,0]],m:M(28,22,26),ink:false},
+  {t:'line',a:[15,16,18,16],m:M(28,20,28),tone:0,ink:false},                                     // mouth
+  {t:'px',a:[[13,14,0],[19,14,0]],m:M(28,22,36),ink:false},                                     // cheek shade
+];
 const HAND=(x,y)=>({t:'e',a:[x,y,1.6,1.4],m:SKIN(42),ink:true});
 function boots(mat){return[
   {t:'poly',a:[[10,52],[15,52],[15,61],[9,62]],m:mat,ink:true,tex:'grain'},            // back leg
@@ -31,7 +41,8 @@ const HERO2={
    {t:'poly',a:[[10,24],[13,26],[12,42],[9,42]],m:M(150,12,20),ink:true,tex:'grain'},                            // back arm
    {t:'poly',a:[[9,17],[23,17],[25,22],[7,22]],m:M(150,10,30),ink:true},                                        // scarf wrapped high
    {t:'e',a:[16,12,5,6.5],m:SKIN(42),rim:true},                                                                // head
-   SHADOW_FACE(16,11,5,4.5),                                                                                      // face lost in the hood
+   {t:'e',a:[16,10.5,5,3.6],m:M(0,0,9),flat:true,tones:1,ink:false},                                             // upper face lost in the hood
+   {t:'px',a:[[16,14,0]],m:M(28,22,30),ink:false},{t:'line',a:[15,16,18,16],m:M(28,20,26),tone:0,ink:false},
    {t:'poly',a:[[9,14],[9,5],[14,2],[20,2],[24,6],[24,14],[20,9],[12,9]],m:M(150,12,20,{step:6}),tex:'grain',rim:true}, // hood
    {t:'poly',a:[[9,14],[12,9],[20,9],[24,14],[22,16],[10,16]],m:M(150,10,12),ink:false},                       // hood's inner dark
    ...EYE_GLINT(18,12,120,40,78),
@@ -75,7 +86,7 @@ const HERO2={
    {t:'poly',a:[[11,17],[21,17],[22,21],[10,21]],m:M(215,6,32),ink:true,tex:'scales'},                            // coif at the neck
    {t:'e',a:[16,11,6,7],m:M(215,8,40,{step:7}),rim:true,tex:'grain'},                                             // helm
    {t:'poly',a:[[11,10],[22,10],[22,13],[11,13]],m:M(0,0,8),flat:true,tones:1,ink:false},                         // visor slit
-   {t:'px',a:[[18,11,3]],m:M(45,30,70),ink:false},                                                                 // a glint inside
+   {t:'px',a:[[14,11,3],[18,11,3]],m:M(45,30,70),ink:false},                                                        // two glints inside
    {t:'px',a:[[13,6,0],[14,7,0],[20,5,0],[21,6,0],[12,15,0]],m:M(215,8,24)},                                      // dents
    {t:'poly',a:[[15,3],[17,3],[17,8],[15,8]],m:M(215,8,46),ink:true},                                              // crest ridge
    {t:'px',a:[[16,2,2],[16,1,2]],m:M(355,30,30)},                                                                   // torn plume

@@ -1,0 +1,10 @@
+<!doctype html><meta charset="utf-8"><style>body{margin:0;background:#15121b;color:#cfc6b8;font:12px sans-serif;padding:14px}
+.g{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.c{background:#0c0a10;border:2px solid #2b2434;padding:8px}
+.row{display:flex;gap:10px;align-items:center}canvas{image-rendering:pixelated;background:#0e1a28;display:block}.l{font-size:11px;color:#7d7488;text-align:center;margin-top:3px}</style>
+<body><div class="g" id="g"></div></body>
+<script src="old.js"></script><script src="fish2.js"></script><script src="kits.js"></script><script src="species96.js"></script>
+<script>Object.keys(FISH3).forEach(id=>{const f=fishById(id);const c=document.createElement('div');c.className='c';c.innerHTML=`<b>${f.name}</b>`;const r=document.createElement('div');r.className='row';
+ const a=document.createElement('canvas');a.width=96;a.height=64;a.style.cssText='width:288px;height:192px';a.getContext('2d').drawImage(renderFish(FISH3[id],f.r),0,0);
+ const b=document.createElement('canvas');b.width=48;b.height=32;b.style.cssText='width:96px;height:64px';b.getContext('2d').drawImage(renderFish(FISH3[id],f.r,0.5),0,0);
+ const w1=document.createElement('div');w1.append(a);w1.insertAdjacentHTML('beforeend','<div class="l">96×64 (3배)</div>');const w2=document.createElement('div');w2.append(b);w2.insertAdjacentHTML('beforeend','<div class="l">48×32 장면용 (2배)</div>');
+ r.append(w1,w2);c.append(r);g.append(c)})</script>
