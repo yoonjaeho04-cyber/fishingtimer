@@ -153,6 +153,40 @@ input[type=number]{width:64px;font-family:var(--display)}
 .toast.show{opacity:1}
 #pipVideo{position:absolute;left:0;top:0;width:4px;height:3px;opacity:.02;pointer-events:none}
 @media (prefers-reduced-motion:reduce){.haul .f{transition:none}.bar i{transition:none}}
+
+.tabs button.alert::after{content:"";width:7px;height:7px;background:var(--gold);box-shadow:0 0 6px var(--gold);margin-left:2px;border:1px solid #000}
+.qboard{position:relative;padding:14px 12px 12px;background:repeating-linear-gradient(0deg,#2a1e14 0 22px,#1f160e 22px 24px),#24190f;border:3px solid #120c08;box-shadow:inset 0 0 0 2px #3b2a1a,inset 0 0 24px #000}
+.qhead{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.qhead h3{margin:0;font:18px var(--display);color:var(--gold);text-shadow:2px 2px 0 #000}
+.qboard .hint{color:#a8987a}
+.qgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+@media (max-width:640px){.qgrid{grid-template-columns:1fr}}
+.note{position:relative;background:linear-gradient(#c9b78f,#b4a078);color:#2a1d12;padding:12px 10px 10px;border:1px solid #6b5636;box-shadow:2px 3px 0 #0008,inset 0 0 18px #7a623a88;display:flex;flex-direction:column;gap:6px;min-height:230px}
+.note:nth-child(3n+1){transform:rotate(-1deg)}.note:nth-child(3n+2){transform:rotate(.8deg)}.note:nth-child(3n){transform:rotate(-.5deg)}
+.note::before{content:"";position:absolute;top:-6px;left:50%;width:10px;height:10px;margin-left:-5px;border-radius:50%;background:#7a2a22;box-shadow:0 0 0 2px #2a0f0c,1px 1px 0 #000}
+.note .who{font:11px var(--display);color:#5c4628;letter-spacing:.5px}
+.note h4{margin:0;font:15px var(--display);color:#22160c}
+.note .art{background:#10161f;border:2px solid #3b2a1a;height:72px;display:grid;place-items:center}
+.note .art canvas{width:96px;height:64px;image-rendering:pixelated}
+.note .art .big{font:13px var(--display);color:#d9a35a;text-align:center;padding:0 6px}
+.note .cond{font-size:11px;color:#4a3820}
+.note .prog{display:flex;align-items:center;gap:6px;font:12px var(--display)}
+.note .prog .bar{width:auto;flex:1;height:7px;margin:0;background:#3b2a1a;box-shadow:none;border:1px solid #2a1d12}
+.note .prog .bar i{background:#6a3a1a}
+.note .rew{font-size:12px;border-top:1px dashed #6b5636;padding-top:6px}
+.note .rew b{color:#6a3a10}
+.note .foot{display:flex;justify-content:space-between;align-items:center;margin-top:auto;gap:6px}
+.note .foot .t{font-size:10px;color:#5c4628}
+.note .stamp{position:absolute;right:8px;top:30px;transform:rotate(-14deg);font:16px var(--display);color:#8a2a1a;border:2px solid #8a2a1a;padding:1px 6px;opacity:.85;pointer-events:none}
+.note.done{box-shadow:2px 3px 0 #0008,inset 0 0 18px #7a623a88,0 0 0 2px #d9b05a,0 0 14px #d9b05a66}
+.note.empty{background:none;border:2px dashed #4a3826;box-shadow:none;transform:none;align-items:center;justify-content:center}
+.note.empty::before{display:none}.note.empty .who{color:#8a7458}.note.empty .emptytxt{font:13px var(--display);color:#a8987a}
+.qfoot{display:flex;justify-content:space-between;align-items:center;margin-top:12px;flex-wrap:wrap;gap:8px}
+.rep{display:flex;gap:4px;align-items:center;font:12px var(--display);color:#c9b78f;flex-wrap:wrap}
+.rep i{width:10px;height:10px;background:#3b2a1a;border:1px solid #000;display:inline-block}.rep i.on{background:#d9b05a}
+.qhaul{display:flex;flex-direction:column;gap:4px;padding:6px 8px;background:#1f1810;border:2px solid #4a3826}
+.qhaul .row{justify-content:space-between;font-size:13px}.qhaul .tag{font:10px var(--display);color:var(--gold)}
+.haul .f.quested{border-color:#8a6a2a;background:#241c10;opacity:.75}
 </style>
 
 <div class="game" id="game">
@@ -189,6 +223,7 @@ input[type=number]{width:64px;font-family:var(--display)}
       <button role="tab" data-tab="gear" data-icon="bag" aria-selected="true">장비</button>
       <button role="tab" data-tab="tank" data-icon="tank" aria-selected="false">어항</button>
       <button role="tab" data-tab="codex" data-icon="book" aria-selected="false">도감</button>
+      <button role="tab" data-tab="quest" data-icon="board" aria-selected="false">의뢰</button>
       <button role="tab" data-tab="log" data-icon="quill" aria-selected="false">일지</button>
       <button class="shopBtn" id="shopBtn" data-icon="coins">상점</button>
       <span class="spacer"></span>
@@ -366,7 +401,7 @@ const EQ_SLOTS=[['rod','낚싯대'],['net','그물'],['contract','계약'],['bai
 // ---------- state ----------
 const KEY='mistlake.v2';
 let S=null;
-const fresh=()=>({v:2,savedAt:0,char:null,gold:0,own:{rod0:1,net0:1,con0:1},eq:{rod:'rod0',net:'net0',contract:'con0',bait:null,charm:null,lantern:null},bait:{},maps:[0],tanks:[[]],tankSel:0,codex:{},totalSec:0,days:{},tags:['공부','작업'],lastTag:'공부',spot:0,muted:false,vol:0.5,goalMin:0,breakMin:0,run:null,brk:null,sessions:0,compact:false});
+const fresh=()=>({v:2,q:null,savedAt:0,char:null,gold:0,own:{rod0:1,net0:1,con0:1},eq:{rod:'rod0',net:'net0',contract:'con0',bait:null,charm:null,lantern:null},bait:{},maps:[0],tanks:[[]],tankSel:0,codex:{},totalSec:0,days:{},tags:['공부','작업'],lastTag:'공부',spot:0,muted:false,vol:0.5,goalMin:0,breakMin:0,run:null,brk:null,sessions:0,compact:false});
 function loadLocal(){try{const j=localStorage.getItem(KEY);return j?JSON.parse(j):null}catch(e){return null}}
 S=Object.assign(fresh(),loadLocal()||{});
 if(S.tank&&!S.tanks)S.tanks=[S.tank];if(!S.tanks||!S.tanks.length)S.tanks=[[]];S.tankSel=Math.min(S.tankSel||0,S.tanks.length-1);
@@ -414,8 +449,8 @@ let bite=0,bitePop=null;
 function tickFishing(now){
   const R=S.run;if(!R)return;const spot=SPOTS[R.spot];let changed=false;
   while(R.nextAt<=now){
-    const c=rollFish(spot,(R.nextAt-R.startAt)/1000,R.nextAt);R.catches.push(c);
-    if(Math.random()<eqv('net'))R.catches.push(rollFish(spot,(R.nextAt-R.startAt)/1000,R.nextAt));
+    const c=rollFish(spot,(R.nextAt-R.startAt)/1000,R.nextAt);R.catches.push(c);qOnCatch(c,R.spot);
+    if(Math.random()<eqv('net')){const c2=rollFish(spot,(R.nextAt-R.startAt)/1000,R.nextAt);R.catches.push(c2);qOnCatch(c2,R.spot)}
     R.lastCatchAt=R.nextAt;R.nextAt+=catchInterval()*1000;changed=true;
     if(now-R.lastCatchAt<3000){bite=performance.now();bitePop=c;const r=fishById(c.id).r;audio.chime(r);if(r>=2)setTimeout(()=>say('rare'),900);else if(Math.random()<0.35)setTimeout(()=>say('catch'),900)}
   }
@@ -423,12 +458,12 @@ function tickFishing(now){
 }
 function startRun(){const now=Date.now();S.run={startAt:now,tag:S.lastTag,spot:S.spot,catches:[],nextAt:now+catchInterval()*1000,lastCatchAt:0};S.brk=null;save();renderAll();say('start');nextIdleSay=Date.now()+rand(150,300)*1000}
 function endRun(){say('end');
-  const R=S.run;if(!R)return;const now=Date.now();tickFishing(now);
+  const R=S.run;if(!R)return;const now=Date.now();tickFishing(now);qOnTick(now);
   const sec=Math.max(0,Math.floor((now-R.startAt)/1000));
   const dk=dayKey(new Date(R.startAt));const d=S.days[dk]||(S.days[dk]={sec:0,tags:{}});
   d.sec+=sec;d.tags[R.tag]=(d.tags[R.tag]||0)+sec;S.totalSec+=sec;S.sessions++;
   const done=S.goalMin>0&&sec>=S.goalMin*60;
-  if(done){const sp=SPOTS[R.spot];let c=rollFish(sp,5400,now);if(fishById(c.id).r===0){const f=sp.fish.find(x=>x.r===1);c={id:f.id,cm:Math.round(rand(f.min,f.max))}}R.catches.push(c)}
+  if(done){const sp=SPOTS[R.spot];let c=rollFish(sp,5400,now);if(fishById(c.id).r===0){const f=sp.fish.find(x=>x.r===1);c={id:f.id,cm:Math.round(rand(f.min,f.max))}}R.catches.push(c);qOnCatch(c,R.spot)}
   const newIds=[];const recs=[];
   const haul=R.catches.map(c=>{const f=fishById(c.id);let p=f.price*(1+eqv('contract')+charm('gold'))*(1+Object.keys(S.codex).length*0.01)*(1+(c.cm-f.min)/(f.max-f.min)*0.3);
     if(S.char==='rogue'){p*=1.05;if(Math.random()<0.05)p*=2}
@@ -531,6 +566,8 @@ function renderPane(){
       const d=document.createElement('div');d.className='desc';d.textContent=got?f.lore:'아직 낚아본 적 없는 물고기.';c.append(art,info,d);right.append(c)}
     else{right.innerHTML='<div class="hint">첫 물고기를 낚으면 여기에 카드가 생겨요.</div>'}
     wrap.append(right);p.append(wrap);
+  }else if(tab==='quest'){
+    renderQuest(p);
   }else if(tab==='log'){
     const today=S.days[dayKey()]?.sec||0;
     let week=0;for(let i=0;i<7;i++){const d=new Date();d.setDate(d.getDate()-i);week+=S.days[dayKey(d)]?.sec||0}
@@ -630,14 +667,126 @@ function showHaul(haul,bonusRate,sec,done,newIds,recs){
   const list=o.querySelector('#haulList');const sorted=[...haul].sort((a,b)=>fishById(b.id).r-fishById(a.id).r||b.price-a.price);
   if(S.tanks.length>1&&haul.length){const ts=document.createElement('select');S.tanks.forEach((t,i)=>{const op=document.createElement('option');op.value=i;op.textContent=`${i+1}번 어항 (${t.length}/${tankCap()})`;if(i===S.tankSel)op.selected=true;ts.append(op)});ts.onchange=()=>{S.tankSel=+ts.value;save()};const wrapSel=document.createElement('div');wrapSel.className='row';wrapSel.innerHTML='<span class="hint">넣을 어항</span>';wrapSel.append(ts);list.before(wrapSel)}
   const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;const seen=new Set();
-  const sum=()=>{const g=sorted.filter(c=>!c.tank).reduce((a,c)=>a+c.price,0);const b=Math.round(g*bonusRate);o.querySelector('#haulGold').textContent='+'+g.toLocaleString()+' G';const hb=o.querySelector('#haulBonus');if(hb)hb.textContent='+'+b.toLocaleString()+' G';return g+b};
+  const sum=()=>{const g=sorted.filter(c=>!c.tank&&!c.q).reduce((a,c)=>a+c.price,0);const b=Math.round(g*bonusRate);o.querySelector('#haulGold').textContent='+'+g.toLocaleString()+' G';const hb=o.querySelector('#haulBonus');if(hb)hb.textContent='+'+b.toLocaleString()+' G';return g+b};
   sorted.forEach((c,i)=>{const f=fishById(c.id);const d=document.createElement('button');d.className='f';d.type='button';const cv=document.createElement('canvas');cv.width=96;cv.height=64;drawFishHD(cv.getContext('2d'),f,0,0,1);
     const n=document.createElement('span');n.className='r'+f.r;n.style.textAlign='left';n.textContent=f.name;const cm=document.createElement('span');cm.className='hint';cm.textContent=c.cm+'cm · '+c.price+'G';const tg=document.createElement('span');tg.className='tag';const base=newIds.includes(c.id)&&!seen.has(c.id)?'NEW':(recs.includes(c.id)&&c.cm===S.codex[c.id].best&&!seen.has('r'+c.id)?'기록':'');seen.add(c.id);if(base==='기록')seen.add('r'+c.id);tg.textContent=base;
-    d.append(cv,n,cm,tg);d.onclick=()=>{if(!c.tank){const used=curTank().length+sorted.filter(x=>x.tank).length;if(used>=tankCap()){toast('어항이 가득 찼어요');return}}c.tank=!c.tank;d.classList.toggle('tanked',c.tank);tg.textContent=c.tank?'어항':base;sum()};
+    d.append(cv,n,cm,tg);c.el=d;d.onclick=()=>{if(c.q)return;if(!c.tank){const used=curTank().length+sorted.filter(x=>x.tank).length;if(used>=tankCap()){toast('어항이 가득 찼어요');return}}c.tank=!c.tank;d.classList.toggle('tanked',c.tank);tg.textContent=c.tank?'어항':base;sum()};
     list.append(d);setTimeout(()=>{d.classList.add('in');if(f.r>=2)audio.rare()},reduced?0:120+i*200)});
-  sum();
+  sum();qHaulDeliver(o,sorted,sum);
   o.querySelector('#haulOk').onclick=()=>{const total=sum();S.gold+=total;sorted.filter(c=>c.tank).forEach(c=>curTank().push({id:c.id,cm:c.cm,at:Date.now()}));save();renderTop();renderPane();o.remove()};
 }
+
+// ---------- quest board (의뢰판) ----------
+// Three notices on the inn board. An empty slot gets a new notice after an hour; a notice stays up for a day.
+// Rewards = the work's expected fishing income × (35% + 3% per reputation level), plus (for deliveries) the
+// sale value of the fish handed over, so a notice always pays a little better than just selling.
+const Q_SLOTS=3,Q_POST_MS=60*60000,Q_LIFE_MS=24*3600000;
+const Q_REP=[3,8,15,25,40];
+const Q_CLIENTS=['여관 주인 브람','등대지기 노파','마법사 길드','대장장이 두린','수도원 요리사','늙은 선장 오스릭','요정 사서','우물지기 소년','떠돌이 연금술사','성의 집사'];
+const Q_W=[70,20,7,2.5,0.5],Q_WS=Q_W.reduce((a,b)=>a+b);
+const qPick=a=>a[Math.floor(Math.random()*a.length)];
+const qRepLv=()=>{const x=(S.q&&S.q.xp)||0;let l=0;while(l<Q_REP.length&&x>=Q_REP[l])l++;return l};
+const qSaleMul=()=>(1+eqv('contract')+charm('gold'))*(1+Object.keys(S.codex).length*0.01)*1.15*(S.char==='rogue'?1.05:1);
+const qAvg=(sp,r)=>{const fs=SPOTS[sp].fish.filter(f=>f.r===r);return fs.length?fs.reduce((a,f)=>a+f.price,0)/fs.length:0};
+const qEV=sp=>{let v=0;for(let r=0;r<5;r++)v+=Q_W[r]/Q_WS*qAvg(sp,r);return v*qSaleMul()};
+const qRound=v=>v<100?Math.max(5,Math.round(v/5)*5):v<1000?Math.round(v/10)*10:Math.round(v/50)*50;
+function qReward(sp,catches,extra=0){
+  const k=0.35+qRepLv()*0.03;const gold=qRound(extra+k*catches*qEV(sp));const rw={gold,xp:Math.max(1,Math.min(3,Math.round(catches/6)))};
+  if(Math.random()<0.35){const tierMax=Math.max(...S.maps)+1;const b=ITEMS.filter(i=>i.cat==='bait'&&i.tier<=tierMax&&i.price/2<=gold*0.5).sort((a,c)=>c.price-a.price)[0];
+    if(b){rw.bait=b.id;rw.baitN=10;rw.gold=qRound(gold-b.price/2*0.8)}}
+  return rw}
+function qMakeNote(now){
+  const q=S.q,open=S.maps.slice().sort((a,b)=>a-b);const sp=Math.random()<0.5&&open.includes(S.spot)?S.spot:qPick(open);
+  const kind=qPick(['deliver','deliver','catch','time']);
+  const n={id:++q.seq,kind,spot:sp,client:qPick(Q_CLIENTS),postedAt:now,expireAt:now+Q_LIFE_MS,prog:0,done:false};
+  if(kind==='deliver'){
+    let r=Math.random()<0.7?0:1;let c=SPOTS[sp].fish.filter(f=>f.r===r&&!f.time);if(!c.length){r=0;c=SPOTS[sp].fish.filter(f=>f.r===0&&!f.time)}
+    const f=qPick(c),p=Q_W[r]/Q_WS/c.length,goal=Math.max(1,Math.min(4,Math.round(12*p)));
+    Object.assign(n,{fish:f.id,goal},qReward(sp,goal/p,goal*f.price*qSaleMul()));
+  }else if(kind==='catch'){
+    const R=qRepLv()>=3&&Math.random()<0.3?3:(Math.random()<0.6?1:2);let p=0;for(let r=R;r<5;r++)p+=Q_W[r]/Q_WS;
+    const goal=R===1?3+Math.floor(Math.random()*3):R===2?1+Math.floor(Math.random()*2):1;
+    Object.assign(n,{rar:R,goal},qReward(sp,goal/p));if(R>=3)n.expireAt=now+Q_LIFE_MS*2;
+  }else{
+    const tod=Math.random()<0.4?qPick(['day','night','dusk']):null;const mins=tod==='dusk'?qPick([40,60]):qPick([40,60,90,120]);
+    if(tod){n.tod=tod;n.spot=null}
+    Object.assign(n,{goal:mins*60},qReward(tod?Math.max(...open):sp,mins/10));
+  }
+  return n}
+function qUpdate(now=Date.now()){
+  if(!S.q){S.q={notes:[],nextAt:0,xp:0,done:0,seq:0};for(let i=0;i<Q_SLOTS;i++)S.q.notes.push(qMakeNote(now));save();qBadge();return}
+  const q=S.q;let ch=false;const n0=q.notes.length;q.notes=q.notes.filter(n=>n.done||n.expireAt>now);if(q.notes.length!==n0)ch=true;
+  if(q.notes.length<Q_SLOTS&&!q.nextAt){q.nextAt=now+Q_POST_MS;ch=true}
+  while(q.notes.length<Q_SLOTS&&q.nextAt&&q.nextAt<=now){q.notes.push(qMakeNote(q.nextAt));q.nextAt=q.notes.length<Q_SLOTS?q.nextAt+Q_POST_MS:0;ch=true;toast('의뢰판에 새 의뢰가 붙었어요')}
+  if(q.notes.length>=Q_SLOTS&&q.nextAt){q.nextAt=0;ch=true}
+  if(ch){save();qBadge();if(tab==='quest')renderPane()}
+}
+function qDone(n){if(n.done||n.prog<n.goal)return;n.done=true;n.prog=n.goal;toast('의뢰 완료! 의뢰판에서 보상을 받으세요');audio.rare();qBadge()}
+function qOnCatch(c,spot){if(!S.q)return;const f=fishById(c.id);S.q.notes.forEach(n=>{if(!n.done&&n.kind==='catch'&&n.spot===spot&&f.r>=n.rar){n.prog++;qDone(n)}})}
+function qOnTick(now){
+  if(!S.q||!S.run)return;const R=S.run,last=R.qAt||R.startAt;if(now<=last)return;R.qAt=now;let saveNow=false;
+  S.q.notes.forEach(n=>{if(n.done||n.kind!=='time')return;let add=0;
+    if(n.tod){for(let t=last;t<now;t+=60000){const e=Math.min(now,t+60000);if(timeOfDay(new Date(t).getHours())===n.tod)add+=(e-t)/1000}}
+    else if(n.spot===R.spot)add=(now-last)/1000;
+    if(add>0){const m0=Math.floor(n.prog/60);n.prog=Math.min(n.goal,n.prog+add);if(Math.floor(n.prog/60)!==m0)saveNow=true;qDone(n)}});
+  if(saveNow){save();if(tab==='quest')renderPane()}
+}
+function qClaim(n){
+  const q=S.q,lv0=qRepLv();S.gold+=n.gold;if(n.bait){S.bait[n.bait]=(S.bait[n.bait]||0)+n.baitN;if(!S.eq.bait)S.eq.bait=n.bait}
+  q.xp+=n.xp;q.done++;q.notes=q.notes.filter(x=>x!==n);if(!q.nextAt)q.nextAt=Date.now()+Q_POST_MS;
+  save();renderTop();audio.rare();toast(`의뢰 보상: ${n.gold.toLocaleString()} G${n.bait?' · '+item(n.bait).name+' ×'+n.baitN:''}`);
+  if(qRepLv()>lv0)setTimeout(()=>toast(`여관 평판이 올랐어요 · 의뢰 보상 +${qRepLv()*3}%`),2400);
+  qBadge();renderPane()}
+function qDrop(n){const q=S.q;q.notes=q.notes.filter(x=>x!==n);if(!q.nextAt)q.nextAt=Date.now()+Q_POST_MS;save();qBadge();renderPane()}
+const qRerollCost=()=>qRound(qEV(Math.max(...S.maps))*2.5);
+function qReroll(){const c=qRerollCost();if(S.gold<c||S.q.notes.length>=Q_SLOTS)return;S.gold-=c;S.q.notes.push(qMakeNote(Date.now()));if(S.q.notes.length>=Q_SLOTS)S.q.nextAt=0;save();renderTop();qBadge();renderPane()}
+function qBadge(){const b=document.querySelector('#tabs [data-tab=quest]');if(!b)return;b.classList.toggle('alert',!!(S.q&&S.q.notes.some(n=>n.done)))}
+function qTitle(n){
+  if(n.kind==='deliver')return `${fishById(n.fish).name} ${n.goal}마리 납품`;
+  if(n.kind==='catch')return `${RAR[n.rar]} 이상 ${n.goal}마리 낚기`;
+  return n.tod?`${TIMES[n.tod]}에 ${n.goal/60}분 낚시`:`${SPOTS[n.spot].name}에서 ${n.goal/60}분 낚시`}
+function qCond(n){
+  if(n.kind==='deliver')return `${SPOTS[n.spot].name} · 귀항할 때 어망에서 넘겨요`;
+  if(n.kind==='catch')return `${SPOTS[n.spot].name} · 출항 중에 저절로 세요`;
+  return n.tod?`어느 낚시터든 · ${TIMES[n.tod]} 시간대에 출항`:`${SPOTS[n.spot].name} · 출항 중에 저절로 쌓여요`}
+function qProg(n){return n.kind==='time'?`${Math.floor(n.prog/60)} / ${n.goal/60}분`:`${n.prog} / ${n.goal}마리`}
+function qLeft(ms){const m=Math.max(0,Math.round(ms/60000));return m>=60?`${Math.floor(m/60)}시간 ${m%60}분`:`${m}분`}
+function renderQuest(p){
+  qUpdate();const q=S.q,now=Date.now();
+  const board=document.createElement('div');board.className='qboard';
+  board.innerHTML=`<div class="qhead"><h3>여관 의뢰판</h3><span class="hint">빈 자리에는 한 시간마다 새 의뢰가 붙어요 · 의뢰는 하루 동안 걸려 있어요</span></div>`;
+  const grid=document.createElement('div');grid.className='qgrid';
+  q.notes.forEach(n=>{const d=document.createElement('div');d.className='note'+(n.done?' done':'');
+    const rew=`<b>${n.gold.toLocaleString()} G</b>${n.bait?` · <b>${item(n.bait).name} ×${n.baitN}</b>`:''}`;
+    d.innerHTML=`<div class="who">${n.client}</div><h4>${qTitle(n)}</h4><div class="art"></div><div class="cond">${qCond(n)}</div>
+      <div class="prog"><span>${qProg(n)}</span><div class="bar"><i style="width:${Math.round(n.prog/n.goal*100)}%"></i></div></div>
+      <div class="rew">보상: ${rew}</div><div class="foot"><span class="t">${n.done?'완료됨':qLeft(n.expireAt-now)+' 뒤 내려가요'}</span></div>${n.done?'<div class="stamp">완료</div>':''}`;
+    const art=d.querySelector('.art');
+    if(n.kind==='deliver'){const f=fishById(n.fish);const cv=document.createElement('canvas');cv.width=96;cv.height=64;const g=cv.getContext('2d');drawFishHD(g,f,0,0,1);
+      if(!S.codex[f.id]){g.globalCompositeOperation='source-atop';g.fillStyle='#05070b';g.fillRect(0,0,96,64);g.globalCompositeOperation='source-over'}art.append(cv)}
+    else if(n.kind==='catch')art.innerHTML=`<span class="big r${n.rar}">${RAR[n.rar]} 이상 ×${n.goal}</span>`;
+    else art.innerHTML=`<span class="big">${n.tod?(n.tod==='night'?'☾ ':'☀ ')+TIMES[n.tod]:SPOTS[n.spot].name} · ${n.goal/60}분</span>`;
+    const foot=d.querySelector('.foot');
+    if(n.done){const b=document.createElement('button');b.className='btn primary small';b.textContent='보상 받기';b.onclick=()=>qClaim(n);foot.append(b)}
+    else{const b=document.createElement('button');b.className='btn small';b.textContent='포기';b.title='이 의뢰를 내려요. 한 시간 뒤 새 의뢰가 붙어요';b.onclick=()=>qDrop(n);foot.append(b)}
+    grid.append(d)});
+  for(let i=q.notes.length;i<Q_SLOTS;i++){const d=document.createElement('div');d.className='note empty';d.innerHTML=`<div class="who">빈 자리</div><div class="emptytxt">${q.nextAt?qLeft(q.nextAt-now)+' 뒤 새 의뢰':'곧 새 의뢰'}</div>`;grid.append(d)}
+  board.append(grid);
+  const lv=qRepLv();const f=document.createElement('div');f.className='qfoot';
+  f.innerHTML=`<span class="rep">여관 평판 ${[0,1,2,3,4].map(i=>`<i class="${i<lv?'on':''}"></i>`).join('')} · 완료한 의뢰 ${q.done}${lv?` · 의뢰 보상 +${lv*3}%`:''}</span>`;
+  if(q.notes.length<Q_SLOTS){const cost=qRerollCost();const s=document.createElement('span');s.className='hint';const b=document.createElement('button');b.className='btn small';b.textContent=`지금 새로 받기 · ${cost.toLocaleString()} G`;b.disabled=S.gold<cost;b.onclick=qReroll;s.append(b);f.append(s)}
+  board.append(f);p.append(board)}
+// haul screen: hand fish over to delivery notices
+function qHaulDeliver(o,sorted,sum){
+  if(!S.q)return;const notes=S.q.notes.filter(n=>!n.done&&n.kind==='deliver'&&sorted.some(c=>c.id===n.fish));if(!notes.length)return;
+  const box=document.createElement('div');box.className='qhaul';o.querySelector('#haulList').before(box);
+  const draw=()=>{box.innerHTML='';notes.forEach(n=>{const avail=sorted.filter(c=>c.id===n.fish&&!c.tank&&!c.q);const row=document.createElement('div');row.className='row';
+    const need=n.goal-n.prog;row.innerHTML=`<span class="tag">의뢰</span><span>${n.client}: ${fishById(n.fish).name} ${n.prog}/${n.goal}</span>`;
+    if(n.done){row.insertAdjacentHTML('beforeend','<span class="hint" style="color:var(--good)">완료! 의뢰판에서 보상 받기</span>')}
+    else if(avail.length){const b=document.createElement('button');b.className='btn small primary';const k=Math.min(avail.length,need);b.textContent=`${k}마리 넘기기`;
+      b.onclick=()=>{avail.slice(0,k).forEach(c=>{c.q=true;if(c.el){c.el.classList.add('quested');c.el.querySelector('.tag').textContent='의뢰'}});n.prog+=k;qDone(n);save();sum();draw()};row.append(b)}
+    box.append(row)})};
+  draw()}
 
 // ---------- pixel art ----------
 const OUT='#0b0a0e';
@@ -1789,6 +1938,7 @@ const TAB_ART={
  book:['.OOOOOOOOO..','.OPPPPPPPpO.','.OPGGGGGPpO.','.OPPPPPPPpO.','.OPGGGGGPpO.','.OPPPPPPPpO.','.OPGGGGGPpO.','.OPPPPPPPpO.','.OPGGGGGPpO.','.OpppppppOO.','.OOOOOOOOO..','............'],
  quill:['.........OO.','........OLLO','.......OLLLO','......OLLLO.','.....OLLLO..','....OLLLO...','...OLLLO....','..OLLLO.....','.OLLLO......','.OGGO.......','OGGO........','OOO.........'],
  gear:['....OO.OO...','..OOAAOAAOO.','.OAAaAAAaAAO','.OAaOOOOOaAO','OOAO.....OAO','OAAO.....OAA','OAAO.....OAA','OOAO.....OAO','.OAaOOOOOaAO','.OAAaAAAaAAO','..OOAAOAAOO.','....OO.OO...'],
+ board:['............','OOOOOOOOOOOO','OWWWWWWWWWWO','OWOOOOFOOOWO','OWOLLLLLLOWO','OWOLggggLOWO','OWOLLLLLLOWO','OWOLggggLOWO','OWOLLLLLLOWO','OWOOOOOOOOWO','OWWWWWWWWWWO','OOOOOOOOOOOO'],
  coins:['............','...OOOO.....','..OGGGGO....','.OGgGGGGO...','.OGGGGGGO...','.OgGGGGgOOO.','..OGGGGOGGO.','..OOOOGGGGGO','....OGgGGGGO','....OGGGGGGO','.....OgGGgO.','......OOOO..'],
 };
 function drawTabIcon(g,kind){const pal={W:'#7a5a3a',w:'#4a3620',G:'#d9b05a',g:'#8a6a2a',L:'#d8ccb0',B:'#1b3a52',F:'#c86a3a',E:'#fff',P:'#5a3a3a',p:'#3a2424',A:'#8a909a',a:'#5a6068'};drawSprite(g,{rows:TAB_ART[kind],pal},0,0)}
@@ -2047,7 +2197,8 @@ requestAnimationFrame(frame);
 function goalReached(){const R=S.run;if(!R||R.goalDone)return;R.goalDone=true;save();audio.fanfare();say('idle');renderTimer();
   const o=overlay(`<h2 style="text-align:center">완주 달성!</h2><div class="hint" style="text-align:center">목표 ${S.goalMin}분을 채웠어요. 귀항하면 완주 보너스가 붙어요.<br>계속 낚시해도 보너스는 유지돼요.</div><div class="row center" style="margin-top:6px"><button class="btn" id="goalGo">계속 낚시</button><button class="btn primary" id="goalEnd">지금 귀항</button></div>`);
   o.querySelector('#goalGo').onclick=()=>o.remove();o.querySelector('#goalEnd').onclick=()=>{o.remove();endRun()}}
-setInterval(()=>{const now=Date.now();if(S.run){tickFishing(now);const s=Math.floor((now-S.run.startAt)/1000);if(S.goalMin&&s>=S.goalMin*60&&!S.run.goalDone)goalReached()}
+let qTickN=0;qUpdate();
+setInterval(()=>{const now=Date.now();if(++qTickN%30===0)qUpdate(now);if(S.run){tickFishing(now);qOnTick(now);const s=Math.floor((now-S.run.startAt)/1000);if(S.goalMin&&s>=S.goalMin*60&&!S.run.goalDone)goalReached()}
   else if(S.brk&&!S.brk.rang&&S.brk.endAt<=now){S.brk.rang=true;audio.bell();toast('다시 출항할 시간이에요');renderTimer();save()}},1000);
 
 // ---------- audio ----------
