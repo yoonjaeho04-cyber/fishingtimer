@@ -2174,6 +2174,9 @@ const mooringHD={pal:PP,rows:[
 const flies=Array.from({length:9},()=>({x:80+Math.random()*200,y:20+Math.random()*160,p:Math.random()*6.28,s:.6+Math.random()*.6}));
 const mist=Array.from({length:5},(_,i)=>({y:30+i*34,o:Math.random()*100,sp:.003+Math.random()*.004}));
 const HX=124,HY=12,BX=208,BY=100;
+// where each painted hero's raised hand is (32x64 sprite coords); the rod grip snaps to it. Code-drawn heroes use (29,38).
+const HERO_HAND={rogue:[27,19],mage:[27,26],knight:[28,23],bard:[28,22],druid:[28,24]};
+const handPos=()=>{const c=S.char||'rogue';return (heroImg&&heroImg[c]&&HERO_HAND[c])||[29,38]};
 function drawScene(g,t){
   if(!base)buildBase();
   drawWater(g,t);
@@ -2193,8 +2196,9 @@ function drawScene(g,t){
   const fishing=!!S.run;const bob=(Math.floor(t/800)%2)*2;
   g.fillStyle='rgba(0,0,0,0.4)';g.fillRect(HX+8,HY+61,20,3);
   drawSprite(g,heroSprite(S.char||'rogue'),HX,HY+bob);
-  if(eqRod&&ITEM_ART[eqRod.id])item2(eqRod,HX+27,HY+8+bob);else{g.fillStyle=C.wd4;for(let i=0;i<28;i++)g.fillRect(HX+29+i,HY+38+bob-i,2,2)}
-  if(fishing){const tipx=HX+57,tipy=HY+8+bob,by=BY+Math.sin(t/700)*2;
+  const [hx,hy]=handPos();const rx=HX+hx-2,ry=HY+hy-30+bob;
+  if(eqRod&&ITEM_ART[eqRod.id])item2(eqRod,rx,ry);else{g.fillStyle=C.wd4;for(let i=0;i<28;i++)g.fillRect(rx+2+i,ry+30-i,2,2)}
+  if(fishing){const tipx=rx+28,tipy=ry,by=BY+Math.sin(t/700)*2;
     g.strokeStyle='rgba(220,220,230,0.4)';g.lineWidth=1;g.beginPath();g.moveTo(tipx+.5,tipy+.5);g.quadraticCurveTo(tipx+12,by,BX+1,by);g.stroke();
     g.fillStyle='#c9c0a8';g.fillRect(BX,by-2,4,2);g.fillStyle='#8a2a22';g.fillRect(BX,by,4,2);g.fillStyle=OUT;g.fillRect(BX-1,by-2,1,4);g.fillRect(BX+4,by-2,1,4);g.fillRect(BX,by-3,4,1);g.fillRect(BX,by+2,4,1);
     if(Math.floor(t/400)%9===0){g.fillStyle='rgba(200,225,240,0.5)';g.fillRect(BX+7,by-6-Math.floor(t/400)%3*2,2,2)}
