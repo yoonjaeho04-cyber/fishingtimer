@@ -526,7 +526,7 @@ function tickFishing(now){
   }
   if(changed)save();
 }
-function startRun(){anim.cast=performance.now();anim.reel=0;const now=Date.now();S.run={startAt:now,tag:S.lastTag,spot:S.spot,catches:[],nextAt:now+catchInterval()*1000,lastCatchAt:0};S.brk=null;save();renderAll();say('start');nextIdleSay=Date.now()+rand(150,300)*1000;wakeLock()}
+function startRun(){const ts=document.getElementById('tagSel');if(ts&&ts.value&&ts.value!=='__new')S.lastTag=ts.value;anim.cast=performance.now();anim.reel=0;const now=Date.now();S.run={startAt:now,tag:S.lastTag,spot:S.spot,catches:[],nextAt:now+catchInterval()*1000,lastCatchAt:0};S.brk=null;save();renderAll();say('start');nextIdleSay=Date.now()+rand(150,300)*1000;wakeLock()}
 function endRun(){say('end');anim.reel=performance.now();anim.cast=0;
   const R=S.run;if(!R)return;const now=Date.now();tickFishing(now);qOnTick(now);
   const sec=Math.max(0,Math.floor((now-R.startAt)/1000));
@@ -556,6 +556,7 @@ function renderTimer(){
     const b=document.createElement('button');b.className='btn primary';b.textContent='귀항';b.onclick=()=>{audio.unlock();endRun()};c.append(b);
     const b2=document.createElement('button');b2.className='btn small';b2.textContent='귀항';b2.onclick=()=>{audio.unlock();S.compact=false;endRun()};cc.append(b2);
   }else{
+    if(S.lastTag&&S.tags.includes(S.lastTag)&&S.tags[0]!==S.lastTag){S.tags=[S.lastTag,...S.tags.filter(x=>x!==S.lastTag)]}
     const sel=document.createElement('select');sel.id='tagSel';S.tags.forEach(t=>{const o=document.createElement('option');o.value=t;o.textContent=t;if(t===S.lastTag)o.selected=true;sel.append(o)});
     const o=document.createElement('option');o.value='__new';o.textContent='+ 새 태그';sel.append(o);
     sel.onchange=()=>{if(sel.value==='__new'){const inp=document.createElement('input');inp.type='text';inp.placeholder='태그 이름';inp.id='newTag';inp.style.width='90px';sel.replaceWith(inp);inp.focus();inp.onkeydown=e=>{if(e.key==='Enter'){const v=inp.value.trim();if(v&&!S.tags.includes(v))S.tags.push(v);if(v)S.lastTag=v;save();renderTimer()}if(e.key==='Escape')renderTimer()};inp.onblur=()=>{if(document.body.contains(inp))renderTimer()}}else{S.lastTag=sel.value;save()}};
@@ -704,7 +705,7 @@ function overlay(html,win){const o=document.createElement('div');o.className='ov
 function showCharSelect(){
   const o=overlay(`<h2>견습 어부를 고르세요</h2><div class="chars" id="chars"></div><div class="row" style="justify-content:flex-end"><button class="btn primary" id="charOk">이 사람으로</button></div>`);
   let pick=S.char||CHARS[0].id;const list=o.querySelector('#chars');
-  CHARS.forEach(c=>{const b=document.createElement('button');b.setAttribute('aria-pressed',c.id===pick);const cv=document.createElement('canvas');cv.width=64;cv.height=128;cv.style.cssText='width:64px;height:128px;image-rendering:pixelated';cv.getContext('2d').drawImage(heroCanvas(c.id,2),0,0);b.append(cv);const d=document.createElement('div');d.innerHTML=`<div class="n">${c.name}</div><div class="d">${c.desc}</div>`;b.append(d);b.onclick=()=>{pick=c.id;list.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b))};list.append(b)});
+  CHARS.forEach(c=>{const b=document.createElement('button');b.setAttribute('aria-pressed',c.id===pick);const cv=document.createElement('canvas');cv.width=64;cv.height=128;cv.style.cssText='width:64px;height:128px';cv.dataset.hero=c.id;paintHeroPick(cv);b.append(cv);const d=document.createElement('div');d.innerHTML=`<div class="n">${c.name}</div><div class="d">${c.desc}</div>`;b.append(d);b.onclick=()=>{pick=c.id;list.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b))};list.append(b)});
   o.querySelector('#charOk').onclick=()=>{S.char=pick;save();o.remove();renderAll();audio.unlock()};
 }
 // ---------- save code (copy / paste) ----------
@@ -1954,7 +1955,8 @@ function drawFish(g,f,x,y,scale=1){const c=fishCanvasSD(f);g.imageSmoothingEnabl
 function drawFishHD(g,f,x,y,scale=1){const c=fishCanvasHD(f);g.imageSmoothingEnabled=false;g.drawImage(c,x,y,96*scale,64*scale)}
 const HERO_ART_V='4';const heroCache={},heroImg={},heroImgTried={};
 // painted hero art from assets/hero/<cls>.png (64x128) and <cls>@2.png (128x256) wins over the code-drawn hero when present
-function loadHeroArt(){CHARS.forEach(c=>{if(heroImgTried[c.id])return;heroImgTried[c.id]=1;[['',''],['@2','2']].forEach(([suf,key])=>{const im=new Image();im.onload=()=>{heroImg[c.id+key]=im;Object.keys(heroCache).forEach(k=>{if(k.startsWith(c.id+':'))delete heroCache[k]});if(typeof renderPane==='function')renderPane()};im.src='assets/hero/'+c.id+suf+'.png?v='+HERO_ART_V})})}
+function paintHeroPick(cv){const g=cv.getContext('2d');g.clearRect(0,0,cv.width,cv.height);g.imageSmoothingEnabled=true;g.imageSmoothingQuality='high';g.drawImage(heroCanvas(cv.dataset.hero,2),0,0,cv.width,cv.height)}
+function loadHeroArt(){CHARS.forEach(c=>{if(heroImgTried[c.id])return;heroImgTried[c.id]=1;[['',''],['@2','2']].forEach(([suf,key])=>{const im=new Image();im.onload=()=>{heroImg[c.id+key]=im;Object.keys(heroCache).forEach(k=>{if(k.startsWith(c.id+':'))delete heroCache[k]});document.querySelectorAll('canvas[data-hero="'+c.id+'"]').forEach(paintHeroPick);if(typeof renderPane==='function')renderPane()};im.src='assets/hero/'+c.id+suf+'.png?v='+HERO_ART_V})})}
 function heroCanvas(cls,k=1){const key=cls+':'+k;if(heroCache[key])return heroCache[key];
   const im=k>=2?(heroImg[cls+'2']||heroImg[cls]):heroImg[cls];
   if(im){const c=document.createElement('canvas');c.width=32*k;c.height=64*k;const g=c.getContext('2d');g.imageSmoothingEnabled=true;g.imageSmoothingQuality='high';g.drawImage(im,0,0,32*k,64*k);return heroCache[key]=c}
