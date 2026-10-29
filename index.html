@@ -2291,7 +2291,7 @@ function frame(t){
   if(S.run&&now>nextIdleSay){if(nextIdleSay)say('idle');nextIdleSay=now+rand(180,420)*1000}
   drawScene(cx,reducedMotion?0:t);if(pipOn||pipStream)drawPip();
   const tk=$('tankCanvas');if(tk)drawTank(tk.getContext('2d'),reducedMotion?0:t);
-  requestAnimationFrame(frame);
+  (typeof docPip!=='undefined'&&docPip&&!docPip.closed?docPip:window).requestAnimationFrame(frame);
 }
 // aquarium: fish drift back and forth in a stone tank
 const tankSwim={};
@@ -2313,7 +2313,7 @@ function goalReached(){const R=S.run;if(!R||R.goalDone)return;R.goalDone=true;sa
   const o=overlay(`<h2 style="text-align:center">완주 달성!</h2><div class="hint" style="text-align:center">목표 ${S.goalMin}분을 채웠어요. 귀항하면 완주 보너스가 붙어요.<br>계속 낚시해도 보너스는 유지돼요.</div><div class="row center" style="margin-top:6px"><button class="btn" id="goalGo">계속 낚시</button><button class="btn primary" id="goalEnd">지금 귀항</button></div>`);
   o.querySelector('#goalGo').onclick=()=>o.remove();o.querySelector('#goalEnd').onclick=()=>{o.remove();endRun()}}
 let qTickN=0;qUpdate();
-setInterval(()=>{const now=Date.now();if(++qTickN%30===0)qUpdate(now);if(S.run){tickFishing(now);qOnTick(now);const s=Math.floor((now-S.run.startAt)/1000);if(S.goalMin&&s>=S.goalMin*60&&!S.run.goalDone)goalReached()}
+setInterval(()=>{const now=Date.now();if(++qTickN%30===0)qUpdate(now);if(S.run){tickFishing(now);qOnTick(now);const s=Math.floor((now-S.run.startAt)/1000);try{const gS=S.goalMin*60;const disp=S.goalMin&&s<gS?gS-s:s;$('clock').innerHTML=fmtClock(disp);$('bigClock').innerHTML=fmtClock(disp);$('status').textContent=statusText()}catch(e){}if(S.goalMin&&s>=S.goalMin*60&&!S.run.goalDone)goalReached()}
   else if(S.brk&&!S.brk.rang&&S.brk.endAt<=now){S.brk.rang=true;audio.bell();toast('다시 출항할 시간이에요');renderTimer();save()}},1000);
 
 // ---------- audio ----------
