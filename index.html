@@ -113,7 +113,13 @@ input[type=number]{width:64px;font-family:var(--display)}
 @keyframes fxRise{from{transform:translateY(20%);opacity:0}15%{opacity:1}85%{opacity:1}to{transform:translateY(-35%);opacity:0}}
 @keyframes fxSweep{0%{background-position:150% 0}60%,100%{background-position:-50% 0}}
 @keyframes fxSpin{to{transform:rotate(360deg)}}
-.haul .f{position:relative;overflow:hidden}
+.haul .f{position:relative;overflow:hidden;flex-shrink:0}
+.tankWrap{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:12px;align-items:stretch}
+@media (max-width:640px){.tankWrap{grid-template-columns:1fr}}
+.tankSide{display:flex;flex-direction:column;gap:4px;background:#0f0c13;border:2px solid var(--bronze3);padding:8px;max-height:260px;overflow:auto;min-width:0}
+.tsp{display:grid;grid-template-columns:48px 1fr auto;gap:8px;align-items:center;font-size:12px;padding:2px 4px;border-left:3px solid currentColor}
+.tsp canvas{width:48px;height:32px}
+.tsp .hint{white-space:nowrap}
 .haul .f.r0,.haul .f.r1,.haul .f.r2,.haul .f.r3,.haul .f.r4{color:var(--fg)}
 .haul .f>.fx{z-index:0}.haul .f>*:not(.fx){position:relative;z-index:1}
 @media (prefers-reduced-motion:reduce){.fx,.fx::before,.fx::after{animation:none!important}}
@@ -635,12 +641,28 @@ function renderPane(){
   }else if(tab==='tank'){
     const sec=document.createElement('div');sec.className='sec';sec.textContent=`${S.tankSel+1}번 어항 ${curTank().length} / ${tankCap()}`;p.append(sec);
     if(S.tanks.length>1){const sw=document.createElement('div');sw.className='cats';S.tanks.forEach((t,i)=>{const b=document.createElement('button');b.textContent=`${i+1}번 어항 · ${t.length}`;b.setAttribute('aria-selected',i===S.tankSel);b.onclick=()=>{S.tankSel=i;save();renderPane()};sw.append(b)});p.append(sw)}
-    const tc=document.createElement('canvas');tc.id='tankCanvas';tc.width=288;tc.height=112;tc.style.cssText='width:100%;max-width:432px;aspect-ratio:144/56;image-rendering:pixelated;border:2px solid var(--bronze3);background:#0a1a26;display:block';p.append(tc);
-    if(!curTank().length){const e=document.createElement('div');e.className='hint';e.textContent='귀항할 때 물고기를 눌러 어항에 넣을 수 있어요. 어항 속 물고기는 팔리지 않고 여기서 헤엄쳐요.';p.append(e)}
+    const wrapT=document.createElement('div');wrapT.className='tankWrap';
+    const tc=document.createElement('canvas');tc.id='tankCanvas';tc.width=288;tc.height=112;tc.style.cssText='width:100%;aspect-ratio:144/56;image-rendering:pixelated;border:2px solid var(--bronze3);background:#0a1a26;display:block';wrapT.append(tc);
+    // right side: which species are in this tank, how many, and the biggest one
+    const side=document.createElement('div');side.className='tankSide';
+    const groups={};curTank().forEach(c=>{const g=groups[c.id]||(groups[c.id]={n:0,best:0});g.n++;g.best=Math.max(g.best,c.cm)});
+    const ids=Object.keys(groups).sort((x,y)=>fishById(y).r-fishById(x).r||groups[y].n-groups[x].n);
+    side.innerHTML=`<div class="sec" style="font-size:12px">들어 있는 어종 ${ids.length}</div>`;
+    if(!ids.length)side.insertAdjacentHTML('beforeend','<div class="hint">아직 비어 있어요.</div>');
+    ids.forEach(id=>{const f=fishById(id),g=groups[id];const r=document.createElement('div');r.className='tsp r'+f.r;const cv=document.createElement('canvas');cv.width=48;cv.height=32;drawFishHD(cv.getContext('2d'),f,0,0,0.5);
+      const n=document.createElement('span');n.className='r'+f.r;n.textContent=f.name;const m=document.createElement('span');m.className='hint';m.textContent=`×${g.n} · 최대 ${g.best}cm`;r.append(cv,n,m);side.append(r)});
+    const total=curTank().reduce((a,c)=>a+tankSellPrice(c),0);if(ids.length)side.insertAdjacentHTML('beforeend',`<div class="hint" style="margin-top:auto">전부 팔면 <span class="gold">${total.toLocaleString()} G</span></div>`);
+    wrapT.append(side);p.append(wrapT);
+    if(!curTank().length){const e=document.createElement('div');e.className='hint';e.textContent='귀항할 때 물고기를 눌러 어항에 넣을 수 있어요. 어항 속 물고기는 여기서 팔거나 의뢰로 넘길 수 있어요.';p.append(e)}
     const list=document.createElement('div');list.className='haul';
-    curTank().forEach((c,i)=>{const f=fishById(c.id);const d=document.createElement('div');d.className='f in r'+f.r;d.style.position='relative';d.append(Object.assign(document.createElement('i'),{className:'fx'}));const cv=document.createElement('canvas');cv.width=96;cv.height=64;drawFishHD(cv.getContext('2d'),f,0,0,1);
+    curTank().forEach((c,i)=>{const f=fishById(c.id);const d=document.createElement('div');d.className='f in r'+f.r;d.style.cssText='position:relative;grid-template-columns:96px 1fr auto auto';d.append(Object.assign(document.createElement('i'),{className:'fx'}));const cv=document.createElement('canvas');cv.width=96;cv.height=64;drawFishHD(cv.getContext('2d'),f,0,0,1);
       const n=document.createElement('span');n.className='r'+f.r;n.textContent=f.name;const cm=document.createElement('span');cm.className='hint';cm.textContent=c.cm+'cm · '+new Date(c.at).toLocaleDateString('ko-KR',{month:'numeric',day:'numeric'});
-      const b=document.createElement('button');b.className='btn small';b.textContent='풀어주기';b.onclick=()=>{curTank().splice(i,1);save();renderPane()};d.append(cv,n,cm,b);list.append(d)});
+      const nm=document.createElement('div');nm.style.cssText='display:flex;flex-direction:column;gap:2px';nm.append(n,cm);
+      const acts=document.createElement('div');acts.className='row';acts.style.cssText='gap:4px;justify-content:flex-end';
+      const price=tankSellPrice(c);const sb=document.createElement('button');sb.className='btn small';sb.textContent=`팔기 ${price.toLocaleString()}G`;sb.onclick=()=>{S.gold+=price;curTank().splice(i,1);save();toast(`${f.name} +${price.toLocaleString()} G`);renderTop();renderPane()};acts.append(sb);
+      const note=tankDeliverNote(c);if(note){const qb=document.createElement('button');qb.className='btn small primary';qb.textContent=`의뢰로 넘기기 (${note.prog}/${note.goal})`;qb.title=note.client;qb.onclick=()=>{curTank().splice(i,1);note.prog++;qDone(note);save();toast(`${note.client}에게 넘겼어요 ${Math.min(note.prog,note.goal)}/${note.goal}`);renderPane()};acts.append(qb)}
+      const b=document.createElement('button');b.className='btn small';b.textContent='풀어주기';b.onclick=()=>{curTank().splice(i,1);save();renderPane()};acts.append(b);
+      d.append(cv,nm,acts);list.append(d)});
     p.append(list);
   }else if(tab==='codex'){
     const n=Object.keys(S.codex).length,tot=allFish().length;
@@ -829,6 +851,8 @@ function qUpdate(now=Date.now()){
   if(q.notes.length>=Q_SLOTS&&q.nextAt){q.nextAt=0;ch=true}
   if(ch){save();qBadge();if(tab==='quest')renderPane()}
 }
+function tankSellPrice(c){const f=fishById(c.id);let p=f.price*(1+eqv('contract')+charm('gold')+perk('pgold')*0.1+(oddCount()>=ODD.length?0.1:0))*(1+Object.keys(S.codex).length*0.01)*(1+(c.cm-f.min)/(f.max-f.min)*0.3);if(S.char==='rogue')p*=1.05;return Math.round(p)}
+function tankDeliverNote(c){return S.q?S.q.notes.find(n=>!n.done&&n.kind==='deliver'&&n.fish===c.id):null}
 function qDone(n){if(n.done||n.prog<n.goal)return;n.done=true;n.prog=n.goal;toast('의뢰 완료! 의뢰판에서 보상을 받으세요');audio.rare();qBadge()}
 function qOnCatch(c,spot){if(!S.q)return;const f=fishById(c.id);S.q.notes.forEach(n=>{if(!n.done&&n.kind==='catch'&&n.spot===spot&&f.r>=n.rar){n.prog++;qDone(n)}})}
 function qOnTick(now){
