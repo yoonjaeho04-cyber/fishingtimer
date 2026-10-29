@@ -1952,7 +1952,7 @@ function fishCanvasSD(f){if(fishSD[f.id])return fishSD[f.id];if(fishImg[f.id]){c
 function fishCanvasXL(f){if(fishImg2[f.id]){const c=document.createElement('canvas');c.width=192;c.height=128;c.getContext('2d').drawImage(fishImg2[f.id],0,0,192,128);return c}return null}
 function drawFish(g,f,x,y,scale=1){const c=fishCanvasSD(f);g.imageSmoothingEnabled=false;g.drawImage(c,x,y,48*scale,32*scale)}
 function drawFishHD(g,f,x,y,scale=1){const c=fishCanvasHD(f);g.imageSmoothingEnabled=false;g.drawImage(c,x,y,96*scale,64*scale)}
-const HERO_ART_V='2';const heroCache={},heroImg={},heroImgTried={};
+const HERO_ART_V='3';const heroCache={},heroImg={},heroImgTried={};
 // painted hero art from assets/hero/<cls>.png (64x128) and <cls>@2.png (128x256) wins over the code-drawn hero when present
 function loadHeroArt(){CHARS.forEach(c=>{if(heroImgTried[c.id])return;heroImgTried[c.id]=1;[['',''],['@2','2']].forEach(([suf,key])=>{const im=new Image();im.onload=()=>{heroImg[c.id+key]=im;Object.keys(heroCache).forEach(k=>{if(k.startsWith(c.id+':'))delete heroCache[k]});if(typeof renderPane==='function')renderPane()};im.src='assets/hero/'+c.id+suf+'.png?v='+HERO_ART_V})})}
 function heroCanvas(cls,k=1){const key=cls+':'+k;if(heroCache[key])return heroCache[key];
