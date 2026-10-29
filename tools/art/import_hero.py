@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Turn a generated character picture (black or transparent background, facing right) into hero sprites.
+"""Turn a generated character picture (or, with --ally, a companion picture into assets/ally at 48x64 and 96x128) (black or transparent background, facing right) into hero sprites.
 
     python3 tools/art/import_hero.py <input> <cls> [--flip]
 
@@ -55,14 +55,16 @@ def lift(im, bright=1.32, contrast=1.10):
 
 def main():
     src,cls=sys.argv[1],sys.argv[2]; flip='--flip' in sys.argv
+    sub='ally' if '--ally' in sys.argv else 'hero'
+    sizes=((48,64,''),(96,128,'@2')) if sub=='ally' else ((64,128,''),(128,256,'@2'))
     im=Image.open(src).convert('RGBA')
     if np.asarray(im)[...,3].min()<255:
         bg=Image.new('RGBA',im.size,(0,0,0,255)); bg.alpha_composite(im); im=bg
     im=crop_content(im)
     if flip: im=im.transpose(Image.FLIP_LEFT_RIGHT)
-    root=os.path.join(os.path.dirname(os.path.abspath(__file__)),'..','..','assets','hero')
+    root=os.path.join(os.path.dirname(os.path.abspath(__file__)),'..','..','assets',sub)
     os.makedirs(root,exist_ok=True)
-    for W,H,suf in ((64,128,''),(128,256,'@2')):
+    for W,H,suf in sizes:
         lift(key_by_flood(fit_bottom_rgb(im,W,H))).save(os.path.join(root,cls+suf+'.png'))
     print('wrote',cls)
 

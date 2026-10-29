@@ -95,6 +95,28 @@ input[type=number]{width:64px;font-family:var(--display)}
 .slot.lock::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(45deg,rgba(0,0,0,.5) 0 3px,transparent 3px 6px)}
 .slot.r0{box-shadow:inset 1px 1px 0 #3a3146,inset -1px -1px 0 #000}
 .slot.r1{border-color:#2b4d66}.slot.r2{border-color:#4a3466}.slot.r3{border-color:#6a5420}.slot.r4{border-color:#6a2a3a}
+/* rarity aura: rare glows, epic pulses with motes, legendary adds a shimmer sweep, mythic adds a turning halo */
+.fx{position:absolute;inset:0;pointer-events:none;overflow:hidden;border-radius:inherit}
+.r1>.fx{box-shadow:inset 0 0 10px rgba(90,166,220,.35)}
+.r2>.fx{box-shadow:inset 0 0 12px rgba(176,127,224,.45);animation:fxPulse 2.6s ease-in-out infinite;--c:176,127,224}
+.r3>.fx{box-shadow:inset 0 0 14px rgba(224,178,78,.55);animation:fxPulse 2.2s ease-in-out infinite;--c:240,200,100}
+.r4>.fx{box-shadow:inset 0 0 16px rgba(232,99,127,.6);animation:fxPulse 1.8s ease-in-out infinite;--c:255,140,170}
+.r2>.fx::before,.r3>.fx::before,.r4>.fx::before{content:"";position:absolute;inset:-20% 0 0 0;background:
+ radial-gradient(1.5px 1.5px at 18% 80%,rgba(var(--c),1),transparent 60%),radial-gradient(1.5px 1.5px at 72% 90%,rgba(var(--c),1),transparent 60%),
+ radial-gradient(1px 1px at 45% 70%,rgba(255,255,255,.9),transparent 60%),radial-gradient(1.5px 1.5px at 88% 60%,rgba(var(--c),.9),transparent 60%),
+ radial-gradient(1px 1px at 30% 95%,rgba(255,255,255,.8),transparent 60%),radial-gradient(1.5px 1.5px at 60% 85%,rgba(var(--c),1),transparent 60%);
+ background-size:100% 100%;animation:fxRise 3.2s linear infinite}
+.r3>.fx::after,.r4>.fx::after{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 35%,rgba(255,240,200,.28) 50%,transparent 65%);background-size:250% 100%;animation:fxSweep 3.4s ease-in-out infinite}
+.r4>.fx::after{background:conic-gradient(from 0deg,transparent,rgba(255,140,170,.25),transparent 30%,rgba(180,140,255,.25),transparent 60%,rgba(255,220,140,.25),transparent 90%);inset:-40%;background-size:auto;animation:fxSpin 6s linear infinite}
+.r3.unk>.fx,.r2.unk>.fx,.r4.unk>.fx,.r1.unk>.fx{display:none}
+@keyframes fxPulse{0%,100%{opacity:.65}50%{opacity:1}}
+@keyframes fxRise{from{transform:translateY(20%);opacity:0}15%{opacity:1}85%{opacity:1}to{transform:translateY(-35%);opacity:0}}
+@keyframes fxSweep{0%{background-position:150% 0}60%,100%{background-position:-50% 0}}
+@keyframes fxSpin{to{transform:rotate(360deg)}}
+.haul .f{position:relative;overflow:hidden}
+.haul .f.r0,.haul .f.r1,.haul .f.r2,.haul .f.r3,.haul .f.r4{color:var(--fg)}
+.haul .f>.fx{z-index:0}.haul .f>*:not(.fx){position:relative;z-index:1}
+@media (prefers-reduced-motion:reduce){.fx,.fx::before,.fx::after{animation:none!important}}
 .r0{color:var(--r0)}.r1{color:var(--r1)}.r2{color:var(--r2)}.r3{color:var(--r3)}.r4{color:var(--r4)}
 /* detail card */
 .card{display:grid;grid-template-columns:104px 1fr;gap:12px;background:#0f0c13;border:2px solid var(--bronze3);box-shadow:inset 0 0 0 1px #000;padding:12px}
@@ -567,7 +589,7 @@ function renderTimer(){
   }
   const ex=document.createElement('button');ex.className='btn small';ex.textContent='펼치기';ex.onclick=()=>{S.compact=false;save();renderAll()};cc.append(ex);
 }
-function slotEl(opts){const s=document.createElement('button');s.className='slot'+(opts.cls?' '+opts.cls:'');s.setAttribute('aria-pressed',!!opts.sel);if(opts.fish)s.classList.add('fish');const cv=document.createElement('canvas');cv.width=opts.fish?96:16;cv.height=opts.fish?64:16;opts.draw(cv.getContext('2d'));s.append(cv);if(opts.cnt!=null){const c=document.createElement('span');c.className='cnt';c.textContent=opts.cnt;s.append(c)}if(opts.title)s.title=opts.title;s.onclick=opts.onclick;return s}
+function slotEl(opts){const s=document.createElement('button');s.className='slot'+(opts.cls?' '+opts.cls:'');s.setAttribute('aria-pressed',!!opts.sel);if(opts.fish)s.classList.add('fish');const cv=document.createElement('canvas');cv.width=opts.fish?96:64;cv.height=opts.fish?64:64;{const x=cv.getContext('2d');if(!opts.fish){x.imageSmoothingEnabled=false;x.scale(4,4)}opts.draw(x)}if(opts.fx)s.append(Object.assign(document.createElement('i'),{className:'fx'}));s.append(cv);if(opts.cnt!=null){const c=document.createElement('span');c.className='cnt';c.textContent=opts.cnt;s.append(c)}if(opts.title)s.title=opts.title;s.onclick=opts.onclick;return s}
 function itemDesc(it){const pc=v=>Math.round(v*100)+'%';
   if(it.cat==='rod')return `던지는 속도 +${pc(it.v)}`;if(it.cat==='net')return `두 마리 확률 ${pc(it.v)}`;if(it.cat==='contract')return `판매가 +${pc(it.v)}`;if(it.cat==='bait')return `희귀 확률 +${pc(it.v)} · 한 마리당 1개`;
   if(it.cat==='ally')return `낚싯줄 하나 더 ${pc(it.v.extra)} · ${SPOTS[it.v.spot].name}에서 +10% · ${TIMES[it.v.tod]}에 +8%`;
@@ -576,7 +598,7 @@ function itemDesc(it){const pc=v=>Math.round(v*100)+'%';
   return '낚시터 개방'}
 function itemCard(it,mode){
   const c=document.createElement('div');c.className='card';
-  const art=document.createElement('div');art.className='art';const cv=document.createElement('canvas');cv.width=16;cv.height=16;drawItem(cv.getContext('2d'),it,0,0);art.append(cv);
+  const art=document.createElement('div');art.className='art';const cv=document.createElement('canvas');cv.width=64;cv.height=64;cv.getContext('2d').scale(4,4);drawItem(cv.getContext('2d'),it,0,0);art.append(cv);
   const info=document.createElement('div');
   const owned=!!S.own[it.id],eq=S.eq[it.cat]===it.id,cnt=S.bait[it.id]||0;
   info.innerHTML=`<h3 style="color:${TIER[it.tier]}">${it.name}</h3><div class="kv"><span>종류</span><span>${CATS[it.cat]}</span><span>효과</span><span>${itemDesc(it)}</span>${it.cat==='bait'?`<span>보유</span><span>${cnt}개</span>`:''}<span>가격</span><span class="gold">${it.price?it.price.toLocaleString()+' G':'-'}</span></div>`;
@@ -616,7 +638,7 @@ function renderPane(){
     const tc=document.createElement('canvas');tc.id='tankCanvas';tc.width=288;tc.height=112;tc.style.cssText='width:100%;max-width:432px;aspect-ratio:144/56;image-rendering:pixelated;border:2px solid var(--bronze3);background:#0a1a26;display:block';p.append(tc);
     if(!curTank().length){const e=document.createElement('div');e.className='hint';e.textContent='귀항할 때 물고기를 눌러 어항에 넣을 수 있어요. 어항 속 물고기는 팔리지 않고 여기서 헤엄쳐요.';p.append(e)}
     const list=document.createElement('div');list.className='haul';
-    curTank().forEach((c,i)=>{const f=fishById(c.id);const d=document.createElement('div');d.className='f in';const cv=document.createElement('canvas');cv.width=96;cv.height=64;drawFishHD(cv.getContext('2d'),f,0,0,1);
+    curTank().forEach((c,i)=>{const f=fishById(c.id);const d=document.createElement('div');d.className='f in r'+f.r;d.style.position='relative';d.append(Object.assign(document.createElement('i'),{className:'fx'}));const cv=document.createElement('canvas');cv.width=96;cv.height=64;drawFishHD(cv.getContext('2d'),f,0,0,1);
       const n=document.createElement('span');n.className='r'+f.r;n.textContent=f.name;const cm=document.createElement('span');cm.className='hint';cm.textContent=c.cm+'cm · '+new Date(c.at).toLocaleDateString('ko-KR',{month:'numeric',day:'numeric'});
       const b=document.createElement('button');b.className='btn small';b.textContent='풀어주기';b.onclick=()=>{curTank().splice(i,1);save();renderPane()};d.append(cv,n,cm,b);list.append(d)});
     p.append(list);
@@ -626,7 +648,7 @@ function renderPane(){
     const wrap=document.createElement('div');wrap.className='shopGrid';const left=document.createElement('div');left.style.cssText='display:flex;flex-direction:column;gap:8px';
     SPOTS.forEach((s,si)=>{const open=S.maps.includes(si);const t=document.createElement('div');t.className='hint';t.style.cssText='font-family:var(--display);color:var(--bronze2)';t.textContent=s.name+(open?'':' · 미개방');left.append(t);
       const g=document.createElement('div');g.className='grid';
-      s.fish.forEach(f=>{const got=S.codex[f.id];g.append(slotEl({fish:true,cls:'r'+f.r+(got?'':' unk'),sel:codexSel===f.id,draw:ctx=>drawFishHD(ctx,f,0,0,1),title:got?f.name:'???',onclick:()=>{codexSel=f.id;renderPane()}}))});left.append(g)});
+      s.fish.forEach(f=>{const got=S.codex[f.id];g.append(slotEl({fish:true,fx:true,cls:'r'+f.r+(got?'':' unk'),sel:codexSel===f.id,draw:ctx=>drawFishHD(ctx,f,0,0,1),title:got?f.name:'???',onclick:()=>{codexSel=f.id;renderPane()}}))});left.append(g)});
     {const t=document.createElement('div');t.className='hint';t.style.cssText='font-family:var(--display);color:#b07fe0';t.textContent=`이변 ${oddCount()}/${ODD.length}`+(oddCount()>=ODD.length?' · 판매가 +10%':' · 하나당 희귀 확률 +1%');left.append(t);
       const g=document.createElement('div');g.className='grid';ODD.forEach(o=>{const got=S.odd&&S.odd[o.id];g.append(slotEl({cls:'r2'+(got?'':' unk'),sel:codexSel===o.id,draw:ctx=>drawOdd(ctx,o,0,0,1),title:got?o.name:'???',onclick:()=>{codexSel=o.id;renderPane()}}))});left.append(g)}
     wrap.append(left);
@@ -637,7 +659,7 @@ function renderPane(){
     const f=codexSel?fishById(codexSel):allFish().find(x=>S.codex[x.id]);
     const right=document.createElement('div');
     if(f){const got=S.codex[f.id];const c=document.createElement('div');c.className='card';c.style.gridTemplateColumns='1fr';
-      const art=document.createElement('div');art.className='art';art.style.cssText='width:200px;height:144px;justify-self:center';const cv=document.createElement('canvas');const xl=got?fishCanvasXL(f):null;cv.width=xl?192:96;cv.height=xl?136:68;cv.style.cssText='width:192px;height:136px';if(got){if(xl)cv.getContext('2d').drawImage(xl,0,4);else drawFishHD(cv.getContext('2d'),f,0,2,1)}else{const x=cv.getContext('2d');x.fillStyle='#2a2434';x.font='40px DotGothic16, monospace';x.textAlign='center';x.fillText('?',48,46)}art.append(cv);
+      const art=document.createElement('div');art.className='art'+(got?' r'+f.r:'');art.style.cssText='width:200px;height:144px;justify-self:center;position:relative;overflow:hidden';if(got)art.append(Object.assign(document.createElement('i'),{className:'fx'}));const cv=document.createElement('canvas');const xl=got?fishCanvasXL(f):null;cv.width=xl?192:96;cv.height=xl?136:68;cv.style.cssText='width:192px;height:136px';if(got){if(xl)cv.getContext('2d').drawImage(xl,0,4);else drawFishHD(cv.getContext('2d'),f,0,2,1)}else{const x=cv.getContext('2d');x.fillStyle='#2a2434';x.font='40px DotGothic16, monospace';x.textAlign='center';x.fillText('?',48,46)}art.append(cv);
       const info=document.createElement('div');
       info.innerHTML=got?`<h3 class="r${f.r}">${f.name}</h3><div class="kv"><span>등급</span><span class="r${f.r}">${RAR[f.r]}</span><span>서식지</span><span>${SPOTS[f.spot].name}</span><span>시간대</span><span>${f.time?TIMES[f.time]+'에만':'언제나'}</span><span>크기</span><span>${f.min}~${f.max}cm</span><span>기본가</span><span class="gold">${f.price} G</span><span>잡은 수</span><span>${got.n}마리</span><span>최고 기록</span><span>${got.best}cm${got.best>=f.max-Math.round((f.max-f.min)*0.1)?' ★':''}</span></div>`
         :`<h3 class="r${f.r}">???</h3><div class="kv"><span>등급</span><span class="r${f.r}">${RAR[f.r]}</span><span>서식지</span><span>${SPOTS[f.spot].name}</span><span>시간대</span><span>${f.time?TIMES[f.time]+'에만':'언제나'}</span></div>`;
@@ -754,7 +776,7 @@ function showHaul(haul,bonusRate,sec,done,newIds,recs){
   const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;const seen=new Set();
   const sum=()=>{const g=sorted.filter(c=>!c.tank&&!c.q).reduce((a,c)=>a+c.price,0);const b=Math.round(g*bonusRate);o.querySelector('#haulGold').textContent='+'+g.toLocaleString()+' G';const hb=o.querySelector('#haulBonus');if(hb)hb.textContent='+'+b.toLocaleString()+' G';return g+b};
   sorted.forEach((c,i)=>{if(c.odd){const od=oddById(c.odd);const d=document.createElement('div');d.className='f';const cv=document.createElement('canvas');cv.width=96;cv.height=64;drawOdd(cv.getContext('2d'),od,24,8,3);const n=document.createElement('span');n.className='r4';n.style.textAlign='left';n.textContent=od.name;const tg=document.createElement('span');tg.className='tag';tg.textContent='이변';d.append(cv,n,document.createElement('span'),tg);list.append(d);setTimeout(()=>{d.classList.add('in');audio.rare()},reduced?0:120+i*200);return}
-    const f=fishById(c.id);const d=document.createElement('button');d.className='f';d.type='button';const cv=document.createElement('canvas');cv.width=96;cv.height=64;drawFishHD(cv.getContext('2d'),f,0,0,1);
+    const f=fishById(c.id);const d=document.createElement('button');d.className='f r'+f.r;d.type='button';d.append(Object.assign(document.createElement('i'),{className:'fx'}));const cv=document.createElement('canvas');cv.width=96;cv.height=64;drawFishHD(cv.getContext('2d'),f,0,0,1);
     const n=document.createElement('span');n.className='r'+f.r;n.style.textAlign='left';n.textContent=f.name;const cm=document.createElement('span');cm.className='hint';cm.textContent=c.cm+'cm · '+c.price+'G';const tg=document.createElement('span');tg.className='tag';const base=newIds.includes(c.id)&&!seen.has(c.id)?'NEW':(recs.includes(c.id)&&c.cm===S.codex[c.id].best&&!seen.has('r'+c.id)?'기록':'');seen.add(c.id);if(base==='기록')seen.add('r'+c.id);tg.textContent=base;
     d.append(cv,n,cm,tg);c.el=d;d.onclick=()=>{if(c.q)return;if(!c.tank){const used=curTank().length+sorted.filter(x=>x.tank).length;if(used>=tankCap()){toast('어항이 가득 찼어요');return}}c.tank=!c.tank;d.classList.toggle('tanked',c.tank);tg.textContent=c.tank?'어항':base;sum()};
     list.append(d);setTimeout(()=>{d.classList.add('in');if(f.r>=2)audio.rare()},reduced?0:120+i*200)});
@@ -1956,13 +1978,15 @@ function drawFishHD(g,f,x,y,scale=1){const c=fishCanvasHD(f);g.imageSmoothingEna
 const HERO_ART_V='4';const heroCache={},heroImg={},heroImgTried={};
 // painted hero art from assets/hero/<cls>.png (64x128) and <cls>@2.png (128x256) wins over the code-drawn hero when present
 function paintHeroPick(cv){const g=cv.getContext('2d');g.clearRect(0,0,cv.width,cv.height);g.imageSmoothingEnabled=true;g.imageSmoothingQuality='high';g.drawImage(heroCanvas(cv.dataset.hero,2),0,0,cv.width,cv.height)}
+const allyImg={};
+function loadAllyArt(){ITEMS.filter(i=>i.cat==='ally').forEach(it=>{['','@2'].forEach(suf=>{const im=new Image();im.onload=()=>{allyImg[it.id+suf]=im;delete itemCache[it.id];propCache.delete('ally:'+it.id);if(typeof renderPane==='function')renderPane();if(typeof shopWin!=='undefined'&&shopWin)renderShop()};im.src='assets/ally/'+it.id+suf+'.png?v='+HERO_ART_V})})}
 function loadHeroArt(){CHARS.forEach(c=>{if(heroImgTried[c.id])return;heroImgTried[c.id]=1;[['',''],['@2','2']].forEach(([suf,key])=>{const im=new Image();im.onload=()=>{heroImg[c.id+key]=im;Object.keys(heroCache).forEach(k=>{if(k.startsWith(c.id+':'))delete heroCache[k]});document.querySelectorAll('canvas[data-hero="'+c.id+'"]').forEach(paintHeroPick);if(typeof renderPane==='function')renderPane()};im.src='assets/hero/'+c.id+suf+'.png?v='+HERO_ART_V})})}
 function heroCanvas(cls,k=1){const key=cls+':'+k;if(heroCache[key])return heroCache[key];
   const im=k>=2?(heroImg[cls+'2']||heroImg[cls]):heroImg[cls];
   if(im){const c=document.createElement('canvas');c.width=32*k;c.height=64*k;const g=c.getContext('2d');g.imageSmoothingEnabled=true;g.imageSmoothingQuality='high';g.drawImage(im,0,0,32*k,64*k);return heroCache[key]=c}
   return heroCache[key]=renderFish(HERO2[cls]||HERO2.rogue,null,k)}
 function heroSprite(cls){return {__hero:cls}}
-loadFishArt();loadHeroArt();
+loadFishArt();loadHeroArt();loadAllyArt();
 function drawSprite(g,sp,x,y,scale=1){if(sp.__hero){const c=heroCanvas(sp.__hero,1);g.imageSmoothingEnabled=false;g.drawImage(c,x,y,32*scale,64*scale);return}const{rows,pal}=sp;for(let j=0;j<rows.length;j++){const r=rows[j];for(let i=0;i<r.length;i++){const ch=r[i];if(ch==='.')continue;g.fillStyle=ch==='O'?OUT:(pal[ch]||'#f0f');g.fillRect(x+i*scale,y+j*scale,scale,scale)}}}
 // hero sprites 32x64: muted palette, dithered shading, light from the upper left. One full sprite per class.
 const IPAL={W:'#8a6a48',w:'#5a3f2a',x:'#b08a60',L:'#e8dcc0',G:'#d9b05a',g:'#8a6a2a',R:'#9a2f28',r:'#5e1c18',B:'#3a6a9a',b:'#1f3f60',P:'#d8c8a0',p:'#a08a60',S:'#c8ccd4',s:'#7a8088',K:'#3a3a44',k:'#23232a',N:'#5a8a3a',n:'#365a24',V:'#7a4fb0',v:'#4a2f70',Y:'#fff0a0',C:'#7fd8f0',M:'#e08ab0',T:'#2f7a7a',E:'#f3eee2',e:'#0b0a0e'};
@@ -2031,9 +2055,10 @@ function bevelCanvas(oc,outline){
   g.putImageData(img,0,0);return oc;
 }
 const itemCache={};
-function itemCanvas(it){if(itemCache[it.id])return itemCache[it.id];const art=ITEM_ART[it.id];if(!art)return null;const tc=TIER[it.tier];const pal=Object.assign({},IPAL,{A:tc,a:shade(tc,-40)});
+function itemCanvas(it){if(itemCache[it.id])return itemCache[it.id];
+  if(it.cat==='ally'&&(allyImg[it.id+'@2']||allyImg[it.id])){const im=allyImg[it.id+'@2']||allyImg[it.id];const c=document.createElement('canvas');c.width=64;c.height=64;const g=c.getContext('2d');g.imageSmoothingEnabled=true;g.imageSmoothingQuality='high';const sc=Math.min(64/im.width,64/im.height);const w=im.width*sc,h=im.height*sc;g.drawImage(im,(64-w)/2,64-h,w,h);return itemCache[it.id]=c}const art=ITEM_ART[it.id];if(!art)return null;const tc=TIER[it.tier];const pal=Object.assign({},IPAL,{A:tc,a:shade(tc,-40)});
   const oc=document.createElement('canvas');oc.width=16;oc.height=16;drawSprite(oc.getContext('2d'),{rows:art,pal},0,0);bevelCanvas(oc,[11,10,14]);itemCache[it.id]=oc;return oc}
-function drawItem(g,it,x,y){const c=itemCanvas(it);if(!c)return;g.imageSmoothingEnabled=false;g.drawImage(c,x,y)}
+function drawItem(g,it,x,y){const c=itemCanvas(it);if(!c)return;g.imageSmoothingEnabled=c.width>16;g.drawImage(c,x,y,16,16)}
 // menu tab icons 12x12
 Object.assign(ITEM_ART,{
  al1:['................','..O..........O..','.OKkO......OkKO.','.OKKKOOOOOOKKKO.','.OKKKKKKKKKKKKO.','.OKKYKKKKKKYKKO.','.OKKKKKKMKKKKKO.','..OKKKKmmmKKKO..','...OOKKKKKKOO...','....OKKKKKKO....','....OKkKKkKO....','....OKKKKKKO....','....OKkKKkKO....','....OOOOOOOO....','................','................'],
@@ -2193,7 +2218,8 @@ function drawScene(g,t){
   prop(g,reeds,20,156);prop(g,reeds,44,172);
   if(eqLn){drawSprite(g,{rows:lanternHD.rows.slice(17),pal:PP},72,45);item2(eqLn,66,24)}else drawSprite(g,lanternHD,72,28);
   if(eqCh)item2(eqCh,26,54);
-  const eqAl=item(S.eq.ally);if(eqAl&&ALLY_ART[eqAl.id]){const ab=(Math.floor(t/900)%2);g.fillStyle='rgba(0,0,0,0.35)';g.fillRect(HX-28,HY+62,16,2);const ac=propCache.get('ally:'+eqAl.id)||(()=>{const c=refine2x(ALLY_ART[eqAl.id]);propCache.set('ally:'+eqAl.id,c);return c})();g.drawImage(ac,HX-34,HY+32+ab)}
+  const eqAl=item(S.eq.ally);const alIm=eqAl&&(allyImg[eqAl.id]);if(alIm){const ab=Math.sin(t/(eqAl.id==='al2'?700:1400))*(eqAl.id==='al2'?2:0.6);const h=eqAl.id==='al2'?44:30,w=alIm.width*h/alIm.height;g.fillStyle='rgba(0,0,0,0.35)';g.fillRect(HX-26-w/2,HY+62,w*0.8,2);g.imageSmoothingEnabled=true;g.drawImage(alIm,HX-22-w,HY+64-h+ab-(eqAl.id==='al2'?4:0),w,h);g.imageSmoothingEnabled=false}
+  else if(eqAl&&ALLY_ART[eqAl.id]){const ab=(Math.floor(t/900)%2);g.fillStyle='rgba(0,0,0,0.35)';g.fillRect(HX-28,HY+62,16,2);const ac=propCache.get('ally:'+eqAl.id)||(()=>{const c=refine2x(ALLY_ART[eqAl.id]);propCache.set('ally:'+eqAl.id,c);return c})();g.drawImage(ac,HX-34,HY+32+ab)}
   if(eqBait&&(S.bait[eqBait.id]||0)>0)item2(eqBait,56,88);
   const fishing=!!S.run;const bob=(Math.floor(t/800)%2)*2;
   // --- animation phases (ms since performance.now() stamps) ---
@@ -2246,6 +2272,10 @@ function drawScene(g,t){
   else if(bite&&bitePop&&bt>=800&&bt<3400){const f=fishById(bitePop.id);const k=Math.min(1,(bt-800)/200),fade=bt>3000?1-(bt-3000)/400:1;g.globalAlpha=fade;
     const cw=112,chh=80,cx0=172,cy0=8-Math.floor((1-k)*8);
     g.fillStyle='rgba(8,6,12,0.88)';g.fillRect(cx0,cy0,cw,chh);g.fillStyle=TIER[Math.min(5,f.r+1)];g.fillRect(cx0,cy0,cw,2);g.fillRect(cx0,cy0+chh-2,cw,2);g.fillRect(cx0,cy0,2,chh);g.fillRect(cx0+cw-2,cy0,2,chh);
+    if(f.r>=1){const col=['','90,166,220','176,127,224','240,200,100','255,140,170'][f.r];const gx2=cx0+cw/2,gy2=cy0+chh/2-6;
+      if(f.r>=3){g.save();g.translate(gx2,gy2);g.rotate(bt/(f.r===4?900:1400));for(let i=0;i<(f.r===4?10:6);i++){g.rotate(Math.PI*2/(f.r===4?10:6));g.fillStyle=`rgba(${col},0.10)`;g.beginPath();g.moveTo(0,0);g.lineTo(60,-6);g.lineTo(60,6);g.fill()}g.restore()}
+      const gr=g.createRadialGradient(gx2,gy2,2,gx2,gy2,f.r>=3?52:40);gr.addColorStop(0,`rgba(${col},${0.12+f.r*0.07})`);gr.addColorStop(1,`rgba(${col},0)`);g.fillStyle=gr;g.fillRect(cx0+2,cy0+2,cw-4,chh-4);
+      if(f.r>=2){const n=f.r*6;for(let i=0;i<n;i++){const ph=(bt/1600+i/n)%1;const x=cx0+6+((i*37)%(cw-12));const y=cy0+chh-6-ph*(chh-10);const a=Math.sin(ph*Math.PI);g.fillStyle=i%3===0?`rgba(255,255,255,${a*0.9})`:`rgba(${col},${a})`;g.fillRect(Math.round(x+Math.sin(ph*6+i)*2),Math.round(y),i%4===0?2:1,i%4===0?2:1)}}}
     drawFishHD(g,f,cx0+8,cy0+8,1);g.globalAlpha=1;
     if(pop){pop.hidden=false;pop.style.opacity=fade;pop.innerHTML=`<b class="r${f.r}">${f.name}</b><span>${RAR[f.r]} · ${bitePop.cm}cm</span>`}}
   else if(pop&&!pop.hidden)pop.hidden=true;
