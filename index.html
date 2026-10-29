@@ -1952,10 +1952,15 @@ function fishCanvasSD(f){if(fishSD[f.id])return fishSD[f.id];if(fishImg[f.id]){c
 function fishCanvasXL(f){if(fishImg2[f.id]){const c=document.createElement('canvas');c.width=192;c.height=128;c.getContext('2d').drawImage(fishImg2[f.id],0,0,192,128);return c}return null}
 function drawFish(g,f,x,y,scale=1){const c=fishCanvasSD(f);g.imageSmoothingEnabled=false;g.drawImage(c,x,y,48*scale,32*scale)}
 function drawFishHD(g,f,x,y,scale=1){const c=fishCanvasHD(f);g.imageSmoothingEnabled=false;g.drawImage(c,x,y,96*scale,64*scale)}
-const heroCache={};
-function heroCanvas(cls,k=1){const key=cls+':'+k;return heroCache[key]||(heroCache[key]=renderFish(HERO2[cls]||HERO2.rogue,null,k))}
+const HERO_ART_V='2';const heroCache={},heroImg={},heroImgTried={};
+// painted hero art from assets/hero/<cls>.png (64x128) and <cls>@2.png (128x256) wins over the code-drawn hero when present
+function loadHeroArt(){CHARS.forEach(c=>{if(heroImgTried[c.id])return;heroImgTried[c.id]=1;[['',''],['@2','2']].forEach(([suf,key])=>{const im=new Image();im.onload=()=>{heroImg[c.id+key]=im;Object.keys(heroCache).forEach(k=>{if(k.startsWith(c.id+':'))delete heroCache[k]});if(typeof renderPane==='function')renderPane()};im.src='assets/hero/'+c.id+suf+'.png?v='+HERO_ART_V})})}
+function heroCanvas(cls,k=1){const key=cls+':'+k;if(heroCache[key])return heroCache[key];
+  const im=k>=2?(heroImg[cls+'2']||heroImg[cls]):heroImg[cls];
+  if(im){const c=document.createElement('canvas');c.width=32*k;c.height=64*k;const g=c.getContext('2d');g.imageSmoothingEnabled=true;g.imageSmoothingQuality='high';g.drawImage(im,0,0,32*k,64*k);return heroCache[key]=c}
+  return heroCache[key]=renderFish(HERO2[cls]||HERO2.rogue,null,k)}
 function heroSprite(cls){return {__hero:cls}}
-loadFishArt();
+loadFishArt();loadHeroArt();
 function drawSprite(g,sp,x,y,scale=1){if(sp.__hero){const c=heroCanvas(sp.__hero,1);g.imageSmoothingEnabled=false;g.drawImage(c,x,y,32*scale,64*scale);return}const{rows,pal}=sp;for(let j=0;j<rows.length;j++){const r=rows[j];for(let i=0;i<r.length;i++){const ch=r[i];if(ch==='.')continue;g.fillStyle=ch==='O'?OUT:(pal[ch]||'#f0f');g.fillRect(x+i*scale,y+j*scale,scale,scale)}}}
 // hero sprites 32x64: muted palette, dithered shading, light from the upper left. One full sprite per class.
 const IPAL={W:'#8a6a48',w:'#5a3f2a',x:'#b08a60',L:'#e8dcc0',G:'#d9b05a',g:'#8a6a2a',R:'#9a2f28',r:'#5e1c18',B:'#3a6a9a',b:'#1f3f60',P:'#d8c8a0',p:'#a08a60',S:'#c8ccd4',s:'#7a8088',K:'#3a3a44',k:'#23232a',N:'#5a8a3a',n:'#365a24',V:'#7a4fb0',v:'#4a2f70',Y:'#fff0a0',C:'#7fd8f0',M:'#e08ab0',T:'#2f7a7a',E:'#f3eee2',e:'#0b0a0e'};
