@@ -519,7 +519,9 @@ const ODD_ART={
 };
 const oddCache={};
 function oddCanvas(o){if(oddCache[o.id])return oddCache[o.id];const pal=Object.assign({},IPAL,{N:'#5a8a3a',M:'#c47a9a',R:'#6a2a2a',r:'#4a1c1c'});const oc=document.createElement('canvas');oc.width=16;oc.height=16;drawSprite(oc.getContext('2d'),{rows:ODD_ART[o.id],pal},0,0);bevelCanvas(oc,[11,10,14]);oddCache[o.id]=oc;return oc}
-function drawOdd(g,o,x,y,scale=1){g.imageSmoothingEnabled=false;g.drawImage(oddCanvas(o),x,y,16*scale,16*scale)}
+const oddImg={};
+function loadOddArt(){ODD.forEach(o=>{const im=new Image();im.onload=()=>{oddImg[o.id]=im;if(typeof renderPane==='function')renderPane()};im.src='assets/odd/'+o.id+'@2.png?v='+HERO_ART_V})}
+function drawOdd(g,o,x,y,scale=1){const im=oddImg[o.id];g.imageSmoothingEnabled=!!im;g.imageSmoothingQuality='high';g.drawImage(im||oddCanvas(o),x,y,16*scale,16*scale);g.imageSmoothingEnabled=false}
 function rollOddity(R,at){const tod=timeOfDay(new Date(at).getHours());const el=(at-R.startAt)/1000;
   for(const o of ODD){if(S.odd&&S.odd[o.id])continue;const c=o.cond;if(c.spot!=null&&c.spot!==R.spot)continue;if(c.tod&&c.tod!==tod)continue;if(c.minSec&&el<c.minSec)continue;if(c.goal&&!R.goalDone)continue;if(Math.random()<o.chance*(WEATHER[weatherAt(at)].odd||1))return o.id}return null}
 const oddCount=()=>Object.keys(S.odd||{}).length;
@@ -815,7 +817,7 @@ function renderPane(){
       const g=document.createElement('div');g.className='grid';ODD.forEach(o=>{const got=S.odd&&S.odd[o.id];g.append(slotEl({cls:'r2'+(got?'':' unk'),sel:codexSel===o.id,draw:ctx=>drawOdd(ctx,o,0,0,1),title:got?o.name:'???',onclick:()=>{codexSel=o.id;renderPane()}}))});left.append(g)}
     wrap.append(left);
     if(codexSel&&oddById(codexSel)){const o=oddById(codexSel);const got=S.odd&&S.odd[o.id];const right=document.createElement('div');const c=document.createElement('div');c.className='card';c.style.gridTemplateColumns='1fr';
-      const art=document.createElement('div');art.className='art';art.style.cssText='width:200px;height:144px;justify-self:center';const cv=document.createElement('canvas');cv.width=64;cv.height=64;cv.style.cssText='width:128px;height:128px';if(got)drawOdd(cv.getContext('2d'),o,0,0,4);else{const x=cv.getContext('2d');x.fillStyle='#2a2434';x.font='32px DotGothic16, monospace';x.textAlign='center';x.fillText('?',32,44)}art.append(cv);
+      const art=document.createElement('div');art.className='art';art.style.cssText='width:200px;height:144px;justify-self:center';const cv=document.createElement('canvas');cv.width=128;cv.height=128;cv.style.cssText='width:128px;height:128px';if(got)drawOdd(cv.getContext('2d'),o,0,0,8);else{const x=cv.getContext('2d');x.fillStyle='#2a2434';x.font='64px DotGothic16, monospace';x.textAlign='center';x.fillText('?',64,88)}art.append(cv);
       const info=document.createElement('div');info.innerHTML=got?`<h3 class="r2">${o.name}</h3><div class="kv"><span>종류</span><span>이변</span><span>조건</span><span>${o.hint}</span><span>얻은 날</span><span>${new Date(got).toLocaleDateString('ko-KR')}</span></div>`:`<h3 class="r2">???</h3><div class="kv"><span>종류</span><span>이변</span><span>조건</span><span>${o.hint}</span></div>`;
       const d=document.createElement('div');d.className='desc';d.textContent=got?o.lore:'조건이 맞을 때만 아주 가끔 걸려요. 팔 수 없고 모으기만 해요.';c.append(art,info,d);right.append(c);wrap.append(right);p.append(wrap);return}
     const f=codexSel?fishById(codexSel):allFish().find(x=>S.codex[x.id]);
@@ -2140,7 +2142,7 @@ function fishCanvasSD(f){if(fishSD[f.id])return fishSD[f.id];if(fishImg[f.id]){c
 function fishCanvasXL(f){if(fishImg2[f.id]){const c=document.createElement('canvas');c.width=192;c.height=128;c.getContext('2d').drawImage(fishImg2[f.id],0,0,192,128);return c}return null}
 function drawFish(g,f,x,y,scale=1){const c=fishCanvasSD(f);g.imageSmoothingEnabled=false;g.drawImage(c,x,y,48*scale,32*scale)}
 function drawFishHD(g,f,x,y,scale=1){const c=fishCanvasHD(f);g.imageSmoothingEnabled=false;g.drawImage(c,x,y,96*scale,64*scale)}
-const HERO_ART_V='6';const heroCache={},heroImg={},heroImgTried={};
+const HERO_ART_V='7';const heroCache={},heroImg={},heroImgTried={};
 // painted hero art from assets/hero/<cls>.png (64x128) and <cls>@2.png (128x256) wins over the code-drawn hero when present
 function paintHeroPick(cv){const g=cv.getContext('2d');g.clearRect(0,0,cv.width,cv.height);g.imageSmoothingEnabled=true;g.imageSmoothingQuality='high';g.drawImage(heroCanvas(cv.dataset.hero,2),0,0,cv.width,cv.height)}
 const allyImg={};
@@ -2151,7 +2153,7 @@ function heroCanvas(cls,k=1){const key=cls+':'+k;if(heroCache[key])return heroCa
   if(im){const c=document.createElement('canvas');c.width=32*k;c.height=64*k;const g=c.getContext('2d');g.imageSmoothingEnabled=true;g.imageSmoothingQuality='high';g.drawImage(im,0,0,32*k,64*k);return heroCache[key]=c}
   return heroCache[key]=renderFish(HERO2[cls]||HERO2.rogue,null,k)}
 function heroSprite(cls){return {__hero:cls}}
-loadFishArt();loadHeroArt();loadAllyArt();
+loadFishArt();loadHeroArt();loadAllyArt();loadOddArt();
 function drawSprite(g,sp,x,y,scale=1){if(sp.__hero){const c=heroCanvas(sp.__hero,1);g.imageSmoothingEnabled=false;g.drawImage(c,x,y,32*scale,64*scale);return}const{rows,pal}=sp;for(let j=0;j<rows.length;j++){const r=rows[j];for(let i=0;i<r.length;i++){const ch=r[i];if(ch==='.')continue;g.fillStyle=ch==='O'?OUT:(pal[ch]||'#f0f');g.fillRect(x+i*scale,y+j*scale,scale,scale)}}}
 // hero sprites 32x64: muted palette, dithered shading, light from the upper left. One full sprite per class.
 const IPAL={W:'#8a6a48',w:'#5a3f2a',x:'#b08a60',L:'#e8dcc0',G:'#d9b05a',g:'#8a6a2a',R:'#9a2f28',r:'#5e1c18',B:'#3a6a9a',b:'#1f3f60',P:'#d8c8a0',p:'#a08a60',S:'#c8ccd4',s:'#7a8088',K:'#3a3a44',k:'#23232a',N:'#5a8a3a',n:'#365a24',V:'#7a4fb0',v:'#4a2f70',Y:'#fff0a0',C:'#7fd8f0',M:'#e08ab0',T:'#2f7a7a',E:'#f3eee2',e:'#0b0a0e'};

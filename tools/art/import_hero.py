@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Turn a generated character picture (or, with --ally, a companion picture into assets/ally at 48x64 and 96x128) (black or transparent background, facing right) into hero sprites.
+"""Turn a generated character picture (with --ally a companion into assets/ally, with --odd an oddity into assets/odd at 64x64 and 128x128) (black or transparent background, facing right) into hero sprites.
 
     python3 tools/art/import_hero.py <input> <cls> [--flip]
 
@@ -55,8 +55,8 @@ def lift(im, bright=1.32, contrast=1.10):
 
 def main():
     src,cls=sys.argv[1],sys.argv[2]; flip='--flip' in sys.argv
-    sub='ally' if '--ally' in sys.argv else 'hero'
-    sizes=((48,64,''),(96,128,'@2')) if sub=='ally' else ((64,128,''),(128,256,'@2'))
+    sub='ally' if '--ally' in sys.argv else 'odd' if '--odd' in sys.argv else 'hero'
+    sizes={'ally':((48,64,''),(96,128,'@2')),'odd':((64,64,''),(128,128,'@2')),'hero':((64,128,''),(128,256,'@2'))}[sub]
     im=Image.open(src).convert('RGBA')
     if np.asarray(im)[...,3].min()<255:
         bg=Image.new('RGBA',im.size,(0,0,0,255)); bg.alpha_composite(im); im=bg
