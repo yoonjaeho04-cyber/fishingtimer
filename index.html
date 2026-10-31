@@ -42,8 +42,8 @@ canvas.scene{display:block;width:100%;aspect-ratio:3/2;max-width:100%;image-rend
 .catchPop{position:absolute;left:59.7%;top:38%;width:39%;display:flex;flex-direction:column;align-items:center;gap:1px;font:10px var(--display);text-shadow:1px 1px 0 #000,-1px 1px 0 #000,1px -1px 0 #000,-1px -1px 0 #000;line-height:1.2}
 .game:not(.compact) .catchPop{font-size:12px}
 .catchPop b{font-weight:400}.catchPop span{color:#bfae88}
-.bubble{position:absolute;left:3%;top:16%;max-width:29%;background:#efe6cf;color:#1a140f;border:2px solid #0b0a0e;box-shadow:2px 2px 0 #000;padding:4px 7px;font-size:11px;line-height:1.35;font-family:var(--body)}
-.bubble::after{content:"";position:absolute;right:-9px;top:40%;border:5px solid transparent;border-left-color:#0b0a0e;border-right:0}
+.bubble{position:absolute;left:29%;top:5%;width:max-content;max-width:56%;background:#efe6cf;color:#1a140f;border:2px solid #0b0a0e;box-shadow:2px 2px 0 #000;padding:4px 7px;font-size:11px;line-height:1.35;font-family:var(--body)}
+.bubble::after{content:"";position:absolute;left:32%;bottom:-9px;border:5px solid transparent;border-top-color:#0b0a0e;border-bottom:0}
 .game:not(.compact) .bubble{font-size:13px}
 .bar{width:96px;height:6px;border:1px solid #000;background:#1a1420;box-shadow:0 0 0 1px var(--bronze3);overflow:hidden;margin-top:3px}
 .bar i{display:block;height:100%;background:#d9b05a;width:0;transition:width .5s linear}
@@ -168,7 +168,8 @@ input[type=number]{width:64px;font-family:var(--display)}
 .eqrow .n{font-weight:700}
 .eqrow .e{font-size:11px;color:#c4b797}
 /* modal windows */
-.overlay{position:absolute;inset:0;background:rgba(4,3,8,.78);display:flex;align-items:center;justify-content:center;padding:12px;z-index:5}
+.overlay{position:fixed;inset:0;background:rgba(4,3,8,.78);display:flex;align-items:center;justify-content:center;padding:12px;z-index:5}
+.overlay.top{align-items:flex-start}
 .win{background:#0c0a10;border:2px solid var(--bronze);box-shadow:0 0 0 2px var(--ink),0 0 0 3px #4a3a22,0 0 0 5px var(--ink),0 12px 30px #000;width:100%;max-width:560px;max-height:100%;display:flex;flex-direction:column}
 .win .title{display:flex;align-items:center;justify-content:space-between;padding:6px 10px;background:linear-gradient(#241d2b,#15111b);border-bottom:2px solid var(--bronze3);font:14px var(--display);color:var(--gold);text-shadow:1px 1px 0 #000}
 .win .title button{color:var(--warn);font:16px var(--display);width:22px;height:22px;border:2px solid var(--bronze3);background:#0f0c13}
@@ -435,6 +436,7 @@ const ITEMS=[
  {id:'con3',cat:'contract',tier:3,name:'요정 상단 계약',price:6500,v:0.38,desc:'대금을 꽃잎으로 주려 한다. 거절하면 금화로 준다.'},
  {id:'con4',cat:'contract',tier:4,name:'왕실 어시장 계약',price:88000,v:0.60,desc:'왕의 식탁에 오른다. 인장이 찍혀 있다.'},
  {id:'con5',cat:'contract',tier:5,name:'대성당 공납 계약',price:280000,v:0.85,desc:'성자의 축일에 쓰일 물고기를 댄다. 값을 묻지 않는다.'},
+ {id:'bait0',cat:'bait',tier:0,name:'맨 바늘',price:0,v:0,desc:'미끼 없이 바늘만 던진다. 물고기 눈에 그럭저럭 보인다.'},
  {id:'bait1',cat:'bait',tier:1,name:'지렁이',price:80,v:0.05,desc:'20마리 묶음. 부두 밑 흙에서 판다.'},
  {id:'bait2',cat:'bait',tier:1,name:'달빛 나방',price:150,v:0.08,desc:'20마리 묶음. 밤 물고기가 좋아한다.'},
  {id:'bait3',cat:'bait',tier:2,name:'반딧불 미끼',price:300,v:0.12,desc:'20개 묶음. 어둠 속에서 깜빡인다.'},
@@ -785,7 +787,7 @@ function showMinutes(k){const isDay=k==='daily';const isGoal=k==='goal';const cu
   o.addEventListener('click',e=>{if(e.target===o)o.remove()})}
 function slotEl(opts){const s=document.createElement('button');s.className='slot'+(opts.cls?' '+opts.cls:'');s.setAttribute('aria-pressed',!!opts.sel);if(opts.fish)s.classList.add('fish');const cv=document.createElement('canvas');cv.width=opts.fish?96:64;cv.height=opts.fish?64:64;{const x=cv.getContext('2d');if(!opts.fish){x.imageSmoothingEnabled=false;x.scale(4,4)}opts.draw(x)}if(opts.fx)s.append(Object.assign(document.createElement('i'),{className:'fx'}));s.append(cv);if(opts.cnt!=null){const c=document.createElement('span');c.className='cnt';c.textContent=opts.cnt;s.append(c)}if(opts.title)s.title=opts.title;s.onclick=opts.onclick;return s}
 function itemDesc(it){const pc=v=>Math.round(v*100)+'%';
-  if(it.cat==='rod')return `던지는 속도 +${pc(it.v)}`;if(it.cat==='net')return `두 마리 확률 ${pc(it.v)}`;if(it.cat==='contract')return `판매가 +${pc(it.v)}`;if(it.cat==='bait')return `희귀 확률 +${pc(it.v)} · 한 마리당 1개`;
+  if(it.cat==='rod')return `던지는 속도 +${pc(it.v)}`;if(it.cat==='net')return `두 마리 확률 ${pc(it.v)}`;if(it.cat==='contract')return `판매가 +${pc(it.v)}`;if(it.cat==='bait')return it.id==='bait0'?'희귀 확률 +0% · 줄지 않음':`희귀 확률 +${pc(it.v)} · 한 마리당 1개`;
   if(it.cat==='ally')return `낚싯줄 하나 더 ${pc(it.v.extra)} · ${SPOTS[it.v.spot].name}에서 +10% · ${TIMES[it.v.tod]}에 +8%`;
   if(it.cat==='treasure')return it.v.chest?'다음 출항에 보물 상자 (15분 이상)':it.v.gold?`다음 출항 판매가 +${pc(it.v.gold)}`:it.v.speed?`다음 출항 던지는 속도 +${pc(it.v.speed)}`:it.v.trophy?'다음 출항 완주 시 귀한 물고기 1마리':`다음 출항 희귀 확률 +${pc(it.v.luck)}`;
   if(it.cat==='deco')return '낚시터 장식 · 능력치 없음';if(it.cat==='svc')return '직업을 다른 것으로 바꿉니다';if(it.cat==='lantern')return `밤·새벽 희귀 확률 +${pc(it.v)}`;if(it.cat==='tank')return it.newTank?'새 어항 1개':`어항 자리 +${it.v}`;
@@ -797,7 +799,7 @@ function itemCard(it,mode){
   const info=document.createElement('div');
   const owned=!!S.own[it.id],eq=S.eq[it.cat]===it.id,cnt=S.bait[it.id]||0,P=mode==='shop'?shopPrice(it):mode==='mer'?merOf(it).price:it.price;
   const worn=mode==='shop'&&EQ_SLOTS_SHOP.includes(it.cat)&&!eq&&S.eq[it.cat]?item(S.eq[it.cat]):null;
-  info.innerHTML=`<h3 style="color:${TIER[it.tier]}">${it.name}</h3><div class="kv"><span>종류</span><span>${CATS[it.cat]}</span><span>효과</span><span>${itemDesc(it)}</span>${shopLocked(it)&&mode==='shop'?`<span>입고</span><span class="now">${SPOTS[it.needMap].name} 개방 후</span>`:''}${worn?`<span>지금</span><span class="now">${worn.name} · ${itemDesc(worn)}</span>`:''}${it.cat==='ally'&&owned?`<span>호감도</span><span class="now">${allyHeart(it.id)}</span>`:''}${it.cat==='bait'?`<span>보유</span><span>${cnt}개</span>`:''}<span>가격</span><span class="gold">${it.price&&P!==it.price?`<s>${it.price.toLocaleString()}</s> `:''}${P?P.toLocaleString()+' G':'-'}</span></div>`;
+  info.innerHTML=`<h3 style="color:${TIER[it.tier]}">${it.name}</h3><div class="kv"><span>종류</span><span>${CATS[it.cat]}</span><span>효과</span><span>${itemDesc(it)}</span>${shopLocked(it)&&mode==='shop'?`<span>입고</span><span class="now">${SPOTS[it.needMap].name} 개방 후</span>`:''}${worn?`<span>지금</span><span class="now">${worn.name} · ${itemDesc(worn)}</span>`:''}${it.cat==='ally'&&owned?`<span>호감도</span><span class="now">${allyHeart(it.id)}</span>`:''}${it.cat==='bait'&&it.id!=='bait0'?`<span>보유</span><span>${cnt}개</span>`:''}<span>가격</span><span class="gold">${it.price&&P!==it.price?`<s>${it.price.toLocaleString()}</s> `:''}${P?P.toLocaleString()+' G':'-'}</span></div>`;
   const desc=document.createElement('div');desc.className='desc';desc.textContent=it.desc||'';
   const act=document.createElement('div');act.className='act';
   if(mode==='mer'){const e=merOf(it),sold=merSold(e);const b=document.createElement('button');b.className='btn primary';b.textContent=sold?'매진':'구매';b.disabled=sold||S.gold<P;b.onclick=()=>merBuy(e,it);act.append(b)}
@@ -810,7 +812,7 @@ function itemCard(it,mode){
     else if(it.cat==='bait'){const b=document.createElement('button');b.className='btn primary';b.textContent='20개 구매';b.disabled=S.gold<P;b.onclick=()=>{if(S.gold>=P){S.gold-=P;S.bait[it.id]=(S.bait[it.id]||0)+20;if(!S.eq.bait)S.eq.bait=it.id;save();toast(it.name+' 20개');renderShop();renderTop()}};act.append(b)}
     else{const b=document.createElement('button');b.className='btn primary';b.textContent=owned?(eq?'장착됨':'장착'):shopLocked(it)?'미입고':'구매';b.disabled=(!owned&&(S.gold<P||shopLocked(it)))||eq;b.onclick=()=>{if(!owned){if(S.gold<P)return;S.gold-=P;S.own[it.id]=1;toast(it.name+' 구매!')}S.eq[it.cat]=it.id;save();renderShop();renderTop();renderPane()};act.append(b)}
   }else{
-    if(it.cat==='bait'){const b=document.createElement('button');b.className='btn';b.textContent=eq?'사용 중':'사용';b.disabled=eq||cnt<=0;b.onclick=()=>{S.eq.bait=it.id;save();renderPane()};act.append(b)}
+    if(it.cat==='bait'){const b=document.createElement('button');b.className='btn';b.textContent=eq?'사용 중':'사용';b.disabled=eq||(cnt<=0&&it.id!=='bait0');b.onclick=()=>{S.eq.bait=it.id;save();renderPane()};act.append(b)}
     else{const b=document.createElement('button');b.className='btn';b.textContent=eq?'장착됨':'장착';b.disabled=eq;b.onclick=()=>{S.eq[it.cat]=it.id;save();renderPane()};act.append(b)}
   }
   if((mode==='shop'||mode==='mer'&&!merSold(merOf(it)))&&!owned&&!shopLocked(it)&&!(it.cat==='map'&&S.maps.includes(it.v))&&S.gold<P){const need=document.createElement('div');need.className='need';need.innerHTML=`<div class="bar"><i style="width:${Math.floor(S.gold/P*100)}%"></i></div><span>${(P-S.gold).toLocaleString()} G 더 모으면 살 수 있소</span>`;c.append(art,info,desc,need,act);return c}
@@ -824,13 +826,13 @@ function renderPane(){
     const sec=document.createElement('div');sec.className='sec';sec.textContent='장착 중';p.append(sec);
     const g=document.createElement('div');g.className='grid';
     EQ_SLOTS.forEach(([cat,lab])=>{const id=S.eq[cat];const it=id?item(id):null;
-      g.append(slotEl({cls:it?'eq':'',sel:gearSel===cat,title:lab+(it?' · '+it.name:''),cnt:cat==='bait'&&it?(S.bait[id]||0):null,draw:ctx=>{if(it)drawItem(ctx,it,0,0)},onclick:()=>{gearSel=cat;renderPane()}}))});
+      g.append(slotEl({cls:it?'eq':'',sel:gearSel===cat,title:lab+(it?' · '+it.name:''),cnt:cat==='bait'&&it&&id!=='bait0'?(S.bait[id]||0):null,draw:ctx=>{if(it)drawItem(ctx,it,0,0)},onclick:()=>{gearSel=cat;renderPane()}}))});
     p.append(g);
     const cat=gearSel||'rod';const sec2=document.createElement('div');sec2.className='sec';sec2.textContent='보유 '+CATS[cat];p.append(sec2);
-    const g2=document.createElement('div');g2.className='grid';const owned=ITEMS.filter(i=>i.cat===cat&&(cat==='bait'?(S.bait[i.id]||0)>0:S.own[i.id]));
+    const g2=document.createElement('div');g2.className='grid';const owned=ITEMS.filter(i=>i.cat===cat&&(cat==='bait'?i.id==='bait0'||(S.bait[i.id]||0)>0:S.own[i.id]));
     let sel=owned.find(i=>i.id===S.eq[cat])||owned[0];
     if(!owned.length){const e=document.createElement('div');e.className='hint';e.textContent='아직 없어요. 상점에서 살 수 있어요.';p.append(e)}
-    owned.forEach(i=>g2.append(slotEl({cls:'r'+Math.min(4,i.tier)+(S.eq[cat]===i.id?' eq':''),sel:sel&&sel.id===i.id,cnt:cat==='bait'?S.bait[i.id]:null,draw:ctx=>drawItem(ctx,i,0,0),onclick:()=>{gearSel=cat;gearPick=i.id;renderPane()}})));
+    owned.forEach(i=>g2.append(slotEl({cls:'r'+Math.min(4,i.tier)+(S.eq[cat]===i.id?' eq':''),sel:sel&&sel.id===i.id,cnt:cat==='bait'&&i.id!=='bait0'?S.bait[i.id]:null,draw:ctx=>drawItem(ctx,i,0,0),onclick:()=>{gearSel=cat;gearPick=i.id;renderPane()}})));
     if(gearPick&&owned.find(i=>i.id===gearPick))sel=item(gearPick);
     p.append(g2);if(sel)p.append(itemCard(sel,'gear'));
   }else if(tab==='tank'){
@@ -918,7 +920,7 @@ $('muteBtn').onclick=()=>{S.muted=!S.muted;audio.unlock();audio.setVol();renderT
 
 // ---------- shop window ----------
 let shopWin=null;
-function openShop(){if(shopWin)return;shopWin=overlay('',true);shopWin.querySelector('.win').style.maxWidth='760px';renderShop()}
+function openShop(){if(shopWin)return;shopWin=overlay('',true);shopWin.classList.add('top');shopWin.querySelector('.win').style.maxWidth='760px';renderShop()}
 const EQ_SLOTS_SHOP=['rod','net','contract','charm','lantern','ally'];
 const DEAL_OFF=0.15;
 // one item a day at a discount, within reach of the player's purse; kept in the save, so buying it does not roll a new deal
@@ -2355,6 +2357,7 @@ function itemCanvas(it){if(itemCache[it.id])return itemCache[it.id];
 function drawItem(g,it,x,y){const c=itemCanvas(it);if(!c)return;g.imageSmoothingEnabled=c.width>16;g.drawImage(c,x,y,16,16)}
 // menu tab icons 12x12
 Object.assign(ITEM_ART,{
+ bait0:['................','........OO......','........OSO.....','.........OsO....','.........OSO....','.........OsO....','.........OSO....','...OO....OsO....','..OSSO...OSO....','..OsO....OsO....','..OSO...OSO.....','..OsOOOOSsO.....','...OSSSSsO......','....OOOOO.......','................','................'],
  dr0:['................','..OOOOOOOOOOOO..','..OwxxxxxxxxwO..','..OAAAAAAAAAAO..','..OAAAAAAAAAAO..','..OAaAAAAAAaAO..','..OAAAGGGGAAAO..','..OAAAGGGGAAAO..','..OAaAAAAAAaAO..','..OAAAAAAAAAAO..','...OAAAAAAAAO...','....OAAAAAAO....','.....OAAAAO.....','......OAAO......','.......OO.......','................'],
  dr1:['................','..OOOOOOOOOOOO..','..OwxxxxxxxxwO..','..OAAAAAAAAAAO..','..OAAAAAAAAAAO..','..OAaAAAAAAaAO..','..OAAAGGGGAAAO..','..OAAAGGGGAAAO..','..OAaAAAAAAaAO..','..OAAAAAAAAAAO..','...OAAAAAAAAO...','....OAAAAAAO....','.....OAAAAO.....','......OAAO......','.......OO.......','................'],
  dr2:['................','..OOOOOOOOOOOO..','..OwxxxxxxxxwO..','..OAAAAAAAAAAO..','..OAAAAAAAAAAO..','..OAaAAAAAAaAO..','..OAAAGGGGAAAO..','..OAAAGGGGAAAO..','..OAaAAAAAAaAO..','..OAAAAAAAAAAO..','...OAAAAAAAAO...','....OAAAAAAO....','.....OAAAAO.....','......OAAO......','.......OO.......','................'],
