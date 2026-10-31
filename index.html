@@ -568,7 +568,7 @@ document.addEventListener('pointerdown',e=>{const n=$('newsPanel');if(n&&!n.cont
 
 // ---------- weather ----------
 const WEATHER={clear:{name:'맑음',desc:'맑은 날이에요.'},rain:{name:'비',speed:0.15,desc:'비가 와요. 낚는 속도 +15%'},fog:{name:'안개',odd:2,desc:'안개가 꼈어요. 이변이 두 배로 잘 걸려요'},storm:{name:'폭풍',luck:0.25,speed:-0.1,desc:'폭풍이에요. 희귀 확률 +25%, 낚는 속도 -10%'}};
-function weatherAt(ms){const d=new Date(ms);const n=nz(d.getFullYear()*372+d.getMonth()*31+d.getDate(),Math.floor(d.getHours()/3),11);return n<0.55?'clear':n<0.77?'rain':n<0.91?'fog':'storm'}
+function weatherAt(ms){const d=new Date(ms);const n=nz(d.getFullYear()*372+d.getMonth()*31+d.getDate(),Math.floor(d.getHours()/3),11);return n<0.70?'clear':n<0.84?'rain':n<0.95?'fog':'storm'}
 const fishWeather=f=>['rain','fog','storm'][(f.spot*3+(+f.id.split('-')[1]))%3];
 
 // ---------- focus depth: unbroken time on the water ----------
@@ -2456,10 +2456,9 @@ function drawScene(g,t){
     g.globalCompositeOperation='source-over';for(let i=0;i<3;i++){g.fillStyle=i<dl?`rgb(${col})`:'rgba(0,0,0,0.45)';g.fillRect(W-10-i*8,14,5,5);g.fillStyle='rgba(0,0,0,0.6)';g.fillRect(W-10-i*8,19,5,1)}}
   // weather
   const wx=weatherAt(Date.now());
-  if(wx==='rain'||wx==='storm'){const st=wx==='storm';g.fillStyle=td==='night'?'rgba(6,10,24,0.10)':st?'rgba(6,10,24,0.34)':'rgba(10,18,34,0.20)';g.fillRect(0,0,W,H);
-    g.strokeStyle=st?'rgba(190,210,235,0.40)':'rgba(190,210,235,0.28)';g.lineWidth=1;g.beginPath();const n=st?130:70,sl=st?10:4;for(let i=0;i<n;i++){const sp=260+(i%5)*40;const y=(i*53+t/1000*sp)%(H+20)-10;const x=((i*97+(st?t/1000*90:0))%(W+40))-20;g.moveTo(x,y);g.lineTo(x-sl,y+(st?12:9))}g.stroke();
-    g.fillStyle='rgba(205,225,240,0.5)';for(let i=0;i<(st?34:18);i++){const k=(t/380+i*0.37)%1;const x=(i*67)%288,y=60+(i*41)%130;if(at(Math.floor(x/32),Math.floor(y/32))==='w'&&k<0.45)g.fillRect(x-Math.round(k*4),y,1+Math.round(k*8),1)}
-    if(st){const b=Math.floor(t/5200);if(nz(b,3,12)<0.45){const fl=t%5200;if(fl<90||(fl>170&&fl<240)){g.fillStyle='rgba(225,232,255,0.55)';g.fillRect(0,0,W,H)}}}}
+  if(wx==='rain'||wx==='storm'){const st=wx==='storm';g.fillStyle=td==='night'?'rgba(6,10,24,0.08)':st?'rgba(6,10,24,0.24)':'rgba(10,18,34,0.12)';g.fillRect(0,0,W,H);
+    g.strokeStyle=st?'rgba(190,210,235,0.20)':'rgba(190,210,235,0.14)';g.lineWidth=1;g.beginPath();const n=st?55:28,sl=st?6:3;for(let i=0;i<n;i++){const sp=120+(i%5)*24;const y=(i*53+t/1000*sp)%(H+20)-10;const x=((i*97+(st?t/1000*30:0))%(W+40))-20;g.moveTo(x,y);g.lineTo(x-sl,y+(st?12:9))}g.stroke();
+    g.fillStyle='rgba(205,225,240,0.28)';for(let i=0;i<(st?16:9);i++){const k=(t/700+i*0.37)%1;const x=(i*67)%288,y=60+(i*41)%130;if(at(Math.floor(x/32),Math.floor(y/32))==='w'&&k<0.45)g.fillRect(x-Math.round(k*4),y,1+Math.round(k*8),1)}}
   else if(wx==='fog'){for(let i=0;i<6;i++){const y=14+i*30;const x=((t/1000*(5+i*2)+i*90)%(W+200))-160;g.fillStyle='rgba(205,214,226,0.13)';g.fillRect(Math.round(x),y,190,16);g.fillStyle='rgba(205,214,226,0.08)';g.fillRect(Math.round(x)-30,y-7,260,30)}g.fillStyle='rgba(190,200,214,0.10)';g.fillRect(0,0,W,H)}
   // catch popup: a big fish drawn on the scene; its label is a DOM overlay so Korean text stays crisp
   const bt=t-bite;const pop=$('catchPop');
