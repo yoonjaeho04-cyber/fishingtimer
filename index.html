@@ -542,6 +542,9 @@ function rollFish(spot,elapsedSec,at){
   return {id:f.id,cm};
 }
 let bite=0,bitePop=null;const anim={cast:0,reel:0};
+function holdPause(now){const R=S.run;if(!R||!R.pausedAt)return;const d=now-(R.holdAt||R.pausedAt);if(d<=0)return;R.startAt+=d;R.nextAt+=d;if(R.qAt)R.qAt+=d;R.holdAt=now;
+  if(S.breakMin>0&&!R.breakRang&&now-R.pausedAt>=S.breakMin*60000){R.breakRang=true;audio.bell();toast('휴식 시간이 끝났어요');save()}}
+function togglePause(){const R=S.run;if(!R)return;const now=Date.now();if(R.pausedAt){holdPause(now);R.pausedAt=0;R.holdAt=0;R.breakRang=false;say('start')}else{R.pausedAt=now;R.holdAt=now}save();renderTimer()}
 function tickFishing(now){
   const R=S.run;if(!R)return;const spot=SPOTS[R.spot];let changed=false;
   while(R.nextAt<=now){
@@ -556,7 +559,7 @@ function tickFishing(now){
 }
 function startRun(){const ts=document.getElementById('tagSel');if(ts&&ts.value&&ts.value!=='__new')S.lastTag=ts.value;anim.cast=performance.now();anim.reel=0;const now=Date.now();S.run={startAt:now,tag:S.lastTag,spot:S.spot,catches:[],nextAt:now+catchInterval()*1000,lastCatchAt:0};S.brk=null;save();renderAll();say('start');nextIdleSay=Date.now()+rand(150,300)*1000;wakeLock()}
 function endRun(){say('end');anim.reel=performance.now();anim.cast=0;
-  const R=S.run;if(!R)return;const now=Date.now();tickFishing(now);qOnTick(now);
+  const R=S.run;if(!R)return;const now=Date.now();holdPause(now);R.pausedAt=0;tickFishing(now);qOnTick(now);
   const sec=Math.max(0,Math.floor((now-R.startAt)/1000));
   const dk=dayKey(new Date(R.startAt));const d=S.days[dk]||(S.days[dk]={sec:0,tags:{}});
   d.sec+=sec;d.tags[R.tag]=(d.tags[R.tag]||0)+sec;S.totalSec+=sec;S.sessions++;
@@ -577,12 +580,14 @@ let tab='gear',codexSel=null,shopCat='all',shopSel=null;
 function renderAll(){renderTop();renderTimer();renderPane();$('game').classList.toggle('compact',!!S.compact)}
 function renderTop(){const t=timeOfDay();$('tod').textContent=TIMES[t];$('mTod').textContent=TIMES[t];$('mClass').textContent=(S.char?charOf().name:'')+(S.rebirths?` · 환생 ${S.rebirths}`:'');$('mGold').textContent=S.gold.toLocaleString()+' G';$('mTotal').textContent=fmtH(S.totalSec);
   $('muteBtn').innerHTML=S.muted?'<svg viewBox="0 0 16 16"><path d="M2 6h3l4-3v10l-4-3H2z"/><path d="M11 5l4 6M15 5l-4 6" stroke="currentColor" stroke-width="1.6" fill="none"/></svg>':'<svg viewBox="0 0 16 16"><path d="M2 6h3l4-3v10l-4-3H2z"/><path d="M11 5a4 4 0 010 6M13 3a7 7 0 010 10" stroke="currentColor" stroke-width="1.6" fill="none"/></svg>'}
-function statusText(){const R=S.run;if(R)return `${SPOTS[R.spot].name} · ${R.tag} · ${R.catches.length}마리`+(S.goalMin?` · 목표 ${S.goalMin}분`:'');if(S.brk&&S.brk.endAt>Date.now())return '휴식 중';return S.brk&&S.brk.rang?'다시 출항할 시간':'출항 준비 중'}
+function statusText(){const R=S.run;if(R&&R.pausedAt){const p=Math.floor((Date.now()-R.pausedAt)/1000);return `휴식 중 ${pad(Math.floor(p/60))}:${pad(p%60)}`+(S.breakMin?` / ${S.breakMin}분`:'')+' · 시간이 멈춰 있어요'}if(R)return `${SPOTS[R.spot].name} · ${R.tag} · ${R.catches.length}마리`+(S.goalMin?` · 목표 ${S.goalMin}분`:'');if(S.brk&&S.brk.endAt>Date.now())return '휴식 중';return S.brk&&S.brk.rang?'다시 출항할 시간':'출항 준비 중'}
 function renderTimer(){
   const c=$('ctrl');c.innerHTML='';const cc=$('compactCtrl');cc.innerHTML='';const R=S.run;$('status').textContent=statusText();
   if(R){if(S.goalMin){const g=document.createElement('span');g.className='pill'+(R.goalDone?' on':'');g.textContent=R.goalDone?'완주 달성함':'완주 미달성';c.append(g)}
     const b=document.createElement('button');b.className='btn primary';b.textContent='귀항';b.onclick=()=>{audio.unlock();endRun()};c.append(b);
+    const pz=document.createElement('button');pz.className='btn';pz.id='pauseBtn';pz.textContent=R.pausedAt?'다시 시작':'휴식';pz.onclick=()=>{audio.unlock();togglePause()};c.append(pz);
     const b2=document.createElement('button');b2.className='btn small';b2.textContent='귀항';b2.onclick=()=>{audio.unlock();S.compact=false;endRun()};cc.append(b2);
+    const pz2=document.createElement('button');pz2.className='btn small';pz2.textContent=R.pausedAt?'다시 시작':'휴식';pz2.onclick=()=>{audio.unlock();togglePause()};cc.append(pz2);
   }else{
     if(S.lastTag&&S.tags.includes(S.lastTag)&&S.tags[0]!==S.lastTag){S.tags=[S.lastTag,...S.tags.filter(x=>x!==S.lastTag)]}
     const sel=document.createElement('select');sel.id='tagSel';S.tags.forEach(t=>{const o=document.createElement('option');o.value=t;o.textContent=t;if(t===S.lastTag)o.selected=true;sel.append(o)});
@@ -592,7 +597,7 @@ function renderTimer(){
     const b=document.createElement('button');b.className='btn primary';b.textContent='출항';b.onclick=()=>{audio.unlock();if(!S.char){showCharSelect();return}startRun()};
     c.append(sp,sel,b);
     const quick=document.createElement('div');quick.className='row center';quick.style.cssText='width:100%;gap:6px';
-    [['goal','타이머',S.goalMin],['brk','휴식',S.breakMin]].forEach(([k,lab,v])=>{const q=document.createElement('button');q.className='btn small';q.id=k==='goal'?'quickGoal':'quickBreak';q.textContent=`${lab} ${v?v+'분':'끔'}`;q.onclick=()=>showMinutes(k);quick.append(q)});
+    [['goal','타이머',S.goalMin]].forEach(([k,lab,v])=>{const q=document.createElement('button');q.className='btn small';q.id=k==='goal'?'quickGoal':'quickBreak';q.textContent=`${lab} ${v?v+'분':'끔'}`;q.onclick=()=>showMinutes(k);quick.append(q)});
     c.append(quick);
     const b2=document.createElement('button');b2.className='btn small';b2.textContent='출항';b2.onclick=()=>{audio.unlock();if(!S.char){S.compact=false;renderAll();showCharSelect();return}startRun()};cc.append(b2);
   }
@@ -725,7 +730,7 @@ function renderPane(){
     const cp=document.createElement('button');cp.className='btn small';cp.textContent='낚시 화면만 보기';cp.onclick=()=>{S.compact=true;save();renderAll()};
     const sc=document.createElement('div');sc.className='row';const scC=document.createElement('button');scC.className='btn small';scC.textContent='복사';scC.onclick=showSaveCode;const scP=document.createElement('button');scP.className='btn small';scP.textContent='붙여넣기';scP.disabled=!!S.run;scP.title=S.run?'귀항한 뒤에 불러올 수 있어요':'';scP.onclick=showSaveLoad;sc.append(scC,scP);
     const wl=document.createElement('button');wl.className='btn small';wl.textContent=S.wake?'켜짐':'꺼짐';wl.onclick=()=>{S.wake=!S.wake;save();wakeLock();renderPane()};
-    p.append(mk('목표 시간 (분)','0이면 자유 모드. 채우면 완주 보너스',goal),mk('휴식 타이머 (분)','0이면 끄기. 끝나면 종이 울려요',brk),mk('음량','',vol),mk('견습 어부','',ch),mk('화면 켜둠 (폰)','출항 중에 화면이 꺼지지 않게',wl),mk('페이지 안 축소 모드','PiP가 안 되는 브라우저용',cp),mk('저장 코드','다른 브라우저나 기기로 기록 옮기기',sc));
+    p.append(mk('목표 시간 (분)','0이면 자유 모드. 채우면 완주 보너스',goal),mk('휴식 타이머 (분)','휴식이나 귀항 뒤 이 시간이 지나면 종이 울려요. 0이면 끄기',brk),mk('음량','',vol),mk('견습 어부','',ch),mk('화면 켜둠 (폰)','출항 중에 화면이 꺼지지 않게',wl),mk('페이지 안 축소 모드','PiP가 안 되는 브라우저용',cp),mk('저장 코드','다른 브라우저나 기기로 기록 옮기기',sc));
     const t=document.createElement('div');t.className='hint';t.textContent='기록은 이 브라우저와 계정에 저장돼요. 다른 곳으로 옮기려면 저장 코드를 쓰세요.';p.append(t);
     if(S.rebirths)p.append(Object.assign(document.createElement('div'),{className:'hint',textContent:`환생 ${S.rebirths}회 · 달의 비늘 ${S.moon||0}`}));
     const rb=document.createElement('button');rb.className='btn small';rb.textContent='물안개 너머로 (환생)';rb.disabled=!!S.run||!canRebirth();rb.title=canRebirth()?'':'심연의 우물 지도를 사거나 누적 100시간이면 열려요';rb.onclick=showRebirth;
@@ -2373,7 +2378,7 @@ function say(kind){const L=(LINES[S.char]||LINES.rogue)[kind];if(!L)return;const
 const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
 let lastSec=-1,lastTod=timeOfDay();
 function frame(t){
-  const now=Date.now();const bar=$('bar'),fill=$('barFill');
+  const now=Date.now();holdPause(now);const bar=$('bar'),fill=$('barFill');
   if(S.run){tickFishing(now);const s=Math.floor((now-S.run.startAt)/1000);if(s!==lastSec){lastSec=s;const gS=S.goalMin*60;const disp=S.goalMin&&s<gS?gS-s:s;$('clock').innerHTML=fmtClock(disp);$('bigClock').innerHTML=fmtClock(disp);if(s%5===0&&!S.goalMin){$('status').textContent=statusText()}
     const goalS=S.goalMin*60,done=S.goalMin&&s>=goalS;
     if(S.goalMin){bar.hidden=false;bar.classList.remove('rest');fill.style.width=Math.min(100,s/goalS*100)+'%';$('status').textContent=done?`목표 달성! 귀항하면 완주 보너스 · ${statusText()}`:`목표까지 ${fmtH(Math.max(0,goalS-s))||'1분 미만'} · ${statusText()}`}else bar.hidden=true;
@@ -2383,7 +2388,7 @@ function frame(t){
     if(!left&&!S.brk.rang){S.brk.rang=true;audio.bell();toast('다시 출항할 시간이에요');renderTimer();save()}}
   else if(lastSec!==0){lastSec=0;$('clock').innerHTML=fmtClock(0);$('bigClock').innerHTML=fmtClock(0);bar.hidden=true}
   const tod=timeOfDay();if(tod!==lastTod){lastTod=tod;renderTop();audio.retune()}
-  if(S.run&&now>nextIdleSay){if(nextIdleSay)say('idle');nextIdleSay=now+rand(180,420)*1000}
+  if(S.run&&!S.run.pausedAt&&now>nextIdleSay){if(nextIdleSay)say('idle');nextIdleSay=now+rand(180,420)*1000}
   drawScene(cx,reducedMotion?0:t);if(pipOn||pipStream)drawPip();
   const tk=$('tankCanvas');if(tk)drawTank(tk.getContext('2d'),reducedMotion?0:t);
   (typeof docPip!=='undefined'&&docPip&&!docPip.closed?docPip:window).requestAnimationFrame(frame);
@@ -2408,7 +2413,7 @@ function goalReached(){const R=S.run;if(!R||R.goalDone)return;R.goalDone=true;sa
   const o=overlay(`<h2 style="text-align:center">완주 달성!</h2><div class="hint" style="text-align:center">목표 ${S.goalMin}분을 채웠어요. 귀항하면 완주 보너스가 붙어요.<br>계속 낚시해도 보너스는 유지돼요.</div><div class="row center" style="margin-top:6px"><button class="btn" id="goalGo">계속 낚시</button><button class="btn primary" id="goalEnd">지금 귀항</button></div>`);
   o.querySelector('#goalGo').onclick=()=>o.remove();o.querySelector('#goalEnd').onclick=()=>{o.remove();endRun()}}
 let qTickN=0;qUpdate();
-setInterval(()=>{const now=Date.now();if(++qTickN%30===0)qUpdate(now);if(S.run){tickFishing(now);qOnTick(now);const s=Math.floor((now-S.run.startAt)/1000);try{const gS=S.goalMin*60;const disp=S.goalMin&&s<gS?gS-s:s;$('clock').innerHTML=fmtClock(disp);$('bigClock').innerHTML=fmtClock(disp);$('status').textContent=statusText()}catch(e){}if(S.goalMin&&s>=S.goalMin*60&&!S.run.goalDone)goalReached()}
+setInterval(()=>{const now=Date.now();holdPause(now);if(++qTickN%30===0)qUpdate(now);if(S.run){tickFishing(now);qOnTick(now);const s=Math.floor((now-S.run.startAt)/1000);try{const gS=S.goalMin*60;const disp=S.goalMin&&s<gS?gS-s:s;$('clock').innerHTML=fmtClock(disp);$('bigClock').innerHTML=fmtClock(disp);$('status').textContent=statusText()}catch(e){}if(S.goalMin&&s>=S.goalMin*60&&!S.run.goalDone)goalReached()}
   else if(S.brk&&!S.brk.rang&&S.brk.endAt<=now){S.brk.rang=true;audio.bell();toast('다시 출항할 시간이에요');renderTimer();save()}},1000);
 
 // ---------- audio ----------
