@@ -2376,6 +2376,15 @@ const mist=Array.from({length:5},(_,i)=>({y:30+i*34,o:Math.random()*100,sp:.003+
 const HX=124,HY=12,BX=208,BY=100;
 // where each painted hero's raised hand is (32x64 sprite coords); the rod grip snaps to it. Code-drawn heroes use (29,38).
 const HERO_HAND={rogue:[27,19],mage:[27,26],knight:[28,23],bard:[28,22],druid:[28,24]};
+// the hero stands at the front of the dock, drawn larger than the 32x64 sprite box
+const HS=1.3,HOX=119,HOY=4;
+const heroOut={};
+// cached scene sprite: pale rim, then a dark outline, then the painting, so the figure separates from any background
+function heroScene(cls){const src=heroCanvas(cls,2);if(heroOut[cls]&&heroOut[cls].src===src)return heroOut[cls].c;
+  const W0=Math.round(32*HS),H0=Math.round(64*HS),P=3;const c=document.createElement('canvas');c.width=W0+P*2;c.height=H0+P*2;const g=c.getContext('2d');g.imageSmoothingEnabled=true;g.imageSmoothingQuality='high';
+  const sil=(col,r)=>{const t=document.createElement('canvas');t.width=c.width;t.height=c.height;const x=t.getContext('2d');x.imageSmoothingEnabled=true;for(let dx=-r;dx<=r;dx++)for(let dy=-r;dy<=r;dy++)if(dx*dx+dy*dy<=r*r+1)x.drawImage(src,P+dx,P+dy,W0,H0);x.globalCompositeOperation='source-in';x.fillStyle=col;x.fillRect(0,0,t.width,t.height);g.drawImage(t,0,0)};
+  sil('rgba(255,236,200,0.30)',2);sil('rgba(11,10,14,1)',1);g.drawImage(src,P,P,W0,H0);heroOut[cls]={src,c};return c}
+function drawHero(g,y){const c=heroScene(S.char||'rogue');g.imageSmoothingEnabled=false;g.drawImage(c,HOX-3,y-3)}
 const handPos=()=>{const c=S.char||'rogue';return (heroImg&&heroImg[c]&&HERO_HAND[c])||[29,38]};
 function drawScene(g,t){
   if(!base)buildBase();
@@ -2391,7 +2400,7 @@ function drawScene(g,t){
   prop(g,reeds,20,156);prop(g,reeds,44,172);
   if(eqLn){drawSprite(g,{rows:lanternHD.rows.slice(17),pal:PP},72,45);item2(eqLn,66,24)}else drawSprite(g,lanternHD,72,28);
   if(eqCh)item2(eqCh,26,54);
-  const eqAl=item(S.eq.ally);const alIm=eqAl&&(allyImg[eqAl.id]);if(alIm){const ab=Math.sin(t/(eqAl.id==='al2'?700:1400))*(eqAl.id==='al2'?2:0.6);const h=eqAl.id==='al2'?44:30,w=alIm.width*h/alIm.height;g.fillStyle='rgba(0,0,0,0.35)';g.fillRect(HX-26-w/2,HY+62,w*0.8,2);g.imageSmoothingEnabled=true;g.drawImage(alIm,HX-22-w,HY+64-h+ab-(eqAl.id==='al2'?4:0),w,h);g.imageSmoothingEnabled=false}
+  const eqAl=item(S.eq.ally);const alIm=eqAl&&(allyImg[eqAl.id]);if(alIm){const ab=Math.sin(t/(eqAl.id==='al2'?700:1400))*(eqAl.id==='al2'?2:0.6);const h=eqAl.id==='al2'?44:30,w=alIm.width*h/alIm.height;g.fillStyle='rgba(0,0,0,0.35)';g.fillRect(HX-26-w/2,HY+72,w*0.8,2);g.imageSmoothingEnabled=true;g.drawImage(alIm,HX-22-w,HY+74-h+ab-(eqAl.id==='al2'?4:0),w,h);g.imageSmoothingEnabled=false}
   else if(eqAl&&ALLY_ART[eqAl.id]){const ab=(Math.floor(t/900)%2);g.fillStyle='rgba(0,0,0,0.35)';g.fillRect(HX-28,HY+62,16,2);const ac=propCache.get('ally:'+eqAl.id)||(()=>{const c=refine2x(ALLY_ART[eqAl.id]);propCache.set('ally:'+eqAl.id,c);return c})();g.drawImage(ac,HX-34,HY+32+ab)}
   if(eqBait&&(S.bait[eqBait.id]||0)>0)item2(eqBait,56,88);
   const fishing=!!S.run;const bob=(Math.floor(t/800)%2)*2;
@@ -2402,9 +2411,9 @@ function drawScene(g,t){
   if(castT<1100){const k=castT/1100;rodAng=k<0.35?-0.9*ease(k/0.35):-0.9+1.5*ease((k-0.35)/0.3)-(k>0.65?0.6*ease((k-0.65)/0.35):0);lean=k<0.35?-3*ease(k/0.35):-3+5*ease((k-0.35)/0.3)-(k>0.65?2*ease((k-0.65)/0.35):0)}
   else if(catchT<900){const k=catchT/900;rodAng=k<0.3?0.55*ease(k/0.3):0.55-1.1*ease((k-0.3)/0.4)+(k>0.7?0.55*ease((k-0.7)/0.3):0);lean=k<0.3?2*ease(k/0.3):2-6*ease((k-0.3)/0.4)+(k>0.7?4*ease((k-0.7)/0.3):0)}
   else if(reelT<600){rodAng=-0.5*Math.sin(reelT/600*Math.PI);lean=-2*Math.sin(reelT/600*Math.PI)}
-  g.fillStyle='rgba(0,0,0,0.4)';g.fillRect(HX+8,HY+61,20,3);
-  g.save();g.transform(1,0,-lean/64,1,lean,0);drawSprite(g,heroSprite(S.char||'rogue'),HX,HY+bob);g.restore();
-  const [hx,hy]=handPos();const gx=HX+hx+lean*(1-hy/64),gy=HY+hy+bob;   // grip point
+  g.fillStyle='rgba(0,0,0,0.4)';g.fillRect(HOX+9,HOY+80,26,4);
+  g.save();g.transform(1,0,-lean/84,1,lean,0);drawHero(g,HOY+bob);g.restore();
+  const [hx,hy]=handPos();const gx=HOX+hx*HS+lean*(1-hy/64),gy=HOY+hy*HS+bob;   // grip point
   g.save();g.translate(gx,gy);g.rotate(rodAng);
   if(eqRod&&ITEM_ART[eqRod.id])item2(eqRod,-2,-30);else{g.fillStyle=C.wd4;for(let i=0;i<28;i++)g.fillRect(i,-i,2,2)}
   g.restore();
@@ -2439,6 +2448,8 @@ function drawScene(g,t){
   g.globalCompositeOperation='source-over';
   if(td==='night'){flies.forEach(f=>{f.p+=0.012*f.s;const x=f.x+Math.sin(f.p)*10,y=f.y+Math.cos(f.p*.7)*6;const a=.25+.75*Math.abs(Math.sin(f.p*2.1));g.fillStyle=`rgba(210,240,120,${a})`;g.fillRect(Math.floor(x),Math.floor(y),2,2);g.fillStyle=`rgba(210,240,120,${a*.25})`;g.fillRect(Math.floor(x)-2,Math.floor(y)-2,6,6)});g.fillStyle='#fff0b0';g.fillRect(80,34,4,4)}
   if(td==='dawn'||td==='night'){mist.forEach(m=>{m.o+=m.sp;const x=((Math.sin(m.o)*.5+.5)*W*1.4)-W*.2;g.fillStyle=td==='dawn'?'rgba(200,210,230,0.16)':'rgba(120,140,180,0.08)';g.fillRect(Math.floor(x),m.y,120,8);g.fillStyle=td==='dawn'?'rgba(200,210,230,0.08)':'rgba(120,140,180,0.04)';g.fillRect(Math.floor(x)-16,m.y-4,152,16)})}
+  // keep the hero readable in the dark: redraw over the lighting at partial strength
+  if(td!=='day'){g.globalAlpha=td==='night'?0.62:0.4;drawHero(g,HOY+bob);g.globalAlpha=1}
   // focus depth: current streaks on the water, motes rising around the hero, pips in the corner
   const dl=depthLvAt(Date.now());if(dl){g.globalCompositeOperation='screen';for(let i=0;i<dl*16;i++){const sp=40+i%5*14;const x=((i*73+t/1000*sp*(1+dl*0.5))%330)-20;const y=70+(i*37)%120;g.fillStyle=`rgba(150,205,235,${0.10+dl*0.06})`;g.fillRect(Math.round(x),y,10+dl*4,1)}
     const col=['','150,205,235','190,160,240','245,205,110'][dl];for(let i=0;i<dl*7;i++){const ph=(t/2400+i/(dl*7))%1;const a=Math.sin(ph*Math.PI);g.fillStyle=`rgba(${col},${a*0.9})`;g.fillRect(Math.round(HX+6+(i*11)%24+Math.sin(ph*7+i)*3),Math.round(HY+60-ph*58),2,2)}
