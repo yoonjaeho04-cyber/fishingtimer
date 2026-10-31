@@ -187,6 +187,8 @@ input[type=number]{width:64px;font-family:var(--display)}
 .keeper .line{display:flex;gap:10px;align-items:center;padding:8px 12px;font-size:13px;line-height:1.45;color:#d8cba8;background:linear-gradient(#1c1510,#120d0a);border:2px solid var(--bronze3);box-shadow:inset 0 0 0 1px #000}
 .keeper .line b{font:12px var(--display);color:var(--gold);font-weight:400;flex:none}
 .dealBox{display:grid;grid-template-columns:44px 1fr;gap:8px;align-items:center;text-align:left;padding:5px 8px;font-size:13px;color:var(--fg);background:linear-gradient(#3a1d16,#1f100d);border:2px solid #8e5f22;box-shadow:inset 0 0 0 1px #000,inset 0 2px 0 #6b3a22}
+.keeper .line small{display:block;font:11px var(--display);color:var(--muted);margin-top:2px}
+.cats button.merTab{color:#c7a6e8;border-color:#4a3466}.cats button.merTab[aria-selected=true]{color:#e6d2ff;border-color:#8a64b8}
 .dealBox canvas{width:44px;height:44px;image-rendering:pixelated}
 .dealBox small{display:block;font:11px var(--display);color:var(--gold)}.dealBox small s,.card .kv s{color:var(--muted)}.dealBox small b{color:#ffdf8a;font-weight:400}
 .cats button.can{position:relative}.cats button.can::after{content:"";position:absolute;right:2px;top:2px;width:5px;height:5px;background:var(--gold);box-shadow:0 0 0 1px #000}
@@ -447,6 +449,11 @@ const ITEMS=[
  {id:'ch5',cat:'charm',tier:3,name:'은 십자가',price:6000,v:{bonus:0.15},desc:'끝까지 버틴 자에게 복을 내린다. 완주 보너스가 늘어난다.'},
  {id:'ch6',cat:'charm',tier:4,name:'용의 눈 반지',price:15000,v:{gold:0.15},desc:'붉은 보석이 박힌 반지. 상인들이 값을 더 쳐준다.'},
  {id:'ch7',cat:'charm',tier:4,name:'세이렌의 비늘',price:20000,v:{luck:0.20},desc:'세이렌이 떨군 비늘. 물고기가 노래를 듣고 온다.'},
+ {id:'ml1',cat:'charm',tier:4,name:'저주받은 금화',price:0,merPrice:18000,v:{gold:0.22,luck:-0.15},desc:'받는 사람마다 물에 빠졌다고 한다. 값은 잘 쳐준다.'},
+ {id:'ml2',cat:'charm',tier:4,name:'눈 없는 물고기 뼈',price:0,merPrice:22000,v:{luck:0.26,gold:-0.12},desc:'귀한 것을 부른다. 다만 상인들이 꺼림칙해한다.'},
+ {id:'ml3',cat:'charm',tier:3,name:'깨진 모래시계',price:0,merPrice:9000,v:{speed:0.16,bonus:-0.15},desc:'시간이 새어 나간다. 줄은 빨라지지만 끝이 허전하다.'},
+ {id:'ml4',cat:'charm',tier:3,name:'물에 젖은 일기장',price:0,merPrice:9000,v:{bonus:0.30,speed:-0.06},desc:'마지막 장에 이렇게 적혀 있다. 끝까지 앉아 있어라.'},
+ {id:'ml5',cat:'charm',tier:3,name:'우는 조개',price:0,merPrice:8000,v:{nightluck:0.32,gold:-0.06},desc:'밤이면 귀에 대지 않아도 들린다.'},
  {id:'ch8',cat:'charm',tier:5,name:'왕의 인장',price:55000,v:{gold:0.25,speed:0.10},desc:'옛 왕의 인장 반지. 모든 문이 열린다.'},
  {id:'ln1',cat:'lantern',tier:1,name:'기름 등불',price:600,v:0.08,desc:'부두의 쇠 등불에 기름을 더 넣었다. 밤과 새벽 어종이 잘 보인다.'},
  {id:'ln2',cat:'lantern',tier:3,name:'푸른 불꽃 등불',price:3000,v:0.18,desc:'마녀에게 산 푸른 불. 물속까지 비춘다.'},
@@ -465,6 +472,9 @@ const ITEMS=[
  {id:'al4',cat:'ally',tier:5,name:'인어 가수',price:35000,v:{extra:0.22,spot:3,tod:'night'},desc:'별이 진 바다의 노래꾼. 밤바다의 물고기가 노래를 따라 올라온다.'},
  {id:'tm1',cat:'treasure',tier:2,name:'낡은 보물지도',price:500,v:{luck:0.5},desc:'누군가 표시해 둔 물길. 다음 출항에 희귀한 것이 잘 걸린다.'},
  {id:'tm2',cat:'treasure',tier:4,name:'금박 보물지도',price:1800,v:{luck:1},desc:'왕실 측량사의 지도. 다음 출항에 희귀 확률이 크게 오른다.'},
+ {id:'mt1',cat:'treasure',tier:3,name:'안개 담은 병',price:0,merEV:3,v:{gold:0.30},desc:'마개를 열면 호수 냄새가 난다. 비늘이 더 곱게 빛난다.'},
+ {id:'mt2',cat:'treasure',tier:3,name:'쉰 소리 나는 종',price:0,merEV:2,v:{speed:0.25},desc:'물속에서 울린다. 물고기들이 잠에서 깬다.'},
+ {id:'mt3',cat:'treasure',tier:3,name:'봉랍 찍힌 편지',price:0,merEV:1.5,v:{trophy:1},desc:'받는 이의 이름이 지워져 있다. 끝까지 앉아 있으면 답이 온다.'},
  {id:'tm3',cat:'treasure',tier:3,name:'침몰선 지도',price:900,v:{chest:1},desc:'가라앉은 배의 위치. 15분 이상 낚시하면 보물 상자를 건진다.'},
  {id:'map1',cat:'map',tier:2,name:'요정의 샘 지도',price:2500,v:1,desc:'숲 깊은 곳의 샘으로 가는 길.'},
  {id:'map2',cat:'map',tier:3,name:'잉걸불 협곡 지도',price:9000,v:2,desc:'화산 협곡의 뜨거운 물길.'},
@@ -574,6 +584,7 @@ function renderPerks(p){const h=document.createElement('div');h.className='sec';
 
 // ---------- update news: add a new entry at the top on every release ----------
 const NEWS=[
+ {v:9,date:'11.01',title:'떠돌이 상인',items:['6일에 한 번, 이틀 동안 떠돌이 상인이 호수에 들어와요','상점에 없는 전용 장신구와 1회용 물건을 팔아요']},
  {v:8,date:'11.01',title:'새로워진 상점',items:['물건이 선반에 진열되고 가격표가 붙었어요','오늘의 특가: 하루 한 개 15% 할인','지금 장비와 비교하고, 모자란 금액도 보여줘요','전체 탭은 맨 뒤로 옮겼어요','좋은 낚싯대는 새 지역을 열면 상점에 들어와요']},
  {v:7,date:'10.31',title:'오늘의 목표와 날씨',items:['오늘의 목표: 채우면 보상 상자, 며칠 이어가면 상자가 좋아져요','주간 리포트: 일지 탭에서 보고 자랑 문구도 복사할 수 있어요','집중 깊이: 쉬지 않고 30·60·90분이면 희귀 확률이 올라요','보물지도: 상점에서 사서 다음 출항에 써요','전시 목표: 의뢰 탭 아래에서 달성하면 골드와 칭호','날씨: 비·안개·폭풍마다 효과가 달라요']},
  {v:6,date:'10.31',title:'낮 화면과 휴식',items:['낮이 밝아졌어요. 물색과 햇빛이 바뀌었어요','출항 중 휴식 버튼: 누르면 시간과 낚시가 멈춰요','출항 버튼 아래 타이머 버튼이 생겼어요','마지막에 쓴 공부·작업 태그가 맨 위에 나와요']},
@@ -634,7 +645,7 @@ function showWeekly(off){S.weekSeen=weekKey(off);save();const w=weekStats(off);c
 function maybeWeekly(){if(!S.char||S.run||document.querySelector('.overlay'))return;const dow=new Date().getDay();const off=dow===0?0:dow===1?-1:null;if(off===null||S.weekSeen===weekKey(off))return;if(weekStats(off).total>0)showWeekly(off)}
 
 // ---------- treasure maps ----------
-function showTreasure(){const owned=ITEMS.filter(i=>i.cat==='treasure');
+function showTreasure(){const owned=ITEMS.filter(i=>i.cat==='treasure'&&(i.price>0||(S.tmaps||{})[i.id]));
   const o=overlay(`<h2>보물지도</h2><div class="hint">고른 지도는 다음 출항에 쓰여요. 상점에서 살 수 있어요.</div><div class="tmaps" id="tmList"></div><div class="row" style="justify-content:flex-end"><button class="btn" id="tmOff">안 쓰기</button><button class="btn primary" id="tmOk">닫기</button></div>`);
   const box=o.querySelector('#tmList');owned.forEach(it=>{const n=(S.tmaps||{})[it.id]||0;const b=document.createElement('button');b.className='tmRow'+(S.activeMap===it.id?' on':'');b.disabled=!n;const cv=document.createElement('canvas');cv.width=64;cv.height=64;const x=cv.getContext('2d');x.imageSmoothingEnabled=false;x.scale(4,4);drawItem(x,it,0,0);const d=document.createElement('div');d.innerHTML=`<div>${it.name} <span class="hint">×${n}</span></div><div class="hint">${itemDesc(it)}</div>`;b.append(cv,d);b.onclick=()=>{S.activeMap=it.id;save();o.remove();renderTimer()};box.append(b)});
   o.querySelector('#tmOff').onclick=()=>{S.activeMap=null;save();o.remove();renderTimer()};o.querySelector('#tmOk').onclick=()=>o.remove()}
@@ -669,7 +680,7 @@ function featTick(now){const lv=depthLvAt(now);if(lv>lastDepth){toast(`집중 �
   if(++dailyTick%5===1){renderDaily();const d=D();if(dailyReady()&&d.notified!==dayKey()){d.notified=dayKey();toast('오늘의 목표 달성! 보상 상자를 열어보세요');audio.fanfare();save()}}}
 
 // ---------- fishing ----------
-function catchInterval(){let s=600/(1+eqv('rod')+charm('speed')+perk('pspeed')*0.08+(WEATHER[weatherAt(Date.now())].speed||0));if(S.char==='bard')s*=0.95;return s*rand(0.7,1.3)}
+function catchInterval(){let s=600/(1+eqv('rod')+charm('speed')+(S.run&&S.run.tmap&&item(S.run.tmap).v.speed||0)+perk('pspeed')*0.08+(WEATHER[weatherAt(Date.now())].speed||0));if(S.char==='bard')s*=0.95;return s*rand(0.7,1.3)}
 function rollFish(spot,elapsedSec,at){
   const tod=timeOfDay(new Date(at).getHours());
   const pool=spot.fish.filter(f=>!f.time||f.time===tod);
@@ -712,9 +723,9 @@ function endRun(){say('end');anim.reel=performance.now();anim.cast=0;
   const dk=dayKey(new Date(R.startAt));const d=S.days[dk]||(S.days[dk]={sec:0,tags:{}});
   d.sec+=sec;d.tags[R.tag]=(d.tags[R.tag]||0)+sec;S.totalSec+=sec;S.sessions++;
   const done=S.goalMin>0&&sec>=S.goalMin*60;
-  if(done){const sp=SPOTS[R.spot];let c=rollFish(sp,5400,now);if(fishById(c.id).r===0){const f=sp.fish.find(x=>x.r===1);c={id:f.id,cm:Math.round(rand(f.min,f.max))}}R.catches.push(c);qOnCatch(c,R.spot)}
+  if(done){const sp=SPOTS[R.spot];let c=rollFish(sp,5400,now);if(fishById(c.id).r===0){const f=sp.fish.find(x=>x.r===1);c={id:f.id,cm:Math.round(rand(f.min,f.max))}}R.catches.push(c);qOnCatch(c,R.spot);if(R.tmap&&item(R.tmap).v.trophy){const r3=sp.fish.filter(x=>x.r===3),pool=r3.length?r3:sp.fish.filter(x=>x.r===2),f=pool[Math.floor(Math.random()*pool.length)],t={id:f.id,cm:Math.round(rand(f.min,f.max))};R.catches.push(t);qOnCatch(t,R.spot)}}
   const newIds=[];const recs=[];
-  const haul=R.catches.map(c=>{if(c.odd)return {odd:c.odd,cm:0,price:0,tank:false};const f=fishById(c.id);let p=f.price*(1+eqv('contract')+charm('gold')+perk('pgold')*0.1+(oddCount()>=ODD.length?0.1:0))*(1+Object.keys(S.codex).length*0.01)*(1+(c.cm-f.min)/(f.max-f.min)*0.3);
+  const haul=R.catches.map(c=>{if(c.odd)return {odd:c.odd,cm:0,price:0,tank:false};const f=fishById(c.id);let p=f.price*(1+eqv('contract')+charm('gold')+(R.tmap&&item(R.tmap).v.gold||0)+perk('pgold')*0.1+(oddCount()>=ODD.length?0.1:0))*(1+Object.keys(S.codex).length*0.01)*(1+(c.cm-f.min)/(f.max-f.min)*0.3);
     if(S.char==='rogue'){p*=1.05;if(Math.random()<0.05)p*=2}
     const e=S.codex[c.id];if(!e){S.codex[c.id]={n:1,best:c.cm};newIds.push(c.id)}else{e.n++;if(c.cm>e.best){e.best=c.cm;recs.push(c.id)}}
     return {id:c.id,cm:c.cm,price:Math.round(p),tank:false}});
@@ -768,20 +779,21 @@ function slotEl(opts){const s=document.createElement('button');s.className='slot
 function itemDesc(it){const pc=v=>Math.round(v*100)+'%';
   if(it.cat==='rod')return `던지는 속도 +${pc(it.v)}`;if(it.cat==='net')return `두 마리 확률 ${pc(it.v)}`;if(it.cat==='contract')return `판매가 +${pc(it.v)}`;if(it.cat==='bait')return `희귀 확률 +${pc(it.v)} · 한 마리당 1개`;
   if(it.cat==='ally')return `낚싯줄 하나 더 ${pc(it.v.extra)} · ${SPOTS[it.v.spot].name}에서 +10% · ${TIMES[it.v.tod]}에 +8%`;
-  if(it.cat==='treasure')return it.v.chest?'다음 출항에 보물 상자 (15분 이상)':`다음 출항 희귀 확률 +${pc(it.v.luck)}`;
+  if(it.cat==='treasure')return it.v.chest?'다음 출항에 보물 상자 (15분 이상)':it.v.gold?`다음 출항 판매가 +${pc(it.v.gold)}`:it.v.speed?`다음 출항 던지는 속도 +${pc(it.v.speed)}`:it.v.trophy?'다음 출항 완주 시 귀한 물고기 1마리':`다음 출항 희귀 확률 +${pc(it.v.luck)}`;
   if(it.cat==='lantern')return `밤·새벽 희귀 확률 +${pc(it.v)}`;if(it.cat==='tank')return it.newTank?'새 어항 1개':`어항 자리 +${it.v}`;
-  if(it.cat==='charm'){const n={gold:'판매가',speed:'던지는 속도',luck:'희귀 확률',nightluck:'밤·새벽 희귀 확률',bonus:'완주 보너스'};return Object.entries(it.v).map(([k,v])=>`${n[k]} +${pc(v)}`).join(' · ')}
+  if(it.cat==='charm'){const n={gold:'판매가',speed:'던지는 속도',luck:'희귀 확률',nightluck:'밤·새벽 희귀 확률',bonus:'완주 보너스'};return Object.entries(it.v).map(([k,v])=>`${n[k]} ${v<0?'':'+'}${pc(v)}`).join(' · ')}
   return '낚시터 개방'}
 function itemCard(it,mode){
   const c=document.createElement('div');c.className='card';
   const art=document.createElement('div');art.className='art';const cv=document.createElement('canvas');cv.width=64;cv.height=64;cv.getContext('2d').scale(4,4);drawItem(cv.getContext('2d'),it,0,0);art.append(cv);
   const info=document.createElement('div');
-  const owned=!!S.own[it.id],eq=S.eq[it.cat]===it.id,cnt=S.bait[it.id]||0,P=mode==='shop'?shopPrice(it):it.price;
+  const owned=!!S.own[it.id],eq=S.eq[it.cat]===it.id,cnt=S.bait[it.id]||0,P=mode==='shop'?shopPrice(it):mode==='mer'?merOf(it).price:it.price;
   const worn=mode==='shop'&&EQ_SLOTS_SHOP.includes(it.cat)&&!eq&&S.eq[it.cat]?item(S.eq[it.cat]):null;
-  info.innerHTML=`<h3 style="color:${TIER[it.tier]}">${it.name}</h3><div class="kv"><span>종류</span><span>${CATS[it.cat]}</span><span>효과</span><span>${itemDesc(it)}</span>${shopLocked(it)&&mode==='shop'?`<span>입고</span><span class="now">${SPOTS[it.needMap].name} 개방 후</span>`:''}${worn?`<span>지금</span><span class="now">${worn.name} · ${itemDesc(worn)}</span>`:''}${it.cat==='bait'?`<span>보유</span><span>${cnt}개</span>`:''}<span>가격</span><span class="gold">${P!==it.price?`<s>${it.price.toLocaleString()}</s> `:''}${it.price?P.toLocaleString()+' G':'-'}</span></div>`;
+  info.innerHTML=`<h3 style="color:${TIER[it.tier]}">${it.name}</h3><div class="kv"><span>종류</span><span>${CATS[it.cat]}</span><span>효과</span><span>${itemDesc(it)}</span>${shopLocked(it)&&mode==='shop'?`<span>입고</span><span class="now">${SPOTS[it.needMap].name} 개방 후</span>`:''}${worn?`<span>지금</span><span class="now">${worn.name} · ${itemDesc(worn)}</span>`:''}${it.cat==='bait'?`<span>보유</span><span>${cnt}개</span>`:''}<span>가격</span><span class="gold">${it.price&&P!==it.price?`<s>${it.price.toLocaleString()}</s> `:''}${P?P.toLocaleString()+' G':'-'}</span></div>`;
   const desc=document.createElement('div');desc.className='desc';desc.textContent=it.desc||'';
   const act=document.createElement('div');act.className='act';
-  if(mode==='shop'){
+  if(mode==='mer'){const e=merOf(it),sold=merSold(e);const b=document.createElement('button');b.className='btn primary';b.textContent=sold?'매진':'구매';b.disabled=sold||S.gold<P;b.onclick=()=>merBuy(e,it);act.append(b)}
+  else if(mode==='shop'){
     if(it.cat==='map'){const has=S.maps.includes(it.v);const b=document.createElement('button');b.className='btn primary';b.textContent=has?'개방됨':'구매';b.disabled=has||S.gold<P;b.onclick=()=>{if(S.gold>=P){S.gold-=P;S.maps.push(it.v);save();const nw=ITEMS.filter(r=>r.needMap===it.v&&!S.own[r.id]);toast(SPOTS[it.v].name+' 개방!'+(nw.length?` 새 낚싯대 입고: ${nw.map(r=>r.name).join(', ')}`:''));audio.rare();renderShop();renderTop();renderTimer()}};act.append(b)}
     else if(it.cat==='tank'){const b=document.createElement('button');b.className='btn primary';b.textContent=owned?'설치됨':'구매';b.disabled=owned||S.gold<P;b.onclick=()=>{if(S.gold>=P){S.gold-=P;S.own[it.id]=1;if(it.newTank){S.tanks.push([]);S.tankSel=S.tanks.length-1;toast(`${S.tanks.length}번째 어항이 생겼어요`)}else toast(`어항 자리 ${tankCap()}칸`);save();renderShop();renderTop()}};act.append(b)}
     else if(it.cat==='treasure'){const b=document.createElement('button');b.className='btn primary';b.textContent=`구매 (보유 ${(S.tmaps||{})[it.id]||0})`;b.disabled=S.gold<P;b.onclick=()=>{if(S.gold>=P){S.gold-=P;S.tmaps=S.tmaps||{};S.tmaps[it.id]=(S.tmaps[it.id]||0)+1;save();toast(it.name+' 구매');renderShop();renderTop();renderTimer()}};act.append(b)}
@@ -791,7 +803,7 @@ function itemCard(it,mode){
     if(it.cat==='bait'){const b=document.createElement('button');b.className='btn';b.textContent=eq?'사용 중':'사용';b.disabled=eq||cnt<=0;b.onclick=()=>{S.eq.bait=it.id;save();renderPane()};act.append(b)}
     else{const b=document.createElement('button');b.className='btn';b.textContent=eq?'장착됨':'장착';b.disabled=eq;b.onclick=()=>{S.eq[it.cat]=it.id;save();renderPane()};act.append(b)}
   }
-  if(mode==='shop'&&!owned&&!shopLocked(it)&&!(it.cat==='map'&&S.maps.includes(it.v))&&S.gold<P){const need=document.createElement('div');need.className='need';need.innerHTML=`<div class="bar"><i style="width:${Math.floor(S.gold/P*100)}%"></i></div><span>${(P-S.gold).toLocaleString()} G 더 모으면 살 수 있소</span>`;c.append(art,info,desc,need,act);return c}
+  if((mode==='shop'||mode==='mer'&&!merSold(merOf(it)))&&!owned&&!shopLocked(it)&&!(it.cat==='map'&&S.maps.includes(it.v))&&S.gold<P){const need=document.createElement('div');need.className='need';need.innerHTML=`<div class="bar"><i style="width:${Math.floor(S.gold/P*100)}%"></i></div><span>${(P-S.gold).toLocaleString()} G 더 모으면 살 수 있소</span>`;c.append(art,info,desc,need,act);return c}
   c.append(art,info,desc,act);return c;
 }
 let gearSel=null;
@@ -914,8 +926,19 @@ const shopHas=i=>!!S.own[i.id]||(i.cat==='map'&&S.maps.includes(i.v));
 // strong rods reach the shop only after their region is opened; rods already owned stay
 const shopLocked=i=>!!i.needMap&&!S.maps.includes(i.needMap)&&!S.own[i.id];
 const canBuy=i=>!shopHas(i)&&!shopLocked(i)&&S.gold>=shopPrice(i)&&i.price>0;
-const KEEPER={rod:'줄은 내가 직접 감았소. 믿어도 좋소.',net:'찢어져도 환불은 없소.',bait:'오늘 잡은 벌레요. 아직 꿈틀거리지.',contract:'서명은 피로 안 해도 되오. 아직은.',charm:'물에서 건진 것들이오. 출처는 묻지 마시오.',lantern:'안개가 짙은 날엔 이게 값을 하지.',ally:'이 친구들, 밥값은 하오.',treasure:'누가 그렸는지는 나도 모르오.',tank:'잡은 걸 두고 볼 자리는 있어야지.',map:'그 물길로 간 자들이 다 돌아온 건 아니오.',all:'천천히 보시오. 호수는 안 도망가오.'};
+const KEEPER={mer:'…낚시꾼이군. 이건 호수 건너에서 건진 것들이오. 대가는 있소.',rod:'줄은 내가 직접 감았소. 믿어도 좋소.',net:'찢어져도 환불은 없소.',bait:'오늘 잡은 벌레요. 아직 꿈틀거리지.',contract:'서명은 피로 안 해도 되오. 아직은.',charm:'물에서 건진 것들이오. 출처는 묻지 마시오.',lantern:'안개가 짙은 날엔 이게 값을 하지.',ally:'이 친구들, 밥값은 하오.',treasure:'누가 그렸는지는 나도 모르오.',tank:'잡은 걸 두고 볼 자리는 있어야지.',map:'그 물길로 간 자들이 다 돌아온 건 아니오.',all:'천천히 보시오. 호수는 안 도망가오.'};
 let shopGold=null;
+// wandering merchant: moors for 2 days out of every 6; wares are fixed per visit
+const MER_CYCLE=6,MER_STAY=2;
+const merDay=()=>Math.floor((Date.now()-new Date().getTimezoneOffset()*60000)/864e5);
+const merHere=()=>merDay()%MER_CYCLE<MER_STAY;
+const merLeft=()=>MER_STAY-merDay()%MER_CYCLE;const merNext=()=>MER_CYCLE-merDay()%MER_CYCLE;
+function merStock(){const v=Math.floor(merDay()/MER_CYCLE);if(!S.mer||S.mer.v!==v){let h=v*2654435761>>>0;const rnd=n=>{h=(h*1103515245+12345)>>>0;return (h>>>16)%n};const c=ITEMS.filter(i=>i.merPrice&&!S.own[i.id]);const t=ITEMS.filter(i=>i.merEV);const ev=qEV(Math.max(...S.maps));const w=[];if(c.length){const i=c[rnd(c.length)];w.push({id:i.id,price:i.merPrice})}const n=c.length?2:3;for(let k=0;k<n;k++){const i=t.splice(rnd(t.length),1)[0];w.push({id:i.id,price:Math.round(ev*i.merEV/10)*10})}S.mer={v,w,sold:[]};save()}return S.mer}
+const merOf=it=>merStock().w.find(e=>e.id===it.id);
+const merSold=e=>merStock().sold.includes(e.id);
+function merBuy(e,it){if(merSold(e)||S.gold<e.price)return;S.gold-=e.price;merStock().sold.push(e.id);if(it.cat==='bait'){S.bait[it.id]=(S.bait[it.id]||0)+20;if(!S.eq.bait)S.eq.bait=it.id}else if(it.cat==='treasure'){S.tmaps=S.tmaps||{};S.tmaps[it.id]=(S.tmaps[it.id]||0)+1}else{S.own[it.id]=1;if(!S.eq.charm)S.eq.charm=it.id}save();toast(it.name+' 구매');renderShop();renderTop();renderTimer()}
+function merWare(e){const i=item(e.id),sold=merSold(e);const d=document.createElement('div');d.className='ware'+(!sold&&S.gold>=e.price?' can':'')+(sold?' has':'');d.append(slotEl({cls:'r'+Math.min(4,i.tier),sel:shopSel===i.id,title:i.name,draw:ctx=>drawItem(ctx,i,0,0),onclick:()=>{shopSel=i.id;renderShop()}}));const t=document.createElement('span');t.className='tag';t.textContent=sold?'매진':e.price.toLocaleString();d.append(t);return d}
+function merArrive(){if(!S.char||!merHere())return;const v=Math.floor(merDay()/MER_CYCLE);if(S.merSeen===v)return;S.merSeen=v;save();toast('떠돌이 상인의 배가 들어왔어요');audio.bell()}
 function ware(i,deal){const has=shopHas(i),eq=S.eq[i.cat]===i.id,P=shopPrice(i);const d=document.createElement('div');d.className='ware'+(canBuy(i)?' can':'')+(has?' has':'')+(shopLocked(i)?' locked':'');
   d.append(slotEl({cls:'r'+Math.min(4,i.tier)+(eq?' eq':'')+(shopLocked(i)?' lock':''),sel:shopSel===i.id,title:i.name,cnt:i.cat==='bait'?(S.bait[i.id]||0)||null:null,draw:ctx=>drawItem(ctx,i,0,0),onclick:()=>{shopSel=i.id;renderShop()}}));
   const t=document.createElement('span');t.className='tag';t.textContent=has?(eq?'장착 중':'보유'):shopLocked(i)?'미입고':P.toLocaleString();if(i.id===deal.id&&!has)t.classList.add('deal');d.append(t);return d}
@@ -923,15 +946,15 @@ function renderShop(){
   if(!shopWin)return;const w=shopWin.querySelector('.win');w.innerHTML='';
   const tt=document.createElement('div');tt.className='title';tt.innerHTML=`<span>선착장 상점</span><span class="purse gold" id="shopPurse">${S.gold.toLocaleString()} G</span>`;const x=document.createElement('button');x.textContent='×';x.setAttribute('aria-label','닫기');x.onclick=()=>{shopWin.remove();shopWin=null;renderPane();renderTop()};tt.append(x);
   const body=document.createElement('div');body.className='body shopBody';const deal=shopDeal();
-  const keep=document.createElement('div');keep.className='keeper';keep.innerHTML=`<div class="line"><b>상인</b>${KEEPER[shopCat]||KEEPER.all}</div>`;
+  const isMer=shopCat==='mer'&&merHere();const keep=document.createElement('div');keep.className='keeper';keep.innerHTML=`<div class="line"><b>${isMer?'떠돌이 상인':'상인'}</b><span>${KEEPER[isMer?'mer':shopCat]||KEEPER.all}<small>${isMer?`${merLeft()}일 뒤 떠남`:merHere()?'떠돌이 상인이 와 있어요':`떠돌이 상인은 ${merNext()}일 뒤에 와요`}</small></span></div>`;
   const dealBtn=document.createElement('button');dealBtn.className='dealBox';const dc=document.createElement('canvas');dc.width=dc.height=64;{const x=dc.getContext('2d');x.imageSmoothingEnabled=false;x.scale(4,4);drawItem(x,deal,0,0)}
   dealBtn.append(dc);const dt=document.createElement('div');dt.innerHTML=shopHas(deal)?`<small>오늘의 특가</small><div>${deal.name}</div><small>이미 사셨구려</small>`:`<small>오늘의 특가 -${DEAL_OFF*100}%</small><div>${deal.name}</div><small><s>${deal.price.toLocaleString()}</s> <b>${shopPrice(deal).toLocaleString()} G</b></small>`;dealBtn.append(dt);dealBtn.onclick=()=>{shopCat=deal.cat;shopSel=deal.id;renderShop()};keep.append(dealBtn);
-  const cats=document.createElement('div');cats.className='cats';[...Object.entries(CATS).filter(([k])=>k!=='all'),['all',CATS.all]].forEach(([k,v])=>{const b=document.createElement('button');b.textContent=v;b.setAttribute('aria-selected',shopCat===k);if(k!=='all'&&ITEMS.some(i=>i.cat===k&&canBuy(i)))b.classList.add('can');b.onclick=()=>{shopCat=k;renderShop()};cats.append(b)});
+  const cats=document.createElement('div');cats.className='cats';if(shopCat==='mer'&&!merHere())shopCat='rod';[...(merHere()?[['mer','떠돌이 상인']]:[]),...Object.entries(CATS).filter(([k])=>k!=='all'),['all',CATS.all]].forEach(([k,v])=>{const b=document.createElement('button');b.textContent=v;if(k==='mer')b.classList.add('merTab');b.setAttribute('aria-selected',shopCat===k);if(k!=='all'&&ITEMS.some(i=>i.cat===k&&canBuy(i)))b.classList.add('can');b.onclick=()=>{shopCat=k;renderShop()};cats.append(b)});
   const grid=document.createElement('div');grid.className='shopGrid';const left=document.createElement('div');left.className='shelf';
-  const list=ITEMS.filter(i=>(shopCat==='all'||i.cat===shopCat)&&i.price>0).sort((a,b)=>shopCat==='all'?0:shopHas(a)-shopHas(b)||a.price-b.price);
-  if(!shopSel||!list.find(i=>i.id===shopSel))shopSel=(list.find(i=>!shopHas(i)&&!shopLocked(i))||list[0])?.id;
-  list.forEach(i=>left.append(ware(i,deal)));
-  const right=document.createElement('div');if(shopSel)right.append(itemCard(item(shopSel),'shop'));
+  const list=isMer?[]:ITEMS.filter(i=>(shopCat==='all'||i.cat===shopCat)&&i.price>0).sort((a,b)=>shopCat==='all'?0:shopHas(a)-shopHas(b)||a.price-b.price);
+  if(!isMer&&(!shopSel||!list.find(i=>i.id===shopSel)))shopSel=(list.find(i=>!shopHas(i)&&!shopLocked(i))||list[0])?.id;
+  if(isMer){const st=merStock();if(!st.w.find(e=>e.id===shopSel))shopSel=st.w[0].id;st.w.forEach(e=>left.append(merWare(e)))}else list.forEach(i=>left.append(ware(i,deal)));
+  const right=document.createElement('div');if(shopSel)right.append(itemCard(item(shopSel),isMer?'mer':'shop'));
   grid.append(left,right);body.append(keep,cats,grid);w.append(tt,body);
   if(shopGold!=null&&S.gold<shopGold){const f=document.createElement('span');f.className='spent';f.textContent=`-${(shopGold-S.gold).toLocaleString()} G`;$('shopPurse').append(f);f.onanimationend=()=>f.remove();audio.chime(1)}
   shopGold=S.gold;
@@ -2282,6 +2305,14 @@ function itemCanvas(it){if(itemCache[it.id])return itemCache[it.id];
 function drawItem(g,it,x,y){const c=itemCanvas(it);if(!c)return;g.imageSmoothingEnabled=c.width>16;g.drawImage(c,x,y,16,16)}
 // menu tab icons 12x12
 Object.assign(ITEM_ART,{
+ ml1:['................','.....OOOOOO.....','...OOGGGGGGOO...','..OGGggggggGGO..','..OGgRRRRRRgGO..','.OGGgReRReRgGGO.','.OGGgRRRRRRgGGO.','.OGGgRRggRRgGGO.','.OGGgrRRRRrgGGO.','.OGGgrRrRrRgGgO.','..OGgggggggggO..','..OGGggggggGgO..','...OOGGGGggOO...','.....OOOOOO.....','................','................'],
+ ml2:['................','................','..OO.......OOO..','.OEEO..O.OOEEEO.','.OEsEOOEOEEeEEO.','.OEEsEEsEEEEEsO.','..OsEOEsOEsEEEO.','.OEEsEEsEEEEEsO.','.OEsEOOEOEEEEO..','.OEEO..O.OOEEEO.','..OO.......OOO..','................','................','................','................','................'],
+ ml3:['..OOOOOOOOOOOO..','..OGGGGGGGGGGO..','...OOOOOOOOOO...','...OSSSSSSSSO...','....OSYYYYSO....','.....OSYYSO.....','......OSYO......','......OeSO......','.....O.eSSO.....','....OSe.SSSO....','...OS.YeSYYSO...','...OSYYYYYYSO...','...OOOOOOOOOO...','..OGGGGGGGGGGO..','..OOOOOOOOOOOO..','................'],
+ ml4:['................','...OOOOOOOOOO...','..ObBBBBBBBBBO..','..ObBBBBBBBBBO..','..ObBPPPPPPBBO..','..ObBPpppPPBBO..','..ObBPPPPPPBBO..','..ObBBBBBBBBBO..','..ObBBCBBBBBBO..','..ObBBBBBBCBBO..','..ObCBBBBBBBBO..','..ObbbbbbbbbbO..','..OPPPPPPPPPPO..','...OOOOOOCOOO...','.........C......','........CCC.....'],
+ ml5:['................','................','......OOOO......','....OOMMMMOO....','...OMMEMMEMMO...','..OMEMMEEMMEMO..','..OMEMEMMEMEMO..','.OMMEMEMMEMEMMO.','.OMMEMEMMEMEMMO.','.OMMMEEMMEEMMMO.','..OMMMEMMEMMMO..','...OOMMMMMMOO...','....OPPPPPPO....','.....OOOOOO.....','................','................'],
+ mt1:['......OOOO......','.....OwwwwO.....','.....OwxxwO.....','......OOOO......','......OSSO......','.....OSCCSO.....','....OSCSSCSO....','...OSCSCSSCSO...','...OSSCSCCSSO...','...OSCSSCSCSO...','...OSSCCSSCSO...','...OSCSSCCSSO...','...OSSSSSSSSO...','....OOOOOOOO....','................','................'],
+ mt2:['......OOOO......','......OwwO......','.....OOGGOO.....','....OGGGGgGO....','....OGGGGgGO....','....OGYGGgGO....','...OGGYGGgGGO...','...OGGGGGgGGO...','...OGGGGGggGO...','..OGGGGGGGggGO..','..OGGGGGGggggO..','..OOOOOOOOOOOO..','......OKKO......','......OKKO......','.......OO.......','................'],
+ mt3:['................','................','.OOOOOOOOOOOOOO.','.OPPPPPPPPPPPpO.','.OpPPPPPPPPPppO.','.OPpPPPPPPPpPpO.','.OPPpPPPPPpPPpO.','.OPPPpPRRpPPPpO.','.OPPPPRRRRPPPpO.','.OPPPPRrRRPPPpO.','.OPPPPPRRPPPPpO.','.OPPPPPPPPPPPpO.','.OppppppppppppO.','.OOOOOOOOOOOOOO.','................','................'],
  al1:['................','..O..........O..','.OKkO......OkKO.','.OKKKOOOOOOKKKO.','.OKKKKKKKKKKKKO.','.OKKYKKKKKKYKKO.','.OKKKKKKMKKKKKO.','..OKKKKmmmKKKO..','...OOKKKKKKOO...','....OKKKKKKO....','....OKkKKkKO....','....OKKKKKKO....','....OKkKKkKO....','....OOOOOOOO....','................','................'],
  al2:['................','......OOOO......','.....OCCCCO.....','....OCLCCCCO....','....OCCCCCCO....','...OCCECCECCO...','...OCCCCCCCCO...','...OCCCCCCCCO...','....OCCCCCCO....','.....OCCCCO.....','....OCCCCCCO....','...OCCCCCCCCO...','..OCCCCCCCCCCO..','...OOCCCCCCOO...','.....OOOOOO.....','................'],
  al3:['................','.....OOOOOO.....','....OKkkkkKO....','...OKKKKKKKKO...','...OSSSSSSSSO...','...OSSESSSESO...','...OWWSSSSWWO...','...OWWWWWWWWO...','....OWWWWWWO....','...OBBBWWWBBO...','..OBbBBBBBBbBO..','..OBBBBBBBBBBO..','...OOOBBBBOOO...','.....OLLLLO.....','.....OOOOOO.....','................'],
@@ -2448,7 +2479,7 @@ function drawScene(g,t){
   for(let i=0;i<70;i++){const x=(i*37+Math.floor(t/900))%288,y=40+(i*53)%140;if(at(Math.floor(x/32),Math.floor(y/32))==='w'&&nz(i,Math.floor(t/900),8)>0.5){g.fillStyle='rgba(120,170,200,0.10)';g.fillRect(x,y,5,1)}}
   g.drawImage(base,0,0);drawDock(g);
   prop(g,windowP,36,6);prop(g,vines,56,26);drawSprite(g,treeHD,-12,-8);drawSprite(g,rackHD,44,36);drawSprite(g,barrelHD,6,76);drawSprite(g,crateHD,28,84);drawSprite(g,bucketHD,40,112);drawSprite(g,anchorHD,62,116);prop(g,rope,72,40);drawSprite(g,mooringHD,80,104);prop(g,crow,82,92);
-  const bobB=Math.round(Math.sin(t/1100))*2;g.fillStyle='rgba(0,0,0,0.35)';g.fillRect(172,140+bobB,36,4);drawSprite(g,boatHD,168,124+bobB);g.strokeStyle='rgba(120,100,70,0.6)';g.lineWidth=1;g.beginPath();g.moveTo(156,118.5);g.lineTo(170,131.5+bobB);g.stroke();
+  const bobB=Math.round(Math.sin(t/1100))*2;g.fillStyle='rgba(0,0,0,0.35)';g.fillRect(172,140+bobB,36,4);drawSprite(g,boatHD,168,124+bobB);if(merHere()){const mb=Math.round(Math.sin(t/1300))*2,mx=232,my=146+mb;g.fillStyle='rgba(0,0,0,0.35)';g.fillRect(mx+4,my+16,36,4);drawSprite(g,boatHD,mx,my);g.fillStyle=OUT;g.fillRect(mx+14,my-8,12,16);g.fillRect(mx+16,my-13,8,6);g.fillStyle='#2c2238';g.fillRect(mx+15,my-7,10,14);g.fillRect(mx+17,my-12,6,5);g.fillStyle='#0b0a0e';g.fillRect(mx+18,my-10,4,3);g.fillStyle='#3a2819';g.fillRect(mx+30,my-14,1,18);g.fillRect(mx+26,my-14,5,1);g.fillStyle='#c79adf';g.fillRect(mx+25,my-13,3,4);g.fillStyle=`rgba(190,140,230,${0.18+Math.sin(t/500)*0.06})`;g.fillRect(mx+22,my-16,9,10)}g.strokeStyle='rgba(120,100,70,0.6)';g.lineWidth=1;g.beginPath();g.moveTo(156,118.5);g.lineTo(170,131.5+bobB);g.stroke();
   prop(g,lily,100,160);prop(g,lily2,114,172);prop(g,drift,132,180);prop(g,lily,148,156);
   const eqNet=item(S.eq.net),eqLn=item(S.eq.lantern),eqCh=item(S.eq.charm),eqBait=item(S.eq.bait),eqRod=item(S.eq.rod);
   const item2=(it,x,y)=>{const c=itemCanvas(it);if(!c)return;g.imageSmoothingEnabled=false;g.drawImage(c,x,y,32,32)};
@@ -2597,7 +2628,7 @@ function frame(t){
     if(!left&&!S.brk.rang){S.brk.rang=true;audio.bell();toast('다시 출항할 시간이에요');renderTimer();save()}}
   else if(lastSec!==0){lastSec=0;$('clock').innerHTML=fmtClock(0);$('bigClock').innerHTML=fmtClock(0);bar.hidden=true}
   const tod=timeOfDay();if(tod!==lastTod){lastTod=tod;renderTop();audio.retune()}
-  if(!(S.run)&&Math.floor(t/60000)!==maybeWeeklyMin){maybeWeeklyMin=Math.floor(t/60000);maybeWeekly()}
+  if(!(S.run)&&Math.floor(t/60000)!==maybeWeeklyMin){maybeWeeklyMin=Math.floor(t/60000);merArrive();maybeWeekly()}
   if(S.run&&!S.run.pausedAt&&now>nextIdleSay){if(nextIdleSay)say('idle');nextIdleSay=now+rand(180,420)*1000}
   drawScene(cx,reducedMotion?0:t);if(pipOn||pipStream)drawPip();
   const tk=$('tankCanvas');if(tk)drawTank(tk.getContext('2d'),reducedMotion?0:t);
