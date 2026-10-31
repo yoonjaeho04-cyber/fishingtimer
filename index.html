@@ -127,6 +127,13 @@ input[type=number]{width:64px;font-family:var(--display)}
 .tmaps{display:flex;flex-direction:column;gap:6px}.tmRow{display:grid;grid-template-columns:44px 1fr;gap:10px;align-items:center;text-align:left;padding:6px 8px;background:var(--panel2);border:2px solid var(--bronze3);color:var(--fg)}.tmRow canvas{width:40px;height:40px}.tmRow.on{border-color:var(--gold)}.tmRow:disabled{opacity:.45;cursor:default}
 .goalGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px}.goal{display:flex;flex-direction:column;gap:4px;background:var(--panel2);border:2px solid #0f0c13;box-shadow:inset 0 0 0 1px #3a3146;padding:8px 10px}.goal.ready{border-color:var(--bronze2)}.goal.done{opacity:.5}.gName{font:14px var(--display);color:var(--fg)}.gFoot{display:flex;justify-content:space-between;gap:8px;font-size:11px}.goal .gold{font-size:11px}
 .qbar{height:8px;border:2px solid #0b0a0e;background:#0f0c13}.qbar i{display:block;height:100%;background:var(--gold)}
+.bell{position:relative;width:24px;height:22px;display:grid;place-items:center;background:var(--panel2);border:2px solid var(--bronze3);color:var(--bronze2);box-shadow:inset 0 1px 0 #3a3044}
+.bell svg{width:13px;height:13px;fill:currentColor}.bell i{position:absolute;right:-3px;top:-3px;width:8px;height:8px;background:#e8637f;border:1px solid #000;border-radius:50%}
+.topbar .meta{align-items:center}
+.newsPanel{position:absolute;right:6px;top:46px;width:320px;max-width:calc(100% - 12px);max-height:380px;overflow:auto;background:#0c0a10;border:2px solid var(--bronze);box-shadow:0 0 0 2px var(--ink),0 10px 24px #000;z-index:7;padding:8px 10px;display:flex;flex-direction:column;gap:8px}
+.newsHead{display:flex;justify-content:space-between;align-items:center;font:14px var(--display);color:var(--gold)}.newsHead b{font-weight:400}.newsHead button{color:var(--muted);font-size:16px;width:22px}
+.newsItem{border-left:3px solid var(--bronze3);padding-left:8px}.newsItem.new{border-left-color:var(--gold)}.newsT{display:flex;justify-content:space-between;gap:8px;font-size:13px}.newsItem.new .newsT span:first-child{color:var(--gold)}
+.newsItem ul{margin:3px 0 0;padding-left:15px;font-size:12px;color:#c4b797;line-height:1.5}
 .tankWrap{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:12px;align-items:stretch}
 @media (max-width:640px){.tankWrap{grid-template-columns:1fr}}
 .tankSide{display:flex;flex-direction:column;gap:4px;background:#0f0c13;border:2px solid var(--bronze3);padding:8px;max-height:260px;overflow:auto;min-width:0}
@@ -233,7 +240,7 @@ input[type=number]{width:64px;font-family:var(--display)}
 <div class="game" id="game">
   <div class="topbar frame">
     <h1>안개호수 낚시꾼</h1>
-    <div class="meta"><span id="mClass"></span><span>골드 <b id="mGold">0</b></span><span>누적 <b id="mTotal">0분</b></span><span id="mTod"></span></div>
+    <div class="meta"><button class="bell" id="bellBtn" aria-label="업데이트 소식" title="업데이트 소식"><svg viewBox="0 0 16 16"><path d="M8 1a1 1 0 011 1v.6A4.5 4.5 0 0112.5 7v3l1.5 2H2l1.5-2V7A4.5 4.5 0 017 2.6V2a1 1 0 011-1zM6.5 13h3a1.5 1.5 0 01-3 0z"/></svg><i id="bellDot" hidden></i></button><span id="mClass"></span><span>골드 <b id="mGold">0</b></span><span>누적 <b id="mTotal">0분</b></span><span id="mTod"></span></div>
   </div>
   <div class="main">
     <div class="sceneBox frame">
@@ -450,7 +457,7 @@ const EQ_SLOTS=[['rod','낚싯대'],['net','그물'],['contract','계약'],['bai
 // ---------- state ----------
 const KEY='mistlake.v2';
 let S=null;
-const fresh=()=>({v:2,daily:{goal:60,streak:0,lastDone:'',claimDay:'',notified:''},weekSeen:'',tmaps:{},activeMap:null,goalsDone:{},title:'',q:null,savedAt:0,char:null,gold:0,own:{rod0:1,net0:1,con0:1},eq:{rod:'rod0',net:'net0',contract:'con0',bait:null,charm:null,lantern:null,ally:null},bait:{},maps:[0],tanks:[[]],tankSel:0,codex:{},totalSec:0,days:{},tags:['공부','작업'],lastTag:'공부',spot:0,muted:false,vol:0.5,goalMin:0,breakMin:0,run:null,brk:null,sessions:0,compact:false});
+const fresh=()=>({v:2,seenNews:0,daily:{goal:60,streak:0,lastDone:'',claimDay:'',notified:''},weekSeen:'',tmaps:{},activeMap:null,goalsDone:{},title:'',q:null,savedAt:0,char:null,gold:0,own:{rod0:1,net0:1,con0:1},eq:{rod:'rod0',net:'net0',contract:'con0',bait:null,charm:null,lantern:null,ally:null},bait:{},maps:[0],tanks:[[]],tankSel:0,codex:{},totalSec:0,days:{},tags:['공부','작업'],lastTag:'공부',spot:0,muted:false,vol:0.5,goalMin:0,breakMin:0,run:null,brk:null,sessions:0,compact:false});
 let wakeSentinel=null;
 async function wakeLock(){try{if(S.wake&&S.run&&!wakeSentinel&&navigator.wakeLock){wakeSentinel=await navigator.wakeLock.request('screen');wakeSentinel.addEventListener('release',()=>{wakeSentinel=null})}else if((!S.wake||!S.run)&&wakeSentinel){await wakeSentinel.release();wakeSentinel=null}}catch(e){wakeSentinel=null}}
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')wakeLock()});
@@ -532,7 +539,7 @@ function rebirthScales(){return 5+S.maps.length*3+Math.floor(Math.sqrt(S.gold/50
 function showRebirth(){const n=rebirthScales();
   const o=overlay(`<h2>물안개 너머로</h2><div style="font-size:13px;line-height:1.6">늙은 어부는 배를 타고 안개 속으로 사라지고, 다음 견습생이 부두를 물려받아요.<br><br><b>초기화</b>: 골드, 장비·미끼·동료, 지도, 걸려 있던 의뢰<br><b>유지</b>: 도감, 이변, 어항, 일지 기록, 여관 평판, 달의 비늘과 영구 능력<br><br>받을 달의 비늘: <span class="gold">${n}</span></div><div class="row" style="justify-content:flex-end;margin-top:8px"><button class="btn" id="rbNo">아직</button><button class="btn primary" id="rbYes">안개 속으로</button></div>`);
   o.querySelector('#rbNo').onclick=()=>o.remove();o.querySelector('#rbYes').onclick=()=>{o.remove();doRebirth(n)}}
-function doRebirth(n){const keep={codex:S.codex,odd:S.odd||{},tanks:S.tanks,tankSel:0,days:S.days,totalSec:S.totalSec,sessions:S.sessions,tags:S.tags,lastTag:S.lastTag,daily:S.daily,weekSeen:S.weekSeen,goalsDone:S.goalsDone||{},title:S.title||'',muted:S.muted,vol:S.vol,goalMin:S.goalMin,breakMin:S.breakMin,wake:S.wake,perks:S.perks||{},moon:(S.moon||0)+n,rebirths:(S.rebirths||0)+1};
+function doRebirth(n){const keep={codex:S.codex,odd:S.odd||{},tanks:S.tanks,tankSel:0,days:S.days,totalSec:S.totalSec,sessions:S.sessions,tags:S.tags,lastTag:S.lastTag,seenNews:S.seenNews||0,daily:S.daily,weekSeen:S.weekSeen,goalsDone:S.goalsDone||{},title:S.title||'',muted:S.muted,vol:S.vol,goalMin:S.goalMin,breakMin:S.breakMin,wake:S.wake,perks:S.perks||{},moon:(S.moon||0)+n,rebirths:(S.rebirths||0)+1};
   const q0=S.q;S=Object.assign(fresh(),keep);if(perk('pmap'))S.maps=[0,1];S.gold=perk('pstart')*1000;
   if(q0){S.q={notes:[],nextAt:0,xp:q0.xp||0,done:q0.done||0,seq:q0.seq||0};for(let i=0;i<Q_SLOTS;i++)S.q.notes.push(qMakeNote(Date.now()))}save();qBadge();audio.fanfare();renderAll();toast(`달의 비늘 +${n}. 새 견습생을 고르세요`);showCharSelect()}
 function renderPerks(p){const h=document.createElement('div');h.className='sec';h.textContent=`달의 비늘 ${S.moon||0} · 영구 능력`;p.append(h);
@@ -541,6 +548,21 @@ function renderPerks(p){const h=document.createElement('div');h.className='sec';
     it.innerHTML=`<div class="name">${pk.name} <span style="color:var(--muted);font-weight:400;font-family:var(--display)">${l}/${pk.max}</span></div><div class="desc" style="grid-column:1">${pk.desc}</div>`;
     const b=document.createElement('button');b.className='btn small';b.style.gridRow='1/3';b.textContent=max?'최대':`비늘 ${cost}`;b.disabled=max||(S.moon||0)<cost;b.onclick=()=>{if((S.moon||0)<cost)return;S.moon-=cost;S.perks=S.perks||{};S.perks[pk.id]=l+1;save();renderPane();toast(pk.name+' 강화')};it.append(b);g.append(it)});
   p.append(g)}
+
+// ---------- update news: add a new entry at the top on every release ----------
+const NEWS=[
+ {v:7,date:'10.31',title:'오늘의 목표와 날씨',items:['오늘의 목표: 채우면 보상 상자, 며칠 이어가면 상자가 좋아져요','주간 리포트: 일지 탭에서 보고 자랑 문구도 복사할 수 있어요','집중 깊이: 쉬지 않고 30·60·90분이면 희귀 확률이 올라요','보물지도: 상점에서 사서 다음 출항에 써요','전시 목표: 의뢰 탭 아래에서 달성하면 골드와 칭호','날씨: 비·안개·폭풍마다 효과가 달라요']},
+ {v:6,date:'10.31',title:'낮 화면과 휴식',items:['낮이 밝아졌어요. 물색과 햇빛이 바뀌었어요','출항 중 휴식 버튼: 누르면 시간과 낚시가 멈춰요','출항 버튼 아래 타이머 버튼이 생겼어요','마지막에 쓴 공부·작업 태그가 맨 위에 나와요']},
+ {v:5,date:'10.29',title:'어항과 등급 효과',items:['어항에서 바로 팔거나 의뢰로 넘길 수 있어요','어항 옆에 들어 있는 어종이 보여요','희귀 이상 물고기에 빛과 빛가루 효과','고양이 견습생과 물의 정령 그림이 새로 들어왔어요']},
+ {v:4,date:'10.29',title:'새 캐릭터와 애니메이션',items:['캐릭터 5종이 새 그림으로 바뀌었어요','출항, 입질, 귀항 애니메이션','위젯에서 시계가 멈추던 문제를 고쳤어요']},
+];
+const NEWS_V=NEWS[0].v;
+function renderBell(){const d=$('bellDot');if(d)d.hidden=(S.seenNews||0)>=NEWS_V}
+function toggleNews(force){const old=$('newsPanel');if(old){old.remove();if(force!==true)return}
+  const unseen=S.seenNews||0;const box=document.createElement('div');box.className='newsPanel';box.id='newsPanel';
+  box.innerHTML=`<div class="newsHead"><b>업데이트 소식</b><button id="newsClose" aria-label="닫기">×</button></div>`+NEWS.map(n=>`<div class="newsItem${n.v>unseen?' new':''}"><div class="newsT"><span>${n.title}</span><span class="hint">${n.date}</span></div><ul>${n.items.map(i=>`<li>${i}</li>`).join('')}</ul></div>`).join('');
+  $('game').append(box);box.querySelector('#newsClose').onclick=()=>box.remove();S.seenNews=NEWS_V;save();renderBell()}
+document.addEventListener('pointerdown',e=>{const n=$('newsPanel');if(n&&!n.contains(e.target)&&!e.target.closest('#bellBtn'))n.remove()});
 
 // ---------- weather ----------
 const WEATHER={clear:{name:'맑음',desc:'맑은 날이에요.'},rain:{name:'비',speed:0.15,desc:'비가 와요. 낚는 속도 +15%'},fog:{name:'안개',odd:2,desc:'안개가 꼈어요. 이변이 두 배로 잘 걸려요'},storm:{name:'폭풍',luck:0.25,speed:-0.1,desc:'폭풍이에요. 희귀 확률 +25%, 낚는 속도 -10%'}};
@@ -2568,6 +2590,8 @@ document.addEventListener('pointerdown',()=>{audio.unlock();if(typeof $('pipVide
 
 // ---------- boot ----------
 renderAll();
-if(!S.char)showCharSelect();
+$('bellBtn').onclick=()=>toggleNews();renderBell();
+if(!S.char){S.seenNews=NEWS_V;renderBell();showCharSelect()}
+else if((S.seenNews||0)<NEWS_V)setTimeout(()=>{if(!document.querySelector('.overlay'))toggleNews(true)},900);
 </script>
 </body></html>

@@ -143,3 +143,6 @@
 - 전시 목표: `GOALS`, `renderGoals`(의뢰 탭 아래), `S.goalsDone`, 칭호 `S.title`.
 - 날씨: `weatherAt(ms)`는 날짜+3시간 단위 해시(저장 안 함, 친구와 같은 날씨). 맑음 55·비 22·안개 14·폭풍 9%. `WEATHER` 효과, `fishWeather(f)`로 종마다 잘 잡히는 날씨(도감 표시).
 - 환생은 daily·weekSeen·goalsDone·title 유지.
+
+### 업데이트 소식 (종 아이콘)
+- 기능을 올릴 때마다 `index.html`의 `NEWS` 맨 위에 항목을 추가하고 `v`를 1 올릴 것. 사용자가 게임을 켰을 때 `S.seenNews`보다 새 항목이 있으면 소식 창이 자동으로 열림. 첫 플레이어에게는 안 뜸.
