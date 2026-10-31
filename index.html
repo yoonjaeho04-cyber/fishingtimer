@@ -192,7 +192,7 @@ input[type=number]{width:64px;font-family:var(--display)}
 .cats button.can{position:relative}.cats button.can::after{content:"";position:absolute;right:2px;top:2px;width:5px;height:5px;background:var(--gold);box-shadow:0 0 0 1px #000}
 .shelf{display:grid;grid-template-columns:repeat(auto-fill,76px);justify-content:space-evenly;grid-auto-rows:100px;padding:6px 4px 0;border:2px solid #000;box-shadow:0 0 0 1px var(--bronze3);background:repeating-linear-gradient(#0000 0 88px,#6b4a28 88px 90px,#4a3119 90px 95px,#150d07 95px 100px),repeating-linear-gradient(90deg,#17110c 0 37px,#100b08 37px 39px)}
 .ware{display:flex;flex-direction:column;align-items:center;gap:0;position:relative}
-.ware.has .slot canvas{opacity:.55}
+.ware.has .slot canvas{opacity:.55}.ware.locked .slot canvas{opacity:.35}
 .ware .tag{position:relative;margin-top:-5px;z-index:1;min-width:46px;padding:0 5px;text-align:center;font:11px/15px var(--display);color:#8a7f6a;background:#241c14;border:1px solid #000;box-shadow:0 1px 0 #000}
 .ware.can .tag{color:#1a140f;background:#e0c070}
 .ware .tag.deal{color:#fff;background:#8a2a22}
@@ -415,11 +415,11 @@ const ITEMS=[
  {id:'rod0',cat:'rod',tier:0,name:'낡은 낚싯대',price:0,v:0,desc:'할아버지가 쓰던 것. 휘지만 아직 부러지진 않았다.'},
  {id:'rod1',cat:'rod',tier:1,name:'참나무 낚싯대',price:240,v:0.12,desc:'단단한 참나무를 깎았다.'},
  {id:'rod2',cat:'rod',tier:2,name:'은사 낚싯대',price:900,v:0.25,desc:'손잡이에 은실을 감았다. 손이 시리지 않다.'},
- {id:'rod3',cat:'rod',tier:3,name:'룬 낚싯대',price:3200,v:0.40,desc:'룬이 새겨져 줄이 스스로 감긴다.'},
- {id:'rod4',cat:'rod',tier:3,name:'드워프 강철 낚싯대',price:7000,v:0.52,desc:'산 아래 대장간에서 벼렸다. 무겁지만 휘지 않는다.'},
- {id:'rod5',cat:'rod',tier:4,name:'별빛 낚싯대',price:14000,v:0.65,desc:'별이 진 바다의 유목으로 만들었다.'},
- {id:'rod6',cat:'rod',tier:5,name:'심연의 낚싯대',price:40000,v:0.85,desc:'우물 바닥에서 건져 올린 것. 누가 만들었는지 모른다.'},
- {id:'rod7',cat:'rod',tier:5,name:'세계수 가지',price:90000,v:1.1,desc:'세계수에서 떨어진 가지. 줄을 던지면 물이 먼저 알아챈다.'},
+ {id:'rod3',cat:'rod',needMap:1,tier:3,name:'룬 낚싯대',price:3200,v:0.40,desc:'룬이 새겨져 줄이 스스로 감긴다.'},
+ {id:'rod4',cat:'rod',needMap:2,tier:3,name:'드워프 강철 낚싯대',price:7000,v:0.52,desc:'산 아래 대장간에서 벼렸다. 무겁지만 휘지 않는다.'},
+ {id:'rod5',cat:'rod',needMap:3,tier:4,name:'별빛 낚싯대',price:14000,v:0.65,desc:'별이 진 바다의 유목으로 만들었다.'},
+ {id:'rod6',cat:'rod',needMap:4,tier:5,name:'심연의 낚싯대',price:40000,v:0.85,desc:'우물 바닥에서 건져 올린 것. 누가 만들었는지 모른다.'},
+ {id:'rod7',cat:'rod',needMap:4,tier:5,name:'세계수 가지',price:90000,v:1.1,desc:'세계수에서 떨어진 가지. 줄을 던지면 물이 먼저 알아챈다.'},
  {id:'net0',cat:'net',tier:0,name:'그물 없음',price:0,v:0,desc:''},
  {id:'net1',cat:'net',tier:1,name:'삼베 그물',price:350,v:0.06,desc:'마을 아낙들이 짠 거친 그물.'},
  {id:'net2',cat:'net',tier:2,name:'인어실 그물',price:1400,v:0.13,desc:'인어의 머리카락으로 짰다. 물에 젖지 않는다.'},
@@ -574,7 +574,7 @@ function renderPerks(p){const h=document.createElement('div');h.className='sec';
 
 // ---------- update news: add a new entry at the top on every release ----------
 const NEWS=[
- {v:8,date:'11.01',title:'새로워진 상점',items:['물건이 선반에 진열되고 가격표가 붙었어요','오늘의 특가: 하루 한 개 15% 할인','지금 장비와 비교하고, 모자란 금액도 보여줘요','전체 탭은 맨 뒤로 옮겼어요']},
+ {v:8,date:'11.01',title:'새로워진 상점',items:['물건이 선반에 진열되고 가격표가 붙었어요','오늘의 특가: 하루 한 개 15% 할인','지금 장비와 비교하고, 모자란 금액도 보여줘요','전체 탭은 맨 뒤로 옮겼어요','좋은 낚싯대는 새 지역을 열면 상점에 들어와요']},
  {v:7,date:'10.31',title:'오늘의 목표와 날씨',items:['오늘의 목표: 채우면 보상 상자, 며칠 이어가면 상자가 좋아져요','주간 리포트: 일지 탭에서 보고 자랑 문구도 복사할 수 있어요','집중 깊이: 쉬지 않고 30·60·90분이면 희귀 확률이 올라요','보물지도: 상점에서 사서 다음 출항에 써요','전시 목표: 의뢰 탭 아래에서 달성하면 골드와 칭호','날씨: 비·안개·폭풍마다 효과가 달라요']},
  {v:6,date:'10.31',title:'낮 화면과 휴식',items:['낮이 밝아졌어요. 물색과 햇빛이 바뀌었어요','출항 중 휴식 버튼: 누르면 시간과 낚시가 멈춰요','출항 버튼 아래 타이머 버튼이 생겼어요','마지막에 쓴 공부·작업 태그가 맨 위에 나와요']},
  {v:5,date:'10.29',title:'어항과 등급 효과',items:['어항에서 바로 팔거나 의뢰로 넘길 수 있어요','어항 옆에 들어 있는 어종이 보여요','희귀 이상 물고기에 빛과 빛가루 효과','고양이 견습생과 물의 정령 그림이 새로 들어왔어요']},
@@ -778,20 +778,20 @@ function itemCard(it,mode){
   const info=document.createElement('div');
   const owned=!!S.own[it.id],eq=S.eq[it.cat]===it.id,cnt=S.bait[it.id]||0,P=mode==='shop'?shopPrice(it):it.price;
   const worn=mode==='shop'&&EQ_SLOTS_SHOP.includes(it.cat)&&!eq&&S.eq[it.cat]?item(S.eq[it.cat]):null;
-  info.innerHTML=`<h3 style="color:${TIER[it.tier]}">${it.name}</h3><div class="kv"><span>종류</span><span>${CATS[it.cat]}</span><span>효과</span><span>${itemDesc(it)}</span>${worn?`<span>지금</span><span class="now">${worn.name} · ${itemDesc(worn)}</span>`:''}${it.cat==='bait'?`<span>보유</span><span>${cnt}개</span>`:''}<span>가격</span><span class="gold">${P!==it.price?`<s>${it.price.toLocaleString()}</s> `:''}${it.price?P.toLocaleString()+' G':'-'}</span></div>`;
+  info.innerHTML=`<h3 style="color:${TIER[it.tier]}">${it.name}</h3><div class="kv"><span>종류</span><span>${CATS[it.cat]}</span><span>효과</span><span>${itemDesc(it)}</span>${shopLocked(it)&&mode==='shop'?`<span>입고</span><span class="now">${SPOTS[it.needMap].name} 개방 후</span>`:''}${worn?`<span>지금</span><span class="now">${worn.name} · ${itemDesc(worn)}</span>`:''}${it.cat==='bait'?`<span>보유</span><span>${cnt}개</span>`:''}<span>가격</span><span class="gold">${P!==it.price?`<s>${it.price.toLocaleString()}</s> `:''}${it.price?P.toLocaleString()+' G':'-'}</span></div>`;
   const desc=document.createElement('div');desc.className='desc';desc.textContent=it.desc||'';
   const act=document.createElement('div');act.className='act';
   if(mode==='shop'){
-    if(it.cat==='map'){const has=S.maps.includes(it.v);const b=document.createElement('button');b.className='btn primary';b.textContent=has?'개방됨':'구매';b.disabled=has||S.gold<P;b.onclick=()=>{if(S.gold>=P){S.gold-=P;S.maps.push(it.v);save();toast(SPOTS[it.v].name+' 개방!');audio.rare();renderShop();renderTop();renderTimer()}};act.append(b)}
+    if(it.cat==='map'){const has=S.maps.includes(it.v);const b=document.createElement('button');b.className='btn primary';b.textContent=has?'개방됨':'구매';b.disabled=has||S.gold<P;b.onclick=()=>{if(S.gold>=P){S.gold-=P;S.maps.push(it.v);save();const nw=ITEMS.filter(r=>r.needMap===it.v&&!S.own[r.id]);toast(SPOTS[it.v].name+' 개방!'+(nw.length?` 새 낚싯대 입고: ${nw.map(r=>r.name).join(', ')}`:''));audio.rare();renderShop();renderTop();renderTimer()}};act.append(b)}
     else if(it.cat==='tank'){const b=document.createElement('button');b.className='btn primary';b.textContent=owned?'설치됨':'구매';b.disabled=owned||S.gold<P;b.onclick=()=>{if(S.gold>=P){S.gold-=P;S.own[it.id]=1;if(it.newTank){S.tanks.push([]);S.tankSel=S.tanks.length-1;toast(`${S.tanks.length}번째 어항이 생겼어요`)}else toast(`어항 자리 ${tankCap()}칸`);save();renderShop();renderTop()}};act.append(b)}
     else if(it.cat==='treasure'){const b=document.createElement('button');b.className='btn primary';b.textContent=`구매 (보유 ${(S.tmaps||{})[it.id]||0})`;b.disabled=S.gold<P;b.onclick=()=>{if(S.gold>=P){S.gold-=P;S.tmaps=S.tmaps||{};S.tmaps[it.id]=(S.tmaps[it.id]||0)+1;save();toast(it.name+' 구매');renderShop();renderTop();renderTimer()}};act.append(b)}
     else if(it.cat==='bait'){const b=document.createElement('button');b.className='btn primary';b.textContent='20개 구매';b.disabled=S.gold<P;b.onclick=()=>{if(S.gold>=P){S.gold-=P;S.bait[it.id]=(S.bait[it.id]||0)+20;if(!S.eq.bait)S.eq.bait=it.id;save();toast(it.name+' 20개');renderShop();renderTop()}};act.append(b)}
-    else{const b=document.createElement('button');b.className='btn primary';b.textContent=owned?(eq?'장착됨':'장착'):'구매';b.disabled=(!owned&&S.gold<P)||eq;b.onclick=()=>{if(!owned){if(S.gold<P)return;S.gold-=P;S.own[it.id]=1;toast(it.name+' 구매!')}S.eq[it.cat]=it.id;save();renderShop();renderTop();renderPane()};act.append(b)}
+    else{const b=document.createElement('button');b.className='btn primary';b.textContent=owned?(eq?'장착됨':'장착'):shopLocked(it)?'미입고':'구매';b.disabled=(!owned&&(S.gold<P||shopLocked(it)))||eq;b.onclick=()=>{if(!owned){if(S.gold<P)return;S.gold-=P;S.own[it.id]=1;toast(it.name+' 구매!')}S.eq[it.cat]=it.id;save();renderShop();renderTop();renderPane()};act.append(b)}
   }else{
     if(it.cat==='bait'){const b=document.createElement('button');b.className='btn';b.textContent=eq?'사용 중':'사용';b.disabled=eq||cnt<=0;b.onclick=()=>{S.eq.bait=it.id;save();renderPane()};act.append(b)}
     else{const b=document.createElement('button');b.className='btn';b.textContent=eq?'장착됨':'장착';b.disabled=eq;b.onclick=()=>{S.eq[it.cat]=it.id;save();renderPane()};act.append(b)}
   }
-  if(mode==='shop'&&!owned&&!(it.cat==='map'&&S.maps.includes(it.v))&&S.gold<P){const need=document.createElement('div');need.className='need';need.innerHTML=`<div class="bar"><i style="width:${Math.floor(S.gold/P*100)}%"></i></div><span>${(P-S.gold).toLocaleString()} G 더 모으면 살 수 있소</span>`;c.append(art,info,desc,need,act);return c}
+  if(mode==='shop'&&!owned&&!shopLocked(it)&&!(it.cat==='map'&&S.maps.includes(it.v))&&S.gold<P){const need=document.createElement('div');need.className='need';need.innerHTML=`<div class="bar"><i style="width:${Math.floor(S.gold/P*100)}%"></i></div><span>${(P-S.gold).toLocaleString()} G 더 모으면 살 수 있소</span>`;c.append(art,info,desc,need,act);return c}
   c.append(art,info,desc,act);return c;
 }
 let gearSel=null;
@@ -908,15 +908,17 @@ function openShop(){if(shopWin)return;shopWin=overlay('',true);shopWin.querySele
 const EQ_SLOTS_SHOP=['rod','net','contract','charm','lantern','ally'];
 const DEAL_OFF=0.15;
 // one item a day at a discount, within reach of the player's purse; kept in the save, so buying it does not roll a new deal
-function shopDeal(){if(!S.deal||S.deal.day!==dayKey()){const all=ITEMS.filter(i=>i.price>0&&i.cat!=='bait'&&i.cat!=='map'&&!shopHas(i));const near=all.filter(i=>i.price<=Math.max(2000,S.gold*4));const pool=near.length?near:all.length?all:ITEMS.filter(i=>i.price>0);S.deal={day:dayKey(),id:pool[Math.floor(Math.random()*pool.length)].id};save()}return item(S.deal.id)}
+function shopDeal(){if(!S.deal||S.deal.day!==dayKey()||shopLocked(item(S.deal.id))){const all=ITEMS.filter(i=>i.price>0&&i.cat!=='bait'&&i.cat!=='map'&&!shopHas(i)&&!shopLocked(i));const near=all.filter(i=>i.price<=Math.max(2000,S.gold*4));const pool=near.length?near:all.length?all:ITEMS.filter(i=>i.price>0&&!shopLocked(i));S.deal={day:dayKey(),id:pool[Math.floor(Math.random()*pool.length)].id};save()}return item(S.deal.id)}
 const shopPrice=it=>it.id===shopDeal().id?Math.round(it.price*(1-DEAL_OFF)):it.price;
 const shopHas=i=>!!S.own[i.id]||(i.cat==='map'&&S.maps.includes(i.v));
-const canBuy=i=>!shopHas(i)&&S.gold>=shopPrice(i)&&i.price>0;
+// strong rods reach the shop only after their region is opened; rods already owned stay
+const shopLocked=i=>!!i.needMap&&!S.maps.includes(i.needMap)&&!S.own[i.id];
+const canBuy=i=>!shopHas(i)&&!shopLocked(i)&&S.gold>=shopPrice(i)&&i.price>0;
 const KEEPER={rod:'줄은 내가 직접 감았소. 믿어도 좋소.',net:'찢어져도 환불은 없소.',bait:'오늘 잡은 벌레요. 아직 꿈틀거리지.',contract:'서명은 피로 안 해도 되오. 아직은.',charm:'물에서 건진 것들이오. 출처는 묻지 마시오.',lantern:'안개가 짙은 날엔 이게 값을 하지.',ally:'이 친구들, 밥값은 하오.',treasure:'누가 그렸는지는 나도 모르오.',tank:'잡은 걸 두고 볼 자리는 있어야지.',map:'그 물길로 간 자들이 다 돌아온 건 아니오.',all:'천천히 보시오. 호수는 안 도망가오.'};
 let shopGold=null;
-function ware(i,deal){const has=shopHas(i),eq=S.eq[i.cat]===i.id,P=shopPrice(i);const d=document.createElement('div');d.className='ware'+(canBuy(i)?' can':'')+(has?' has':'');
-  d.append(slotEl({cls:'r'+Math.min(4,i.tier)+(eq?' eq':''),sel:shopSel===i.id,title:i.name,cnt:i.cat==='bait'?(S.bait[i.id]||0)||null:null,draw:ctx=>drawItem(ctx,i,0,0),onclick:()=>{shopSel=i.id;renderShop()}}));
-  const t=document.createElement('span');t.className='tag';t.textContent=has?(eq?'장착 중':'보유'):P.toLocaleString();if(i.id===deal.id&&!has)t.classList.add('deal');d.append(t);return d}
+function ware(i,deal){const has=shopHas(i),eq=S.eq[i.cat]===i.id,P=shopPrice(i);const d=document.createElement('div');d.className='ware'+(canBuy(i)?' can':'')+(has?' has':'')+(shopLocked(i)?' locked':'');
+  d.append(slotEl({cls:'r'+Math.min(4,i.tier)+(eq?' eq':'')+(shopLocked(i)?' lock':''),sel:shopSel===i.id,title:i.name,cnt:i.cat==='bait'?(S.bait[i.id]||0)||null:null,draw:ctx=>drawItem(ctx,i,0,0),onclick:()=>{shopSel=i.id;renderShop()}}));
+  const t=document.createElement('span');t.className='tag';t.textContent=has?(eq?'장착 중':'보유'):shopLocked(i)?'미입고':P.toLocaleString();if(i.id===deal.id&&!has)t.classList.add('deal');d.append(t);return d}
 function renderShop(){
   if(!shopWin)return;const w=shopWin.querySelector('.win');w.innerHTML='';
   const tt=document.createElement('div');tt.className='title';tt.innerHTML=`<span>선착장 상점</span><span class="purse gold" id="shopPurse">${S.gold.toLocaleString()} G</span>`;const x=document.createElement('button');x.textContent='×';x.setAttribute('aria-label','닫기');x.onclick=()=>{shopWin.remove();shopWin=null;renderPane();renderTop()};tt.append(x);
@@ -927,7 +929,7 @@ function renderShop(){
   const cats=document.createElement('div');cats.className='cats';[...Object.entries(CATS).filter(([k])=>k!=='all'),['all',CATS.all]].forEach(([k,v])=>{const b=document.createElement('button');b.textContent=v;b.setAttribute('aria-selected',shopCat===k);if(k!=='all'&&ITEMS.some(i=>i.cat===k&&canBuy(i)))b.classList.add('can');b.onclick=()=>{shopCat=k;renderShop()};cats.append(b)});
   const grid=document.createElement('div');grid.className='shopGrid';const left=document.createElement('div');left.className='shelf';
   const list=ITEMS.filter(i=>(shopCat==='all'||i.cat===shopCat)&&i.price>0).sort((a,b)=>shopCat==='all'?0:shopHas(a)-shopHas(b)||a.price-b.price);
-  if(!shopSel||!list.find(i=>i.id===shopSel))shopSel=(list.find(i=>!shopHas(i))||list[0])?.id;
+  if(!shopSel||!list.find(i=>i.id===shopSel))shopSel=(list.find(i=>!shopHas(i)&&!shopLocked(i))||list[0])?.id;
   list.forEach(i=>left.append(ware(i,deal)));
   const right=document.createElement('div');if(shopSel)right.append(itemCard(item(shopSel),'shop'));
   grid.append(left,right);body.append(keep,cats,grid);w.append(tt,body);
