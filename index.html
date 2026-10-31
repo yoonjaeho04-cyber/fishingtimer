@@ -679,6 +679,10 @@ function tickFishing(now){
   }
   if(changed)save();
 }
+// rename a work tag everywhere, past records included; renaming onto an existing tag merges the two
+function renameTag(from,to){if(!to||to===from)return;const has=S.tags.includes(to);S.tags=has?S.tags.filter(t=>t!==from):S.tags.map(t=>t===from?to:t);
+  Object.values(S.days||{}).forEach(d=>{if(d.tags&&d.tags[from]!=null){d.tags[to]=(d.tags[to]||0)+d.tags[from];delete d.tags[from]}});
+  S.lastTag=to;save()}
 function startRun(){const ts=document.getElementById('tagSel');if(ts&&ts.value&&ts.value!=='__new')S.lastTag=ts.value;anim.cast=performance.now();anim.reel=0;const now=Date.now();S.run={startAt:now,tag:S.lastTag,spot:S.spot,catches:[],nextAt:now+catchInterval()*1000,lastCatchAt:0};if(S.activeMap&&(S.tmaps[S.activeMap]||0)>0){S.run.tmap=S.activeMap;S.tmaps[S.activeMap]--;toast(item(S.activeMap).name+' 사용')}S.activeMap=null;S.brk=null;save();renderAll();say('start');nextIdleSay=Date.now()+rand(150,300)*1000;wakeLock()}
 function endRun(){say('end');anim.reel=performance.now();anim.cast=0;
   const R=S.run;if(!R)return;const now=Date.now();holdPause(now);R.pausedAt=0;tickFishing(now);qOnTick(now);
@@ -716,7 +720,10 @@ function renderTimer(){
     if(S.lastTag&&S.tags.includes(S.lastTag)&&S.tags[0]!==S.lastTag){S.tags=[S.lastTag,...S.tags.filter(x=>x!==S.lastTag)]}
     const sel=document.createElement('select');sel.id='tagSel';S.tags.forEach(t=>{const o=document.createElement('option');o.value=t;o.textContent=t;if(t===S.lastTag)o.selected=true;sel.append(o)});
     const o=document.createElement('option');o.value='__new';o.textContent='+ 새 태그';sel.append(o);
-    sel.onchange=()=>{if(sel.value==='__new'){const inp=document.createElement('input');inp.type='text';inp.placeholder='태그 이름';inp.id='newTag';inp.style.width='90px';sel.replaceWith(inp);inp.focus();inp.onkeydown=e=>{if(e.key==='Enter'){const v=inp.value.trim();if(v&&!S.tags.includes(v))S.tags.push(v);if(v)S.lastTag=v;save();renderTimer()}if(e.key==='Escape')renderTimer()};inp.onblur=()=>{if(document.body.contains(inp))renderTimer()}}else{S.lastTag=sel.value;save()}};
+    const cur=S.tags.includes(S.lastTag)?S.lastTag:S.tags[0];
+    if(cur){const r=document.createElement('option');r.value='__rename';r.textContent='✎ 이름 바꾸기';sel.append(r)}
+    const tagInput=(val,done)=>{const inp=document.createElement('input');inp.type='text';inp.placeholder='태그 이름';inp.id='newTag';inp.maxLength=12;inp.style.width='90px';inp.value=val;sel.replaceWith(inp);inp.focus();inp.select();let over=false;const end=ok=>{if(over)return;over=true;if(ok)done(inp.value.trim());renderTimer()};inp.onkeydown=e=>{if(e.key==='Enter')end(true);if(e.key==='Escape')end(false)};inp.onblur=()=>end(!!val)};
+    sel.onchange=()=>{if(sel.value==='__new')tagInput('',v=>{if(v&&!S.tags.includes(v))S.tags.push(v);if(v)S.lastTag=v;save()});else if(sel.value==='__rename')tagInput(cur,v=>{renameTag(cur,v)});else{S.lastTag=sel.value;save()}};
     const sp=document.createElement('select');sp.id='spotSel';SPOTS.forEach((s,i)=>{if(!S.maps.includes(i))return;const o=document.createElement('option');o.value=i;o.textContent=s.name;if(S.spot===i)o.selected=true;sp.append(o)});sp.onchange=()=>{S.spot=+sp.value;save()};
     const b=document.createElement('button');b.className='btn primary';b.textContent='출항';b.onclick=()=>{audio.unlock();if(!S.char){showCharSelect();return}startRun()};
     c.append(sp,sel,b);
