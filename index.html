@@ -591,10 +591,20 @@ function renderTimer(){
     const sp=document.createElement('select');sp.id='spotSel';SPOTS.forEach((s,i)=>{if(!S.maps.includes(i))return;const o=document.createElement('option');o.value=i;o.textContent=s.name;if(S.spot===i)o.selected=true;sp.append(o)});sp.onchange=()=>{S.spot=+sp.value;save()};
     const b=document.createElement('button');b.className='btn primary';b.textContent='출항';b.onclick=()=>{audio.unlock();if(!S.char){showCharSelect();return}startRun()};
     c.append(sp,sel,b);
+    const quick=document.createElement('div');quick.className='row center';quick.style.cssText='width:100%;gap:6px';
+    [['goal','타이머',S.goalMin],['brk','휴식',S.breakMin]].forEach(([k,lab,v])=>{const q=document.createElement('button');q.className='btn small';q.id=k==='goal'?'quickGoal':'quickBreak';q.textContent=`${lab} ${v?v+'분':'끔'}`;q.onclick=()=>showMinutes(k);quick.append(q)});
+    c.append(quick);
     const b2=document.createElement('button');b2.className='btn small';b2.textContent='출항';b2.onclick=()=>{audio.unlock();if(!S.char){S.compact=false;renderAll();showCharSelect();return}startRun()};cc.append(b2);
   }
   const ex=document.createElement('button');ex.className='btn small';ex.textContent='펼치기';ex.onclick=()=>{S.compact=false;save();renderAll()};cc.append(ex);
 }
+// quick picker next to 출항 for the goal and break timers
+function showMinutes(k){const isGoal=k==='goal';const cur=isGoal?S.goalMin:S.breakMin;const presets=isGoal?[0,25,50,90,120]:[0,5,10,15,30];
+  const o=overlay(`<h2>${isGoal?'타이머':'휴식 타이머'}</h2><div class="hint">${isGoal?'끄면 자유 모드예요. 정해두면 시간이 줄어들고 다 채우면 완주 보너스가 붙어요.':'귀항하면 돌아가고, 끝나면 종이 울려요.'}</div><div class="cats" id="minBtns"></div><div class="row"><input type="number" id="minInput" min="0" max="600" value="${cur}"><span class="hint">분</span><span style="flex:1"></span><button class="btn primary" id="minOk">확인</button></div>`);
+  const set=v=>{v=Math.max(0,Math.min(600,Math.round(+v||0)));if(isGoal)S.goalMin=v;else S.breakMin=v;save();o.remove();renderTimer();if(tab==='set')renderPane()};
+  const box=o.querySelector('#minBtns');presets.forEach(v=>{const b=document.createElement('button');b.textContent=v?v+'분':'끔';b.setAttribute('aria-selected',v===cur);b.onclick=()=>set(v);box.append(b)});
+  o.querySelector('#minOk').onclick=()=>set(o.querySelector('#minInput').value);
+  o.addEventListener('click',e=>{if(e.target===o)o.remove()})}
 function slotEl(opts){const s=document.createElement('button');s.className='slot'+(opts.cls?' '+opts.cls:'');s.setAttribute('aria-pressed',!!opts.sel);if(opts.fish)s.classList.add('fish');const cv=document.createElement('canvas');cv.width=opts.fish?96:64;cv.height=opts.fish?64:64;{const x=cv.getContext('2d');if(!opts.fish){x.imageSmoothingEnabled=false;x.scale(4,4)}opts.draw(x)}if(opts.fx)s.append(Object.assign(document.createElement('i'),{className:'fx'}));s.append(cv);if(opts.cnt!=null){const c=document.createElement('span');c.className='cnt';c.textContent=opts.cnt;s.append(c)}if(opts.title)s.title=opts.title;s.onclick=opts.onclick;return s}
 function itemDesc(it){const pc=v=>Math.round(v*100)+'%';
   if(it.cat==='rod')return `던지는 속도 +${pc(it.v)}`;if(it.cat==='net')return `두 마리 확률 ${pc(it.v)}`;if(it.cat==='contract')return `판매가 +${pc(it.v)}`;if(it.cat==='bait')return `희귀 확률 +${pc(it.v)} · 한 마리당 1개`;
@@ -2147,13 +2157,15 @@ function buildBase(){
   for(let x=0;x<96;x+=5)for(let y=32;y<160;y++)if(nz(x,y,7)>0.965){p(x,y,C.mt,3,1)}
   base=oc;
 }
+const WATER={day:{wa:'#2f6f96',wa2:'#285f84',wa3:'#4a8fb4',wa4:'#9fd0e4'},dawn:{wa:'#1d3a52',wa2:'#172f44',wa3:'#2f5672',wa4:'#5f8ca6'},dusk:{wa:'#1a3448',wa2:'#14293a',wa3:'#2b4f68',wa4:'#54809a'},night:{wa:C.wa,wa2:C.wa2,wa3:C.wa3,wa4:C.wa4}};
 function drawWater(g,t){
+  const Wc=WATER[timeOfDay()]||WATER.night;
   const f=Math.floor(t/700)%6;
   for(let ty=0;ty<6;ty++)for(let tx=0;tx<9;tx++){if(at(tx,ty)!=='w'&&at(tx,ty)!=='D')continue;const X=tx*T,Y=ty*T;
-    g.fillStyle=C.wa;g.fillRect(X,Y,T,T);
-    for(let i=0;i<T;i+=2)for(let j=0;j<T;j+=2){const n=nz(X+i,Y+j,5);if(n<0.07){g.fillStyle=C.wa2;g.fillRect(X+i,Y+j,3,1)}else if(n>0.985){g.fillStyle=C.wa3;g.fillRect(X+i,Y+j,2,1)}}
-    for(let k=0;k<4;k++){const n=nz(tx,ty,20+k);const wy=Y+Math.floor(n*30);const wx=X+((Math.floor(n*61)+f*2)%T);g.fillStyle=k<2?C.wa4:C.wa3;g.fillRect(wx,wy,4,1);g.fillRect(wx+6,wy,2,1);if(k===0)g.fillRect(wx+2,wy+1,2,1)}
-    const land=(dx,dy)=>at(tx+dx,ty+dy)==='S'||at(tx+dx,ty+dy)==='W';g.fillStyle=C.wa4;
+    g.fillStyle=Wc.wa;g.fillRect(X,Y,T,T);
+    for(let i=0;i<T;i+=2)for(let j=0;j<T;j+=2){const n=nz(X+i,Y+j,5);if(n<0.07){g.fillStyle=Wc.wa2;g.fillRect(X+i,Y+j,3,1)}else if(n>0.985){g.fillStyle=Wc.wa3;g.fillRect(X+i,Y+j,2,1)}}
+    for(let k=0;k<4;k++){const n=nz(tx,ty,20+k);const wy=Y+Math.floor(n*30);const wx=X+((Math.floor(n*61)+f*2)%T);g.fillStyle=k<2?Wc.wa4:Wc.wa3;g.fillRect(wx,wy,4,1);g.fillRect(wx+6,wy,2,1);if(k===0)g.fillRect(wx+2,wy+1,2,1)}
+    const land=(dx,dy)=>at(tx+dx,ty+dy)==='S'||at(tx+dx,ty+dy)==='W';g.fillStyle=Wc.wa4;
     if(land(-1,0))for(let j=0;j<T;j+=4)if(nz(X,Y+j,f)>0.35)g.fillRect(X,Y+j,1+(j%8===0?1:0),2);
     if(land(0,-1))for(let i=0;i<T;i+=4)if(nz(X+i,Y,f)>0.35)g.fillRect(X+i,Y,2,1+(i%8===0?1:0));
   }
@@ -2280,10 +2292,10 @@ function drawScene(g,t){
   else if(!fishing&&reelT<600){const k=ease(reelT/600);const bx=BX+(gx-BX)*k,by=BY+(gy-BY)*k-Math.sin(k*Math.PI)*20;line(bx,by,3);drawBobber(Math.round(bx),Math.round(by))}
   // lighting
   const td=timeOfDay();g.globalCompositeOperation='multiply';
-  g.fillStyle=td==='day'?'rgba(238,240,246,1)':td==='dusk'?'rgba(215,140,95,0.95)':td==='night'?'rgba(62,78,135,0.95)':'rgba(150,165,200,0.95)';g.fillRect(0,0,W,H);
-  const vg=g.createRadialGradient(144,96,68,144,96,200);vg.addColorStop(0,'rgba(255,255,255,1)');vg.addColorStop(1,td==='day'?'rgba(170,168,180,1)':'rgba(120,115,130,1)');g.fillStyle=vg;g.fillRect(0,0,W,H);
+  g.fillStyle=td==='day'?'rgba(255,253,246,1)':td==='dusk'?'rgba(215,140,95,0.95)':td==='night'?'rgba(62,78,135,0.95)':'rgba(150,165,200,0.95)';g.fillRect(0,0,W,H);
+  const vg=g.createRadialGradient(144,96,68,144,96,200);vg.addColorStop(0,'rgba(255,255,255,1)');vg.addColorStop(1,td==='day'?'rgba(226,224,214,1)':'rgba(120,115,130,1)');g.fillStyle=vg;g.fillRect(0,0,W,H);
   g.globalCompositeOperation='screen';
-  if(td==='day'){g.fillStyle='rgba(140,165,190,0.14)';g.fillRect(0,0,W,H)}
+  if(td==='day'){g.fillStyle='rgba(150,142,120,0.16)';g.fillRect(0,0,W,H);const sun=g.createRadialGradient(40,-10,10,40,-10,240);sun.addColorStop(0,'rgba(255,240,200,0.30)');sun.addColorStop(1,'rgba(255,240,200,0)');g.fillStyle=sun;g.fillRect(0,0,W,H);for(let i=0;i<46;i++){const x=(i*61+Math.floor(t/500)*(i%3+1))%288,y=(i*43)%192;if(at(Math.floor(x/32),Math.floor(y/32))==='w'&&Math.sin(t/300+i*2)>0.55){g.fillStyle='rgba(255,250,225,0.65)';g.fillRect(x,y,3,1)}}}
   if(td!=='day'){const wg=g.createRadialGradient(44,16,2,44,16,28);wg.addColorStop(0,'rgba(240,176,64,0.5)');wg.addColorStop(1,'rgba(240,176,64,0)');g.fillStyle=wg;g.fillRect(12,0,68,48);
     const gr=g.createRadialGradient(82,36,4,82,36,td==='night'?88:48);gr.addColorStop(0,'rgba(242,178,58,'+(td==='night'?0.62:0.3)+')');gr.addColorStop(1,'rgba(242,178,58,0)');g.fillStyle=gr;g.fillRect(0,0,220,160);
     for(let y=68;y<140;y+=3){const a=(td==='night'?0.22:0.1)*(1-(y-68)/72);g.fillStyle=`rgba(242,178,58,${a})`;const w=20-Math.floor((y-68)/5);g.fillRect(82-w/2+Math.sin(t/500+y)*3,y,w,2)}}
