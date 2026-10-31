@@ -134,3 +134,12 @@
 - 사용자가 GPT로 만든 전신 그림(검은 배경, 오른쪽 보기, 낚싯대 없음) 5장을 `tools/art/import_hero.py <그림> <cls>`로 넣음 → `assets/hero/<cls>.png`(64×128)·`<cls>@2.png`(128×256). 배경은 테두리에서 번져 들어가는 flood fill로 떼어내므로 어두운 옷이 남고, 어두운 장면에서 보이게 밝기 1.32배.
 - 게임: `loadHeroArt()`가 시작 때 그림을 시도, 있으면 `heroCanvas`가 그림을 쓰고 없으면 `HERO2` 코드 그림. 캐시 깨기용 `HERO_ART_V`를 그림 바꿀 때 올릴 것.
 - 5종 전부 들어감. 낚싯대 손 위치는 그림마다 조금 달라서 낚싯대가 손에서 살짝 뜰 수 있음(미세 조정 후보).
+
+### 2026-10-31 챕터 2 묶음 (사용자가 시안 없이 바로 구현 지시)
+- 오늘의 목표: `S.daily`(goal 분, streak, lastDone, claimDay, notified). 출항 패널 `#dailyBox`, `renderDaily`, `openDailyChest`. 상자 골드 = EV×(목표분/10)×0.5×(1+연속×0.1, 최대 10일). 3일마다 미끼 20, 7일마다 침몰선 지도.
+- 주간 리포트: `showWeekly(off)`, `weekStats`. 일지 탭 버튼, 일요일(이번 주)·월요일(지난 주) 자동 표시(`maybeWeekly`, `S.weekSeen`). 귀항 때 `S.days[날짜].n`, `.best` 기록. 그 이전 기록엔 best가 없음.
+- 집중 깊이: `depthLvAt`, 쉬지 않고 30/60/90분에 1/2/3단계, 희귀 확률 +10/20/30%(옛 연속 증가식 대체). 휴식 후 다시 시작하면 `R.depthFrom`으로 초기화. 장면: 물살 빨라짐·빛가루·오른쪽 위 칸 표시.
+- 보물지도: `cat:'treasure'`(tm1 희귀+50%, tm2 +100%, tm3 보물 상자·15분 이상). `S.tmaps`, `S.activeMap`, `showTreasure`, 출항 때 `R.tmap`.
+- 전시 목표: `GOALS`, `renderGoals`(의뢰 탭 아래), `S.goalsDone`, 칭호 `S.title`.
+- 날씨: `weatherAt(ms)`는 날짜+3시간 단위 해시(저장 안 함, 친구와 같은 날씨). 맑음 55·비 22·안개 14·폭풍 9%. `WEATHER` 효과, `fishWeather(f)`로 종마다 잘 잡히는 날씨(도감 표시).
+- 환생은 daily·weekSeen·goalsDone·title 유지.

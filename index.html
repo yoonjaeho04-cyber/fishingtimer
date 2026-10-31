@@ -114,6 +114,19 @@ input[type=number]{width:64px;font-family:var(--display)}
 @keyframes fxSweep{0%{background-position:150% 0}60%,100%{background-position:-50% 0}}
 @keyframes fxSpin{to{transform:rotate(360deg)}}
 .haul .f{position:relative;overflow:hidden;flex-shrink:0}
+.daily{display:flex;flex-direction:column;gap:4px;margin-top:2px}
+.dailyHead{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);width:100%}.dailyHead b{font:12px var(--display);color:var(--fg);font-weight:400}
+.dailyBar{width:100%;height:8px;margin:0}.daily .btn.primary{font-size:13px;padding:5px 10px}.daily .hint{text-align:center}
+.btn.on{border-color:var(--bronze2);color:var(--gold)}
+.chestPop{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center}.chestPop canvas{width:96px;height:96px;image-rendering:pixelated;animation:chestPop .5s ease-out}
+.chestList{display:flex;flex-direction:column;gap:2px}@keyframes chestPop{from{transform:scale(.4) rotate(-8deg);opacity:0}to{transform:none;opacity:1}}
+.report{display:flex;flex-direction:column;gap:10px;min-width:0}.repTotal{font:30px var(--display);color:var(--gold);text-shadow:2px 2px 0 #000}
+.repDays{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;height:90px}.repDays div{display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:3px;height:100%;font-size:11px;color:var(--muted)}.repDays i{display:block;width:100%;min-height:2px;background:linear-gradient(var(--gold),#8a6a2a)}
+.repTags{display:flex;flex-direction:column;gap:2px;font-size:13px}.repTags div{display:flex;justify-content:space-between}.repTags b{font:13px var(--display);font-weight:400}
+.repBest{display:flex;gap:10px;align-items:center;background:var(--panel2);padding:6px 10px}.repBest canvas{width:96px;height:64px}
+.tmaps{display:flex;flex-direction:column;gap:6px}.tmRow{display:grid;grid-template-columns:44px 1fr;gap:10px;align-items:center;text-align:left;padding:6px 8px;background:var(--panel2);border:2px solid var(--bronze3);color:var(--fg)}.tmRow canvas{width:40px;height:40px}.tmRow.on{border-color:var(--gold)}.tmRow:disabled{opacity:.45;cursor:default}
+.goalGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px}.goal{display:flex;flex-direction:column;gap:4px;background:var(--panel2);border:2px solid #0f0c13;box-shadow:inset 0 0 0 1px #3a3146;padding:8px 10px}.goal.ready{border-color:var(--bronze2)}.goal.done{opacity:.5}.gName{font:14px var(--display);color:var(--fg)}.gFoot{display:flex;justify-content:space-between;gap:8px;font-size:11px}.goal .gold{font-size:11px}
+.qbar{height:8px;border:2px solid #0b0a0e;background:#0f0c13}.qbar i{display:block;height:100%;background:var(--gold)}
 .tankWrap{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:12px;align-items:stretch}
 @media (max-width:640px){.tankWrap{grid-template-columns:1fr}}
 .tankSide{display:flex;flex-direction:column;gap:4px;background:#0f0c13;border:2px solid var(--bronze3);padding:8px;max-height:260px;overflow:auto;min-width:0}
@@ -238,6 +251,7 @@ input[type=number]{width:64px;font-family:var(--display)}
     <div class="cmd frame">
       <div class="big" id="bigClock">00:00<small>:00</small></div>
       <div class="row center" id="ctrl"></div>
+      <div class="daily" id="dailyBox"></div>
       <div class="row center" style="margin-top:4px">
         <button class="btn small" id="shopBtn2">상점</button>
         <button class="btn small" id="pipBtn" title="낚시 화면만 작은 창으로 띄워 다른 창 위에 고정">위젯 모드</button>
@@ -421,19 +435,22 @@ const ITEMS=[
  {id:'al2',cat:'ally',tier:3,name:'물의 정령',price:4000,v:{extra:0.15,spot:1,tod:'dawn'},desc:'요정의 샘에서 따라온 물방울 정령. 새벽에 가장 또렷하다.'},
  {id:'al3',cat:'ally',tier:4,name:'드워프 노어부',price:12000,v:{extra:0.18,spot:2,tod:'day'},desc:'잉걸불 협곡에서 사십 년을 낚은 노인. 낮의 협곡을 손바닥처럼 안다.'},
  {id:'al4',cat:'ally',tier:5,name:'인어 가수',price:35000,v:{extra:0.22,spot:3,tod:'night'},desc:'별이 진 바다의 노래꾼. 밤바다의 물고기가 노래를 따라 올라온다.'},
+ {id:'tm1',cat:'treasure',tier:2,name:'낡은 보물지도',price:500,v:{luck:0.5},desc:'누군가 표시해 둔 물길. 다음 출항에 희귀한 것이 잘 걸린다.'},
+ {id:'tm2',cat:'treasure',tier:4,name:'금박 보물지도',price:1800,v:{luck:1},desc:'왕실 측량사의 지도. 다음 출항에 희귀 확률이 크게 오른다.'},
+ {id:'tm3',cat:'treasure',tier:3,name:'침몰선 지도',price:900,v:{chest:1},desc:'가라앉은 배의 위치. 15분 이상 낚시하면 보물 상자를 건진다.'},
  {id:'map1',cat:'map',tier:2,name:'요정의 샘 지도',price:2500,v:1,desc:'숲 깊은 곳의 샘으로 가는 길.'},
  {id:'map2',cat:'map',tier:3,name:'잉걸불 협곡 지도',price:9000,v:2,desc:'화산 협곡의 뜨거운 물길.'},
  {id:'map3',cat:'map',tier:4,name:'별이 진 바다 해도',price:30000,v:3,desc:'별이 떨어진 바다의 해도.'},
  {id:'map4',cat:'map',tier:5,name:'심연의 우물 지도',price:100000,v:4,desc:'아무도 바닥을 본 적 없는 우물.'},
 ];
 const item=id=>ITEMS.find(i=>i.id===id);
-const CATS={all:'전체',rod:'낚싯대',net:'그물',bait:'미끼',contract:'계약',charm:'장신구',lantern:'등불',ally:'동료',tank:'어항',map:'지도'};
+const CATS={all:'전체',rod:'낚싯대',net:'그물',bait:'미끼',contract:'계약',charm:'장신구',lantern:'등불',ally:'동료',treasure:'보물지도',tank:'어항',map:'지도'};
 const EQ_SLOTS=[['rod','낚싯대'],['net','그물'],['contract','계약'],['bait','미끼'],['charm','장신구'],['lantern','등불'],['ally','동료']];
 
 // ---------- state ----------
 const KEY='mistlake.v2';
 let S=null;
-const fresh=()=>({v:2,q:null,savedAt:0,char:null,gold:0,own:{rod0:1,net0:1,con0:1},eq:{rod:'rod0',net:'net0',contract:'con0',bait:null,charm:null,lantern:null,ally:null},bait:{},maps:[0],tanks:[[]],tankSel:0,codex:{},totalSec:0,days:{},tags:['공부','작업'],lastTag:'공부',spot:0,muted:false,vol:0.5,goalMin:0,breakMin:0,run:null,brk:null,sessions:0,compact:false});
+const fresh=()=>({v:2,daily:{goal:60,streak:0,lastDone:'',claimDay:'',notified:''},weekSeen:'',tmaps:{},activeMap:null,goalsDone:{},title:'',q:null,savedAt:0,char:null,gold:0,own:{rod0:1,net0:1,con0:1},eq:{rod:'rod0',net:'net0',contract:'con0',bait:null,charm:null,lantern:null,ally:null},bait:{},maps:[0],tanks:[[]],tankSel:0,codex:{},totalSec:0,days:{},tags:['공부','작업'],lastTag:'공부',spot:0,muted:false,vol:0.5,goalMin:0,breakMin:0,run:null,brk:null,sessions:0,compact:false});
 let wakeSentinel=null;
 async function wakeLock(){try{if(S.wake&&S.run&&!wakeSentinel&&navigator.wakeLock){wakeSentinel=await navigator.wakeLock.request('screen');wakeSentinel.addEventListener('release',()=>{wakeSentinel=null})}else if((!S.wake||!S.run)&&wakeSentinel){await wakeSentinel.release();wakeSentinel=null}}catch(e){wakeSentinel=null}}
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')wakeLock()});
@@ -497,7 +514,7 @@ const oddCache={};
 function oddCanvas(o){if(oddCache[o.id])return oddCache[o.id];const pal=Object.assign({},IPAL,{N:'#5a8a3a',M:'#c47a9a',R:'#6a2a2a',r:'#4a1c1c'});const oc=document.createElement('canvas');oc.width=16;oc.height=16;drawSprite(oc.getContext('2d'),{rows:ODD_ART[o.id],pal},0,0);bevelCanvas(oc,[11,10,14]);oddCache[o.id]=oc;return oc}
 function drawOdd(g,o,x,y,scale=1){g.imageSmoothingEnabled=false;g.drawImage(oddCanvas(o),x,y,16*scale,16*scale)}
 function rollOddity(R,at){const tod=timeOfDay(new Date(at).getHours());const el=(at-R.startAt)/1000;
-  for(const o of ODD){if(S.odd&&S.odd[o.id])continue;const c=o.cond;if(c.spot!=null&&c.spot!==R.spot)continue;if(c.tod&&c.tod!==tod)continue;if(c.minSec&&el<c.minSec)continue;if(c.goal&&!R.goalDone)continue;if(Math.random()<o.chance)return o.id}return null}
+  for(const o of ODD){if(S.odd&&S.odd[o.id])continue;const c=o.cond;if(c.spot!=null&&c.spot!==R.spot)continue;if(c.tod&&c.tod!==tod)continue;if(c.minSec&&el<c.minSec)continue;if(c.goal&&!R.goalDone)continue;if(Math.random()<o.chance*(WEATHER[weatherAt(at)].odd||1))return o.id}return null}
 const oddCount=()=>Object.keys(S.odd||{}).length;
 
 // ---------- 환생 (rebirth) ----------
@@ -515,7 +532,7 @@ function rebirthScales(){return 5+S.maps.length*3+Math.floor(Math.sqrt(S.gold/50
 function showRebirth(){const n=rebirthScales();
   const o=overlay(`<h2>물안개 너머로</h2><div style="font-size:13px;line-height:1.6">늙은 어부는 배를 타고 안개 속으로 사라지고, 다음 견습생이 부두를 물려받아요.<br><br><b>초기화</b>: 골드, 장비·미끼·동료, 지도, 걸려 있던 의뢰<br><b>유지</b>: 도감, 이변, 어항, 일지 기록, 여관 평판, 달의 비늘과 영구 능력<br><br>받을 달의 비늘: <span class="gold">${n}</span></div><div class="row" style="justify-content:flex-end;margin-top:8px"><button class="btn" id="rbNo">아직</button><button class="btn primary" id="rbYes">안개 속으로</button></div>`);
   o.querySelector('#rbNo').onclick=()=>o.remove();o.querySelector('#rbYes').onclick=()=>{o.remove();doRebirth(n)}}
-function doRebirth(n){const keep={codex:S.codex,odd:S.odd||{},tanks:S.tanks,tankSel:0,days:S.days,totalSec:S.totalSec,sessions:S.sessions,tags:S.tags,lastTag:S.lastTag,muted:S.muted,vol:S.vol,goalMin:S.goalMin,breakMin:S.breakMin,wake:S.wake,perks:S.perks||{},moon:(S.moon||0)+n,rebirths:(S.rebirths||0)+1};
+function doRebirth(n){const keep={codex:S.codex,odd:S.odd||{},tanks:S.tanks,tankSel:0,days:S.days,totalSec:S.totalSec,sessions:S.sessions,tags:S.tags,lastTag:S.lastTag,daily:S.daily,weekSeen:S.weekSeen,goalsDone:S.goalsDone||{},title:S.title||'',muted:S.muted,vol:S.vol,goalMin:S.goalMin,breakMin:S.breakMin,wake:S.wake,perks:S.perks||{},moon:(S.moon||0)+n,rebirths:(S.rebirths||0)+1};
   const q0=S.q;S=Object.assign(fresh(),keep);if(perk('pmap'))S.maps=[0,1];S.gold=perk('pstart')*1000;
   if(q0){S.q={notes:[],nextAt:0,xp:q0.xp||0,done:q0.done||0,seq:q0.seq||0};for(let i=0;i<Q_SLOTS;i++)S.q.notes.push(qMakeNote(Date.now()))}save();qBadge();audio.fanfare();renderAll();toast(`달의 비늘 +${n}. 새 견습생을 고르세요`);showCharSelect()}
 function renderPerks(p){const h=document.createElement('div');h.className='sec';h.textContent=`달의 비늘 ${S.moon||0} · 영구 능력`;p.append(h);
@@ -525,17 +542,98 @@ function renderPerks(p){const h=document.createElement('div');h.className='sec';
     const b=document.createElement('button');b.className='btn small';b.style.gridRow='1/3';b.textContent=max?'최대':`비늘 ${cost}`;b.disabled=max||(S.moon||0)<cost;b.onclick=()=>{if((S.moon||0)<cost)return;S.moon-=cost;S.perks=S.perks||{};S.perks[pk.id]=l+1;save();renderPane();toast(pk.name+' 강화')};it.append(b);g.append(it)});
   p.append(g)}
 
+// ---------- weather ----------
+const WEATHER={clear:{name:'맑음',desc:'맑은 날이에요.'},rain:{name:'비',speed:0.15,desc:'비가 와요. 낚는 속도 +15%'},fog:{name:'안개',odd:2,desc:'안개가 꼈어요. 이변이 두 배로 잘 걸려요'},storm:{name:'폭풍',luck:0.25,speed:-0.1,desc:'폭풍이에요. 희귀 확률 +25%, 낚는 속도 -10%'}};
+function weatherAt(ms){const d=new Date(ms);const n=nz(d.getFullYear()*372+d.getMonth()*31+d.getDate(),Math.floor(d.getHours()/3),11);return n<0.55?'clear':n<0.77?'rain':n<0.91?'fog':'storm'}
+const fishWeather=f=>['rain','fog','storm'][(f.spot*3+(+f.id.split('-')[1]))%3];
+
+// ---------- focus depth: unbroken time on the water ----------
+function depthLvAt(at){const R=S.run;if(!R||R.pausedAt)return 0;const m=(at-(R.depthFrom||R.startAt))/60000;return m>=90?3:m>=60?2:m>=30?1:0}
+const DEPTH_LUCK=[0,0.1,0.2,0.3];
+
+// ---------- today's goal and streak chest ----------
+const D=()=>S.daily||(S.daily={goal:60,streak:0,lastDone:'',claimDay:'',notified:''});
+const dayShift=n=>{const d=new Date();d.setDate(d.getDate()+n);return dayKey(d)};
+function todaySec(){let s=S.days[dayKey()]?.sec||0;if(S.run)s+=Math.max(0,Math.floor((Date.now()-S.run.startAt)/1000));return s}
+const dailyReady=()=>todaySec()>=D().goal*60&&D().claimDay!==dayKey();
+const liveStreak=()=>{const d=D();return d.lastDone===dayKey()||d.lastDone===dayShift(-1)?d.streak:0};
+function renderDaily(){const box=$('dailyBox');if(!box)return;const d=D(),sec=todaySec(),need=d.goal*60,pc=Math.min(100,sec/need*100),st=liveStreak();box.innerHTML='';
+  const head=document.createElement('button');head.className='dailyHead';head.title='오늘의 목표 바꾸기';head.innerHTML=`<span>오늘의 목표</span><b>${Math.floor(sec/60)} / ${d.goal}분</b>`;head.onclick=()=>showMinutes('daily');
+  const bar=document.createElement('div');bar.className='bar dailyBar';bar.innerHTML=`<i style="width:${pc}%"></i>`;box.append(head,bar);
+  if(dailyReady()){const b=document.createElement('button');b.className='btn primary';b.id='chestBtn';b.textContent='보상 상자 열기';b.onclick=openDailyChest;box.append(b)}
+  else{const t=document.createElement('div');t.className='hint';t.textContent=d.claimDay===dayKey()?`오늘 상자 받음 · 연속 ${st}일`:`연속 ${st}일 · 채우면 보상 상자`;box.append(t)}}
+function openDailyChest(){if(!dailyReady())return;const d=D();const n=d.lastDone===dayShift(-1)?d.streak+1:1;d.streak=n;d.lastDone=dayKey();d.claimDay=dayKey();
+  const gold=Math.round(qEV(Math.max(...S.maps))*(d.goal/10)*0.5*(1+Math.min(n,10)*0.1));S.gold+=gold;const lines=[`${gold.toLocaleString()} G`];
+  if(n%3===0){const bs=ITEMS.filter(i=>i.cat==='bait'&&i.tier<=Math.min(4,1+Math.floor(n/3)));const b=bs[bs.length-1];S.bait[b.id]=(S.bait[b.id]||0)+20;if(!S.eq.bait)S.eq.bait=b.id;lines.push(`${b.name} 20개`)}
+  if(n%7===0){S.tmaps=S.tmaps||{};S.tmaps.tm3=(S.tmaps.tm3||0)+1;lines.push('침몰선 지도 1장')}
+  save();audio.fanfare();renderTop();renderDaily();
+  const next=n%7===0?'':`<div class="hint">${7-n%7}일 더 이어가면 침몰선 지도</div>`;
+  const o=overlay(`<div class="chestPop"><canvas id="chestCv" width="96" height="96"></canvas><h2>연속 ${n}일 상자</h2><div class="chestList">${lines.map(l=>`<div class="gold">${l}</div>`).join('')}</div>${next}<button class="btn primary" id="chestOk">받기</button></div>`);
+  const g=o.querySelector('#chestCv').getContext('2d');g.imageSmoothingEnabled=false;drawSprite(g,{rows:ITEM_ART.chest,pal:IPAL},0,0,6);o.querySelector('#chestOk').onclick=()=>o.remove()}
+
+// ---------- weekly report ----------
+const weekStart=off=>{const d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-((d.getDay()+6)%7)+off*7);return d};
+const weekKey=off=>dayKey(weekStart(off));
+function weekStats(off){const s0=weekStart(off),days=[],tags={};let total=0,n=0,best=null;
+  for(let i=0;i<7;i++){const d=new Date(s0);d.setDate(d.getDate()+i);const e=S.days[dayKey(d)];const sec=e?.sec||0;days.push({label:'월화수목금토일'[i],sec});total+=sec;n+=e?.n||0;
+    if(e){Object.entries(e.tags||{}).forEach(([t,v])=>tags[t]=(tags[t]||0)+v);if(e.best&&(!best||e.best.p>best.p))best=e.best}}
+  return {s0,days,tags,total,n,best}}
+function weekMonth(d){return `${d.getMonth()+1}월 ${Math.floor((d.getDate()-1)/7)+1}주`}
+function showWeekly(off){S.weekSeen=weekKey(off);save();const w=weekStats(off);const max=Math.max(1,...w.days.map(x=>x.sec));const top=Object.entries(w.tags).sort((a,b)=>b[1]-a[1]);const f=w.best?fishById(w.best.id):null;
+  const o=overlay(`<div class="report"><h2>항해 일지 · ${weekMonth(w.s0)}</h2><div class="repTotal">${fmtH(w.total)}</div><div class="repDays">${w.days.map(x=>`<div><i style="height:${Math.round(x.sec/max*100)}%"></i><span>${x.label}</span></div>`).join('')}</div><div class="repTags">${top.length?top.map(([t,v])=>`<div><span>${t}</span><b>${fmtH(v)}</b></div>`).join(''):'<div class="hint">이 주에는 기록이 없어요</div>'}</div>${f?`<div class="repBest"><canvas id="repFish" width="96" height="64"></canvas><div><div class="hint">이번 주 최고의 한 마리</div><div class="r${f.r}">${f.name}</div><div class="hint">${w.best.cm}cm · 어획 ${w.n}마리</div></div></div>`:''}<div class="row" style="justify-content:flex-end"><button class="btn small" id="repCopy">자랑 문구 복사</button><button class="btn primary" id="repOk">닫기</button></div></div>`);
+  if(f)drawFishHD(o.querySelector('#repFish').getContext('2d'),f,0,0,1);
+  const txt=`안개호수 낚시꾼 ${weekMonth(w.s0)}: ${fmtH(w.total)} 집중`+(top[0]?`, ${top[0][0]} ${fmtH(top[0][1])}`:'')+(f?`, 최고 어획 ${f.name} ${w.best.cm}cm`:'');
+  o.querySelector('#repCopy').onclick=()=>{if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(txt).then(()=>toast('복사했어요')).catch(()=>toast(txt));else toast(txt)};
+  o.querySelector('#repOk').onclick=()=>o.remove()}
+function maybeWeekly(){if(!S.char||S.run||document.querySelector('.overlay'))return;const dow=new Date().getDay();const off=dow===0?0:dow===1?-1:null;if(off===null||S.weekSeen===weekKey(off))return;if(weekStats(off).total>0)showWeekly(off)}
+
+// ---------- treasure maps ----------
+function showTreasure(){const owned=ITEMS.filter(i=>i.cat==='treasure');
+  const o=overlay(`<h2>보물지도</h2><div class="hint">고른 지도는 다음 출항에 쓰여요. 상점에서 살 수 있어요.</div><div class="tmaps" id="tmList"></div><div class="row" style="justify-content:flex-end"><button class="btn" id="tmOff">안 쓰기</button><button class="btn primary" id="tmOk">닫기</button></div>`);
+  const box=o.querySelector('#tmList');owned.forEach(it=>{const n=(S.tmaps||{})[it.id]||0;const b=document.createElement('button');b.className='tmRow'+(S.activeMap===it.id?' on':'');b.disabled=!n;const cv=document.createElement('canvas');cv.width=64;cv.height=64;const x=cv.getContext('2d');x.imageSmoothingEnabled=false;x.scale(4,4);drawItem(x,it,0,0);const d=document.createElement('div');d.innerHTML=`<div>${it.name} <span class="hint">×${n}</span></div><div class="hint">${itemDesc(it)}</div>`;b.append(cv,d);b.onclick=()=>{S.activeMap=it.id;save();o.remove();renderTimer()};box.append(b)});
+  o.querySelector('#tmOff').onclick=()=>{S.activeMap=null;save();o.remove();renderTimer()};o.querySelector('#tmOk').onclick=()=>o.remove()}
+
+// ---------- display goals ----------
+const allTank=()=>(S.tanks||[]).flat().map(c=>fishById(c.id));
+const tankRare=r=>allTank().filter(f=>f.r>=r).length;
+const spotCodex=i=>SPOTS[i].fish.filter(f=>S.codex[f.id]).length;
+const GOALS=[
+ {id:'g1',name:'전시의 시작',desc:'어항에 영웅 이상 3마리 넣기',need:3,cur:()=>tankRare(2),gold:1500},
+ {id:'g2',name:'전설의 수조',desc:'어항에 전설 이상 3마리 넣기',need:3,cur:()=>tankRare(3),gold:8000,title:'수조의 주인'},
+ {id:'g3',name:'신화를 담다',desc:'어항에 신화 1마리 넣기',need:1,cur:()=>tankRare(4),gold:15000,title:'신화를 본 자'},
+ {id:'g4',name:'다채로운 어항',desc:'한 어항에 다른 어종 8종',need:8,cur:()=>Math.max(0,...(S.tanks||[]).map(t=>new Set(t.map(c=>c.id)).size)),gold:3000},
+ ...SPOTS.map((s,i)=>({id:'gs'+i,name:s.name+' 도감',desc:`${s.name} ${s.fish.length}종 모두 낚기`,need:s.fish.length,cur:()=>spotCodex(i),gold:2500*(i+1)})),
+ {id:'g5',name:'밤의 수집가',desc:'밤에만 나오는 어종 8종 낚기',need:8,cur:()=>allFish().filter(f=>f.time==='night'&&S.codex[f.id]).length,gold:4000},
+ {id:'g6',name:'월척꾼',desc:'10종을 최대 크기에 가깝게 낚기',need:10,cur:()=>allFish().filter(f=>S.codex[f.id]&&S.codex[f.id].best>=f.max-(f.max-f.min)*0.1).length,gold:5000},
+ {id:'g7',name:'이변 수집가',desc:'이변 5개 모으기',need:5,cur:()=>oddCount(),gold:6000,tm:'tm2'},
+ {id:'g8',name:'호수의 기록자',desc:'도감 80종 전부 채우기',need:80,cur:()=>Object.keys(S.codex).length,gold:50000,title:'호수의 기록자'},
+];
+function renderGoals(p){S.goalsDone=S.goalsDone||{};const h=document.createElement('div');h.className='sec';h.textContent=`전시 목표 ${Object.keys(S.goalsDone).length} / ${GOALS.length}`+(S.title?` · 칭호 「${S.title}」`:'');p.append(h);
+  const g=document.createElement('div');g.className='goalGrid';
+  GOALS.map(x=>({x,v:Math.min(x.need,x.cur()),done:!!S.goalsDone[x.id]})).sort((a,b)=>a.done-b.done||(b.v>=b.x.need)-(a.v>=a.x.need)||b.v/b.x.need-a.v/a.x.need).forEach(({x,v,done})=>{const d=document.createElement('div');d.className='goal'+(done?' done':v>=x.need?' ready':'');
+    const rw=[`${x.gold.toLocaleString()} G`,x.tm?item(x.tm).name:'',x.title?`칭호 「${x.title}」`:''].filter(Boolean).join(' · ');
+    d.innerHTML=`<div class="gName">${x.name}</div><div class="hint">${x.desc}</div><div class="qbar"><i style="width:${v/x.need*100}%"></i></div><div class="gFoot"><span class="hint">${v}/${x.need}</span><span class="gold">${rw}</span></div>`;
+    if(!done&&v>=x.need){const b=document.createElement('button');b.className='btn small primary';b.textContent='받기';b.onclick=()=>{S.goalsDone[x.id]=Date.now();S.gold+=x.gold;if(x.tm){S.tmaps=S.tmaps||{};S.tmaps[x.tm]=(S.tmaps[x.tm]||0)+1}if(x.title)S.title=x.title;save();audio.fanfare();toast(`${x.name} 달성! +${x.gold.toLocaleString()} G`);renderTop();renderPane()};d.append(b)}
+    g.append(d)});p.append(g)}
+
+// ---------- per-second upkeep for the features above ----------
+let lastDepth=0,dailyTick=0,lastWeather=null,maybeWeeklyMin=-1;
+function featTick(now){const lv=depthLvAt(now);if(lv>lastDepth){toast(`집중 깊이 ${lv}단계 · 희귀 확률 +${DEPTH_LUCK[lv]*100}%`);audio.chime(1)}lastDepth=lv;
+  const w=weatherAt(now);if(w!==lastWeather){if(lastWeather!==null)toast(WEATHER[w].desc);lastWeather=w;renderTop()}
+  if(++dailyTick%5===1){renderDaily();const d=D();if(dailyReady()&&d.notified!==dayKey()){d.notified=dayKey();toast('오늘의 목표 달성! 보상 상자를 열어보세요');audio.fanfare();save()}}}
+
 // ---------- fishing ----------
-function catchInterval(){let s=600/(1+eqv('rod')+charm('speed')+perk('pspeed')*0.08);if(S.char==='bard')s*=0.95;return s*rand(0.7,1.3)}
+function catchInterval(){let s=600/(1+eqv('rod')+charm('speed')+perk('pspeed')*0.08+(WEATHER[weatherAt(Date.now())].speed||0));if(S.char==='bard')s*=0.95;return s*rand(0.7,1.3)}
 function rollFish(spot,elapsedSec,at){
   const tod=timeOfDay(new Date(at).getHours());
   const pool=spot.fish.filter(f=>!f.time||f.time===tod);
-  let luck=baitLuck()+charm('luck')+perk('pluck')*0.04+oddCount()*0.01+Math.min(elapsedSec/7200,1)*0.3;if(S.char==='mage')luck+=0.08;
+  let luck=baitLuck()+charm('luck')+perk('pluck')*0.04+oddCount()*0.01+DEPTH_LUCK[depthLvAt(at)]+(WEATHER[weatherAt(at)].luck||0);if(S.run&&S.run.tmap)luck+=item(S.run.tmap).v.luck||0;if(S.char==='mage')luck+=0.08;
   if(tod==='night'||tod==='dawn')luck+=eqv('lantern')+charm('nightluck');
   const w=[70,20,7,2.5,0.5].map((x,i)=>i?x*(1+luck):x);
   let r=Math.random()*w.reduce((a,b)=>a+b),ri=0;for(;ri<5;ri++){r-=w[ri];if(r<0)break}
   let cands=pool.filter(f=>f.r===ri);while(!cands.length&&ri>0){ri--;cands=pool.filter(f=>f.r===ri)}
   let f=cands[Math.floor(Math.random()*cands.length)];
+  {const w=weatherAt(at);const fav=cands.filter(x=>fishWeather(x)===w);if(fav.length&&Math.random()<0.5)f=fav[Math.floor(Math.random()*fav.length)]}
   if(S.char==='druid'&&(tod==='night'||tod==='dawn')&&Math.random()<0.1){const sp=pool.filter(x=>x.time);if(sp.length)f=sp[Math.floor(Math.random()*sp.length)]}
   const cm=Math.round(f.min+Math.pow(Math.random(),1.6)*(f.max-f.min));
   if(S.eq.bait&&S.bait[S.eq.bait]>0)S.bait[S.eq.bait]--;
@@ -544,7 +642,7 @@ function rollFish(spot,elapsedSec,at){
 let bite=0,bitePop=null;const anim={cast:0,reel:0};
 function holdPause(now){const R=S.run;if(!R||!R.pausedAt)return;const d=now-(R.holdAt||R.pausedAt);if(d<=0)return;R.startAt+=d;R.nextAt+=d;if(R.qAt)R.qAt+=d;R.holdAt=now;
   if(S.breakMin>0&&!R.breakRang&&now-R.pausedAt>=S.breakMin*60000){R.breakRang=true;audio.bell();toast('휴식 시간이 끝났어요');save()}}
-function togglePause(){const R=S.run;if(!R)return;const now=Date.now();if(R.pausedAt){holdPause(now);R.pausedAt=0;R.holdAt=0;R.breakRang=false;say('start')}else{R.pausedAt=now;R.holdAt=now}save();renderTimer()}
+function togglePause(){const R=S.run;if(!R)return;const now=Date.now();if(R.pausedAt){holdPause(now);R.pausedAt=0;R.holdAt=0;R.breakRang=false;R.depthFrom=now;say('start')}else{R.pausedAt=now;R.holdAt=now}save();renderTimer()}
 function tickFishing(now){
   const R=S.run;if(!R)return;const spot=SPOTS[R.spot];let changed=false;
   while(R.nextAt<=now){
@@ -557,7 +655,7 @@ function tickFishing(now){
   }
   if(changed)save();
 }
-function startRun(){const ts=document.getElementById('tagSel');if(ts&&ts.value&&ts.value!=='__new')S.lastTag=ts.value;anim.cast=performance.now();anim.reel=0;const now=Date.now();S.run={startAt:now,tag:S.lastTag,spot:S.spot,catches:[],nextAt:now+catchInterval()*1000,lastCatchAt:0};S.brk=null;save();renderAll();say('start');nextIdleSay=Date.now()+rand(150,300)*1000;wakeLock()}
+function startRun(){const ts=document.getElementById('tagSel');if(ts&&ts.value&&ts.value!=='__new')S.lastTag=ts.value;anim.cast=performance.now();anim.reel=0;const now=Date.now();S.run={startAt:now,tag:S.lastTag,spot:S.spot,catches:[],nextAt:now+catchInterval()*1000,lastCatchAt:0};if(S.activeMap&&(S.tmaps[S.activeMap]||0)>0){S.run.tmap=S.activeMap;S.tmaps[S.activeMap]--;toast(item(S.activeMap).name+' 사용')}S.activeMap=null;S.brk=null;save();renderAll();say('start');nextIdleSay=Date.now()+rand(150,300)*1000;wakeLock()}
 function endRun(){say('end');anim.reel=performance.now();anim.cast=0;
   const R=S.run;if(!R)return;const now=Date.now();holdPause(now);R.pausedAt=0;tickFishing(now);qOnTick(now);
   const sec=Math.max(0,Math.floor((now-R.startAt)/1000));
@@ -570,6 +668,8 @@ function endRun(){say('end');anim.reel=performance.now();anim.cast=0;
     if(S.char==='rogue'){p*=1.05;if(Math.random()<0.05)p*=2}
     const e=S.codex[c.id];if(!e){S.codex[c.id]={n:1,best:c.cm};newIds.push(c.id)}else{e.n++;if(c.cm>e.best){e.best=c.cm;recs.push(c.id)}}
     return {id:c.id,cm:c.cm,price:Math.round(p),tank:false}});
+  haul.forEach(c=>{if(c.odd)return;d.n=(d.n||0)+1;const f=fishById(c.id);const sc=f.r*1e6+c.price;if(!d.best||sc>d.best.p)d.best={id:c.id,cm:c.cm,p:sc}});
+  if(R.tmap&&item(R.tmap).v.chest){if(sec>=900){const g=Math.round(qEV(R.spot)*rand(5,9));S.gold+=g;setTimeout(()=>{toast(`보물 상자 발견! +${g.toLocaleString()} G`);audio.rare()},900)}else setTimeout(()=>toast('너무 일찍 돌아와 보물을 못 찾았어요 (15분 이상 필요)'),900)}
   const bonusRate=done?(S.char==='knight'?0.40:0.25)+charm('bonus'):0;
   S.run=null;if(S.breakMin>0)S.brk={endAt:now+S.breakMin*60000,rang:false};wakeLock();
   save();renderAll();showHaul(haul,bonusRate,sec,done,newIds,recs);
@@ -577,10 +677,10 @@ function endRun(){say('end');anim.reel=performance.now();anim.cast=0;
 
 // ---------- render ----------
 let tab='gear',codexSel=null,shopCat='all',shopSel=null;
-function renderAll(){renderTop();renderTimer();renderPane();$('game').classList.toggle('compact',!!S.compact)}
-function renderTop(){const t=timeOfDay();$('tod').textContent=TIMES[t];$('mTod').textContent=TIMES[t];$('mClass').textContent=(S.char?charOf().name:'')+(S.rebirths?` · 환생 ${S.rebirths}`:'');$('mGold').textContent=S.gold.toLocaleString()+' G';$('mTotal').textContent=fmtH(S.totalSec);
+function renderAll(){if(typeof renderDaily==='function')renderDaily();renderTop();renderTimer();renderPane();$('game').classList.toggle('compact',!!S.compact)}
+function renderTop(){const t=timeOfDay();const wn=WEATHER[weatherAt(Date.now())];const lab=TIMES[t]+(wn.name==='맑음'?'':' · '+wn.name);$('tod').textContent=lab;$('mTod').textContent=lab;$('mTod').title=wn.desc;$('mClass').textContent=(S.title?`「${S.title}」 `:'')+(S.char?charOf().name:'')+(S.rebirths?` · 환생 ${S.rebirths}`:'');$('mGold').textContent=S.gold.toLocaleString()+' G';$('mTotal').textContent=fmtH(S.totalSec);
   $('muteBtn').innerHTML=S.muted?'<svg viewBox="0 0 16 16"><path d="M2 6h3l4-3v10l-4-3H2z"/><path d="M11 5l4 6M15 5l-4 6" stroke="currentColor" stroke-width="1.6" fill="none"/></svg>':'<svg viewBox="0 0 16 16"><path d="M2 6h3l4-3v10l-4-3H2z"/><path d="M11 5a4 4 0 010 6M13 3a7 7 0 010 10" stroke="currentColor" stroke-width="1.6" fill="none"/></svg>'}
-function statusText(){const R=S.run;if(R&&R.pausedAt){const p=Math.floor((Date.now()-R.pausedAt)/1000);return `휴식 중 ${pad(Math.floor(p/60))}:${pad(p%60)}`+(S.breakMin?` / ${S.breakMin}분`:'')+' · 시간이 멈춰 있어요'}if(R)return `${SPOTS[R.spot].name} · ${R.tag} · ${R.catches.length}마리`+(S.goalMin?` · 목표 ${S.goalMin}분`:'');if(S.brk&&S.brk.endAt>Date.now())return '휴식 중';return S.brk&&S.brk.rang?'다시 출항할 시간':'출항 준비 중'}
+function statusText(){const R=S.run;if(R&&R.pausedAt){const p=Math.floor((Date.now()-R.pausedAt)/1000);return `휴식 중 ${pad(Math.floor(p/60))}:${pad(p%60)}`+(S.breakMin?` / ${S.breakMin}분`:'')+' · 시간이 멈춰 있어요'}if(R)return `${SPOTS[R.spot].name} · ${R.tag} · ${R.catches.length}마리`+(depthLvAt(Date.now())?` · 깊이 ${depthLvAt(Date.now())}`:'')+(S.goalMin?` · 목표 ${S.goalMin}분`:'');if(S.brk&&S.brk.endAt>Date.now())return '휴식 중';return S.brk&&S.brk.rang?'다시 출항할 시간':'출항 준비 중'}
 function renderTimer(){
   const c=$('ctrl');c.innerHTML='';const cc=$('compactCtrl');cc.innerHTML='';const R=S.run;$('status').textContent=statusText();
   if(R){if(S.goalMin){const g=document.createElement('span');g.className='pill'+(R.goalDone?' on':'');g.textContent=R.goalDone?'완주 달성함':'완주 미달성';c.append(g)}
@@ -598,15 +698,16 @@ function renderTimer(){
     c.append(sp,sel,b);
     const quick=document.createElement('div');quick.className='row center';quick.style.cssText='width:100%;gap:6px';
     [['goal','타이머',S.goalMin]].forEach(([k,lab,v])=>{const q=document.createElement('button');q.className='btn small';q.id=k==='goal'?'quickGoal':'quickBreak';q.textContent=`${lab} ${v?v+'분':'끔'}`;q.onclick=()=>showMinutes(k);quick.append(q)});
+    {const q=document.createElement('button');q.className='btn small'+(S.activeMap?' on':'');q.id='quickMap';const n=Object.values(S.tmaps||{}).reduce((a,b)=>a+b,0);q.textContent=S.activeMap?item(S.activeMap).name:`보물지도 ${n}`;q.onclick=showTreasure;quick.append(q)}
     c.append(quick);
     const b2=document.createElement('button');b2.className='btn small';b2.textContent='출항';b2.onclick=()=>{audio.unlock();if(!S.char){S.compact=false;renderAll();showCharSelect();return}startRun()};cc.append(b2);
   }
   const ex=document.createElement('button');ex.className='btn small';ex.textContent='펼치기';ex.onclick=()=>{S.compact=false;save();renderAll()};cc.append(ex);
 }
 // quick picker next to 출항 for the goal and break timers
-function showMinutes(k){const isGoal=k==='goal';const cur=isGoal?S.goalMin:S.breakMin;const presets=isGoal?[0,25,50,90,120]:[0,5,10,15,30];
-  const o=overlay(`<h2>${isGoal?'타이머':'휴식 타이머'}</h2><div class="hint">${isGoal?'끄면 자유 모드예요. 정해두면 시간이 줄어들고 다 채우면 완주 보너스가 붙어요.':'귀항하면 돌아가고, 끝나면 종이 울려요.'}</div><div class="cats" id="minBtns"></div><div class="row"><input type="number" id="minInput" min="0" max="600" value="${cur}"><span class="hint">분</span><span style="flex:1"></span><button class="btn primary" id="minOk">확인</button></div>`);
-  const set=v=>{v=Math.max(0,Math.min(600,Math.round(+v||0)));if(isGoal)S.goalMin=v;else S.breakMin=v;save();o.remove();renderTimer();if(tab==='set')renderPane()};
+function showMinutes(k){const isDay=k==='daily';const isGoal=k==='goal';const cur=isDay?D().goal:isGoal?S.goalMin:S.breakMin;const presets=isDay?[30,60,120,180,240]:isGoal?[0,25,50,90,120]:[0,5,10,15,30];
+  const o=overlay(`<h2>${isDay?'오늘의 목표':isGoal?'타이머':'휴식 타이머'}</h2><div class="hint">${isDay?'하루에 집중할 시간이에요. 채우면 보상 상자가 나오고, 며칠 이어가면 상자가 좋아져요.':isGoal?'끄면 자유 모드예요. 정해두면 시간이 줄어들고 다 채우면 완주 보너스가 붙어요.':'귀항하면 돌아가고, 끝나면 종이 울려요.'}</div><div class="cats" id="minBtns"></div><div class="row"><input type="number" id="minInput" min="0" max="600" value="${cur}"><span class="hint">분</span><span style="flex:1"></span><button class="btn primary" id="minOk">확인</button></div>`);
+  const set=v=>{v=Math.max(0,Math.min(600,Math.round(+v||0)));if(isDay)D().goal=Math.max(10,v);else if(isGoal)S.goalMin=v;else S.breakMin=v;save();o.remove();renderTimer();renderDaily();if(tab==='set')renderPane()};
   const box=o.querySelector('#minBtns');presets.forEach(v=>{const b=document.createElement('button');b.textContent=v?v+'분':'끔';b.setAttribute('aria-selected',v===cur);b.onclick=()=>set(v);box.append(b)});
   o.querySelector('#minOk').onclick=()=>set(o.querySelector('#minInput').value);
   o.addEventListener('click',e=>{if(e.target===o)o.remove()})}
@@ -614,6 +715,7 @@ function slotEl(opts){const s=document.createElement('button');s.className='slot
 function itemDesc(it){const pc=v=>Math.round(v*100)+'%';
   if(it.cat==='rod')return `던지는 속도 +${pc(it.v)}`;if(it.cat==='net')return `두 마리 확률 ${pc(it.v)}`;if(it.cat==='contract')return `판매가 +${pc(it.v)}`;if(it.cat==='bait')return `희귀 확률 +${pc(it.v)} · 한 마리당 1개`;
   if(it.cat==='ally')return `낚싯줄 하나 더 ${pc(it.v.extra)} · ${SPOTS[it.v.spot].name}에서 +10% · ${TIMES[it.v.tod]}에 +8%`;
+  if(it.cat==='treasure')return it.v.chest?'다음 출항에 보물 상자 (15분 이상)':`다음 출항 희귀 확률 +${pc(it.v.luck)}`;
   if(it.cat==='lantern')return `밤·새벽 희귀 확률 +${pc(it.v)}`;if(it.cat==='tank')return it.newTank?'새 어항 1개':`어항 자리 +${it.v}`;
   if(it.cat==='charm'){const n={gold:'판매가',speed:'던지는 속도',luck:'희귀 확률',nightluck:'밤·새벽 희귀 확률',bonus:'완주 보너스'};return Object.entries(it.v).map(([k,v])=>`${n[k]} +${pc(v)}`).join(' · ')}
   return '낚시터 개방'}
@@ -628,6 +730,7 @@ function itemCard(it,mode){
   if(mode==='shop'){
     if(it.cat==='map'){const has=S.maps.includes(it.v);const b=document.createElement('button');b.className='btn primary';b.textContent=has?'개방됨':'구매';b.disabled=has||S.gold<it.price;b.onclick=()=>{if(S.gold>=it.price){S.gold-=it.price;S.maps.push(it.v);save();toast(SPOTS[it.v].name+' 개방!');audio.rare();renderShop();renderTop();renderTimer()}};act.append(b)}
     else if(it.cat==='tank'){const b=document.createElement('button');b.className='btn primary';b.textContent=owned?'설치됨':'구매';b.disabled=owned||S.gold<it.price;b.onclick=()=>{if(S.gold>=it.price){S.gold-=it.price;S.own[it.id]=1;if(it.newTank){S.tanks.push([]);S.tankSel=S.tanks.length-1;toast(`${S.tanks.length}번째 어항이 생겼어요`)}else toast(`어항 자리 ${tankCap()}칸`);save();renderShop();renderTop()}};act.append(b)}
+    else if(it.cat==='treasure'){const b=document.createElement('button');b.className='btn primary';b.textContent=`구매 (보유 ${(S.tmaps||{})[it.id]||0})`;b.disabled=S.gold<it.price;b.onclick=()=>{if(S.gold>=it.price){S.gold-=it.price;S.tmaps=S.tmaps||{};S.tmaps[it.id]=(S.tmaps[it.id]||0)+1;save();toast(it.name+' 구매');renderShop();renderTop();renderTimer()}};act.append(b)}
     else if(it.cat==='bait'){const b=document.createElement('button');b.className='btn primary';b.textContent='20개 구매';b.disabled=S.gold<it.price;b.onclick=()=>{if(S.gold>=it.price){S.gold-=it.price;S.bait[it.id]=(S.bait[it.id]||0)+20;if(!S.eq.bait)S.eq.bait=it.id;save();toast(it.name+' 20개');renderShop();renderTop()}};act.append(b)}
     else{const b=document.createElement('button');b.className='btn primary';b.textContent=owned?(eq?'장착됨':'장착'):'구매';b.disabled=(!owned&&S.gold<it.price)||eq;b.onclick=()=>{if(!owned){if(S.gold<it.price)return;S.gold-=it.price;S.own[it.id]=1;toast(it.name+' 구매!')}S.eq[it.cat]=it.id;save();renderShop();renderTop();renderPane()};act.append(b)}
   }else{
@@ -698,7 +801,7 @@ function renderPane(){
     if(f){const got=S.codex[f.id];const c=document.createElement('div');c.className='card';c.style.gridTemplateColumns='1fr';
       const art=document.createElement('div');art.className='art'+(got?' r'+f.r:'');art.style.cssText='width:200px;height:144px;justify-self:center;position:relative;overflow:hidden';if(got)art.append(Object.assign(document.createElement('i'),{className:'fx'}));const cv=document.createElement('canvas');const xl=got?fishCanvasXL(f):null;cv.width=xl?192:96;cv.height=xl?136:68;cv.style.cssText='width:192px;height:136px';if(got){if(xl)cv.getContext('2d').drawImage(xl,0,4);else drawFishHD(cv.getContext('2d'),f,0,2,1)}else{const x=cv.getContext('2d');x.fillStyle='#2a2434';x.font='40px DotGothic16, monospace';x.textAlign='center';x.fillText('?',48,46)}art.append(cv);
       const info=document.createElement('div');
-      info.innerHTML=got?`<h3 class="r${f.r}">${f.name}</h3><div class="kv"><span>등급</span><span class="r${f.r}">${RAR[f.r]}</span><span>서식지</span><span>${SPOTS[f.spot].name}</span><span>시간대</span><span>${f.time?TIMES[f.time]+'에만':'언제나'}</span><span>크기</span><span>${f.min}~${f.max}cm</span><span>기본가</span><span class="gold">${f.price} G</span><span>잡은 수</span><span>${got.n}마리</span><span>최고 기록</span><span>${got.best}cm${got.best>=f.max-Math.round((f.max-f.min)*0.1)?' ★':''}</span></div>`
+      info.innerHTML=got?`<h3 class="r${f.r}">${f.name}</h3><div class="kv"><span>등급</span><span class="r${f.r}">${RAR[f.r]}</span><span>서식지</span><span>${SPOTS[f.spot].name}</span><span>시간대</span><span>${f.time?TIMES[f.time]+'에만':'언제나'}</span><span>잘 잡히는 날씨</span><span>${WEATHER[fishWeather(f)].name}</span><span>크기</span><span>${f.min}~${f.max}cm</span><span>기본가</span><span class="gold">${f.price} G</span><span>잡은 수</span><span>${got.n}마리</span><span>최고 기록</span><span>${got.best}cm${got.best>=f.max-Math.round((f.max-f.min)*0.1)?' ★':''}</span></div>`
         :`<h3 class="r${f.r}">???</h3><div class="kv"><span>등급</span><span class="r${f.r}">${RAR[f.r]}</span><span>서식지</span><span>${SPOTS[f.spot].name}</span><span>시간대</span><span>${f.time?TIMES[f.time]+'에만':'언제나'}</span></div>`;
       const d=document.createElement('div');d.className='desc';d.textContent=got?f.lore:'아직 낚아본 적 없는 물고기.';c.append(art,info,d);right.append(c)}
     else{right.innerHTML='<div class="hint">첫 물고기를 낚으면 여기에 카드가 생겨요.</div>'}
@@ -710,6 +813,7 @@ function renderPane(){
     let week=0;for(let i=0;i<7;i++){const d=new Date();d.setDate(d.getDate()-i);week+=S.days[dayKey(d)]?.sec||0}
     let streak=0;{const d=new Date();if(!(S.days[dayKey(d)]?.sec))d.setDate(d.getDate()-1);while(S.days[dayKey(d)]?.sec>0){streak++;d.setDate(d.getDate()-1)}}
     const caught=Object.values(S.codex).reduce((a,e)=>a+e.n,0);
+    {const r=document.createElement('div');r.className='row';const a=document.createElement('button');a.className='btn small';a.textContent='이번 주 리포트';a.onclick=()=>showWeekly(0);const b=document.createElement('button');b.className='btn small';b.textContent='지난 주 리포트';b.onclick=()=>showWeekly(-1);r.append(a,b);p.append(r)}
     const st=document.createElement('div');st.className='stats';
     st.innerHTML=[['오늘',fmtH(today)],['이번 주',fmtH(week)],['전체',fmtH(S.totalSec)],['연속',streak+'일'],['출항',S.sessions+'회'],['총 어획',caught+'마리']].map(([k,v])=>`<div class="stat"><div class="k">${k}</div><div class="v">${v}</div></div>`).join('');p.append(st);
     const s1=document.createElement('div');s1.className='sec';s1.textContent='최근 12주';p.append(s1);
@@ -922,7 +1026,7 @@ function renderQuest(p){
   const lv=qRepLv();const f=document.createElement('div');f.className='qfoot';
   f.innerHTML=`<span class="rep">여관 평판 ${[0,1,2,3,4].map(i=>`<i class="${i<lv?'on':''}"></i>`).join('')} · 완료한 의뢰 ${q.done}${lv?` · 의뢰 보상 +${lv*3}%`:''}</span>`;
   if(q.notes.length<Q_SLOTS){const cost=qRerollCost();const s=document.createElement('span');s.className='hint';const b=document.createElement('button');b.className='btn small';b.textContent=`지금 새로 받기 · ${cost.toLocaleString()} G`;b.disabled=S.gold<cost;b.onclick=qReroll;s.append(b);f.append(s)}
-  board.append(f);p.append(board)}
+  board.append(f);p.append(board);renderGoals(p)}
 // haul screen: hand fish over to delivery notices
 function qHaulDeliver(o,sorted,sum){
   if(!S.q)return;const notes=S.q.notes.filter(n=>!n.done&&n.kind==='deliver'&&sorted.some(c=>c.id===n.fish));if(!notes.length)return;
@@ -2030,6 +2134,10 @@ function drawSprite(g,sp,x,y,scale=1){if(sp.__hero){const c=heroCanvas(sp.__hero
 // hero sprites 32x64: muted palette, dithered shading, light from the upper left. One full sprite per class.
 const IPAL={W:'#8a6a48',w:'#5a3f2a',x:'#b08a60',L:'#e8dcc0',G:'#d9b05a',g:'#8a6a2a',R:'#9a2f28',r:'#5e1c18',B:'#3a6a9a',b:'#1f3f60',P:'#d8c8a0',p:'#a08a60',S:'#c8ccd4',s:'#7a8088',K:'#3a3a44',k:'#23232a',N:'#5a8a3a',n:'#365a24',V:'#7a4fb0',v:'#4a2f70',Y:'#fff0a0',C:'#7fd8f0',M:'#e08ab0',T:'#2f7a7a',E:'#f3eee2',e:'#0b0a0e'};
 const ITEM_ART={
+ tm1:['OOOOOOOOOOOOOOO.','OPPPPPPPPPPPPPpO','OPpPPPPPPPPPPPpO','OPPpPPPPRPPRPPpO','OPPPpPPPPRRPPPpO','OPPPPpPPPRRPPPpO','OPPPPPpPRPPRPPpO','OPPPPPPpPPPPPPpO','OPPPPPPPpppPPPpO','OPPPPPPPPPPPPPpO','OppppppppppppppO','OOOOOOOOOOOOOOOO','................','................','................','................'],
+ tm2:['OOOOOOOOOOOOOOO.','OGGGGGGGGGGGGGgO','OGPPPPPPPPPPPGgO','OGPpPPPPRPPRPGgO','OGPPpPPPPRRPPGgO','OGPPPpPPPRRPPGgO','OGPPPPpPRPPRPGgO','OGPPPPPpPPPPPGgO','OGPPPPPPpppPPGgO','OGPPPPPPPPPPPGgO','OGGGGGGGGGGGGGgO','OOOOOOOOOOOOOOOO','................','................','................','................'],
+ tm3:['OOOOOOOOOOOOOOO.','OBBBBBBBBBBBBBbO','OBBBBBLLBBBBBBbO','OBBBBBLBLBBBBBbO','OBBBBBLBBLBBBBbO','OBBBBBLBBBBBBBbO','OBWWWWWWWWWWBBbO','OBBWwwwwwwWBBBbO','OBBBWWWWWWBBBBbO','OBCBBCBBCBBCBBbO','ObbbbbbbbbbbbbbO','OOOOOOOOOOOOOOOO','................','................','................','................'],
+ chest:['................','...OOOOOOOOOO...','..OWxWWWWWWWwO..','.OWWxWWWWWWWwwO.','.OGGGGGGGGGGGGO.','.OWWwWWGGWWwWwO.','.OWWwWGYYGWwWwO.','.OWWwWWGGWWwWwO.','.OWWwWWWWWWwWwO.','.OwwwwwwwwwwwwO.','.OOOOOOOOOOOOOO.','................','................','................','................','................'],
  // rods: shaft from bottom-left to top-right, handle style and tip ornament differ by rod
  rod0:['...............O','..............OW','.............OWw','............OWwO','...........OWwO.','..........OWwO..','.........OWwO...','........OWwO....','.......OWwO.....','......OWwO......','.....OWwO.......','....OWwO........','...OwwO.........','..OwwO..........','.OwwO...........','.OOO............'],
  rod1:['...............O','..............OW','.............OWw','............OWwO','...........OWwO.','..........OWwO..','.........OWwO...','........OWwO....','.......OWwO.....','......OxwO......','.....OWwO.......','....OxwO........','...OWwO...OO....','..OxwO...OKO....','.OWwO....OOO....','.OOO............'],
@@ -2165,7 +2273,7 @@ function buildBase(){
 const WATER={day:{wa:'#2f6f96',wa2:'#285f84',wa3:'#4a8fb4',wa4:'#9fd0e4'},dawn:{wa:'#1d3a52',wa2:'#172f44',wa3:'#2f5672',wa4:'#5f8ca6'},dusk:{wa:'#1a3448',wa2:'#14293a',wa3:'#2b4f68',wa4:'#54809a'},night:{wa:C.wa,wa2:C.wa2,wa3:C.wa3,wa4:C.wa4}};
 function drawWater(g,t){
   const Wc=WATER[timeOfDay()]||WATER.night;
-  const f=Math.floor(t/700)%6;
+  const f=Math.floor(t/(700-depthLvAt(Date.now())*170))%6;
   for(let ty=0;ty<6;ty++)for(let tx=0;tx<9;tx++){if(at(tx,ty)!=='w'&&at(tx,ty)!=='D')continue;const X=tx*T,Y=ty*T;
     g.fillStyle=Wc.wa;g.fillRect(X,Y,T,T);
     for(let i=0;i<T;i+=2)for(let j=0;j<T;j+=2){const n=nz(X+i,Y+j,5);if(n<0.07){g.fillStyle=Wc.wa2;g.fillRect(X+i,Y+j,3,1)}else if(n>0.985){g.fillStyle=Wc.wa3;g.fillRect(X+i,Y+j,2,1)}}
@@ -2307,6 +2415,17 @@ function drawScene(g,t){
   g.globalCompositeOperation='source-over';
   if(td==='night'){flies.forEach(f=>{f.p+=0.012*f.s;const x=f.x+Math.sin(f.p)*10,y=f.y+Math.cos(f.p*.7)*6;const a=.25+.75*Math.abs(Math.sin(f.p*2.1));g.fillStyle=`rgba(210,240,120,${a})`;g.fillRect(Math.floor(x),Math.floor(y),2,2);g.fillStyle=`rgba(210,240,120,${a*.25})`;g.fillRect(Math.floor(x)-2,Math.floor(y)-2,6,6)});g.fillStyle='#fff0b0';g.fillRect(80,34,4,4)}
   if(td==='dawn'||td==='night'){mist.forEach(m=>{m.o+=m.sp;const x=((Math.sin(m.o)*.5+.5)*W*1.4)-W*.2;g.fillStyle=td==='dawn'?'rgba(200,210,230,0.16)':'rgba(120,140,180,0.08)';g.fillRect(Math.floor(x),m.y,120,8);g.fillStyle=td==='dawn'?'rgba(200,210,230,0.08)':'rgba(120,140,180,0.04)';g.fillRect(Math.floor(x)-16,m.y-4,152,16)})}
+  // focus depth: current streaks on the water, motes rising around the hero, pips in the corner
+  const dl=depthLvAt(Date.now());if(dl){g.globalCompositeOperation='screen';for(let i=0;i<dl*16;i++){const sp=40+i%5*14;const x=((i*73+t/1000*sp*(1+dl*0.5))%330)-20;const y=70+(i*37)%120;g.fillStyle=`rgba(150,205,235,${0.10+dl*0.06})`;g.fillRect(Math.round(x),y,10+dl*4,1)}
+    const col=['','150,205,235','190,160,240','245,205,110'][dl];for(let i=0;i<dl*7;i++){const ph=(t/2400+i/(dl*7))%1;const a=Math.sin(ph*Math.PI);g.fillStyle=`rgba(${col},${a*0.9})`;g.fillRect(Math.round(HX+6+(i*11)%24+Math.sin(ph*7+i)*3),Math.round(HY+60-ph*58),2,2)}
+    g.globalCompositeOperation='source-over';for(let i=0;i<3;i++){g.fillStyle=i<dl?`rgb(${col})`:'rgba(0,0,0,0.45)';g.fillRect(W-10-i*8,14,5,5);g.fillStyle='rgba(0,0,0,0.6)';g.fillRect(W-10-i*8,19,5,1)}}
+  // weather
+  const wx=weatherAt(Date.now());
+  if(wx==='rain'||wx==='storm'){const st=wx==='storm';g.fillStyle=td==='night'?'rgba(6,10,24,0.10)':st?'rgba(6,10,24,0.34)':'rgba(10,18,34,0.20)';g.fillRect(0,0,W,H);
+    g.strokeStyle=st?'rgba(190,210,235,0.40)':'rgba(190,210,235,0.28)';g.lineWidth=1;g.beginPath();const n=st?130:70,sl=st?10:4;for(let i=0;i<n;i++){const sp=260+(i%5)*40;const y=(i*53+t/1000*sp)%(H+20)-10;const x=((i*97+(st?t/1000*90:0))%(W+40))-20;g.moveTo(x,y);g.lineTo(x-sl,y+(st?12:9))}g.stroke();
+    g.fillStyle='rgba(205,225,240,0.5)';for(let i=0;i<(st?34:18);i++){const k=(t/380+i*0.37)%1;const x=(i*67)%288,y=60+(i*41)%130;if(at(Math.floor(x/32),Math.floor(y/32))==='w'&&k<0.45)g.fillRect(x-Math.round(k*4),y,1+Math.round(k*8),1)}
+    if(st){const b=Math.floor(t/5200);if(nz(b,3,12)<0.45){const fl=t%5200;if(fl<90||(fl>170&&fl<240)){g.fillStyle='rgba(225,232,255,0.55)';g.fillRect(0,0,W,H)}}}}
+  else if(wx==='fog'){for(let i=0;i<6;i++){const y=14+i*30;const x=((t/1000*(5+i*2)+i*90)%(W+200))-160;g.fillStyle='rgba(205,214,226,0.13)';g.fillRect(Math.round(x),y,190,16);g.fillStyle='rgba(205,214,226,0.08)';g.fillRect(Math.round(x)-30,y-7,260,30)}g.fillStyle='rgba(190,200,214,0.10)';g.fillRect(0,0,W,H)}
   // catch popup: a big fish drawn on the scene; its label is a DOM overlay so Korean text stays crisp
   const bt=t-bite;const pop=$('catchPop');
   if(bite&&bitePop&&bitePop.odd&&bt>=800&&bt<3400){const o=oddById(bitePop.odd);const k=Math.min(1,(bt-800)/200),fade=bt>3000?1-(bt-3000)/400:1;g.globalAlpha=fade;const cw=112,chh=80,cx0=172,cy0=8-Math.floor((1-k)*8);g.fillStyle='rgba(8,6,12,0.9)';g.fillRect(cx0,cy0,cw,chh);g.fillStyle='#b07fe0';g.fillRect(cx0,cy0,cw,2);g.fillRect(cx0,cy0+chh-2,cw,2);g.fillRect(cx0,cy0,2,chh);g.fillRect(cx0+cw-2,cy0,2,chh);drawOdd(g,o,cx0+24,cy0+6,4);g.globalAlpha=1;if(pop){pop.hidden=false;pop.style.opacity=fade;pop.innerHTML=`<b class="r2">${o.name}</b><span>이변</span>`}}
@@ -2388,6 +2507,7 @@ function frame(t){
     if(!left&&!S.brk.rang){S.brk.rang=true;audio.bell();toast('다시 출항할 시간이에요');renderTimer();save()}}
   else if(lastSec!==0){lastSec=0;$('clock').innerHTML=fmtClock(0);$('bigClock').innerHTML=fmtClock(0);bar.hidden=true}
   const tod=timeOfDay();if(tod!==lastTod){lastTod=tod;renderTop();audio.retune()}
+  if(!(S.run)&&Math.floor(t/60000)!==maybeWeeklyMin){maybeWeeklyMin=Math.floor(t/60000);maybeWeekly()}
   if(S.run&&!S.run.pausedAt&&now>nextIdleSay){if(nextIdleSay)say('idle');nextIdleSay=now+rand(180,420)*1000}
   drawScene(cx,reducedMotion?0:t);if(pipOn||pipStream)drawPip();
   const tk=$('tankCanvas');if(tk)drawTank(tk.getContext('2d'),reducedMotion?0:t);
@@ -2413,7 +2533,7 @@ function goalReached(){const R=S.run;if(!R||R.goalDone)return;R.goalDone=true;sa
   const o=overlay(`<h2 style="text-align:center">완주 달성!</h2><div class="hint" style="text-align:center">목표 ${S.goalMin}분을 채웠어요. 귀항하면 완주 보너스가 붙어요.<br>계속 낚시해도 보너스는 유지돼요.</div><div class="row center" style="margin-top:6px"><button class="btn" id="goalGo">계속 낚시</button><button class="btn primary" id="goalEnd">지금 귀항</button></div>`);
   o.querySelector('#goalGo').onclick=()=>o.remove();o.querySelector('#goalEnd').onclick=()=>{o.remove();endRun()}}
 let qTickN=0;qUpdate();
-setInterval(()=>{const now=Date.now();holdPause(now);if(++qTickN%30===0)qUpdate(now);if(S.run){tickFishing(now);qOnTick(now);const s=Math.floor((now-S.run.startAt)/1000);try{const gS=S.goalMin*60;const disp=S.goalMin&&s<gS?gS-s:s;$('clock').innerHTML=fmtClock(disp);$('bigClock').innerHTML=fmtClock(disp);$('status').textContent=statusText()}catch(e){}if(S.goalMin&&s>=S.goalMin*60&&!S.run.goalDone)goalReached()}
+setInterval(()=>{const now=Date.now();holdPause(now);featTick(now);if(++qTickN%30===0)qUpdate(now);if(S.run){tickFishing(now);qOnTick(now);const s=Math.floor((now-S.run.startAt)/1000);try{const gS=S.goalMin*60;const disp=S.goalMin&&s<gS?gS-s:s;$('clock').innerHTML=fmtClock(disp);$('bigClock').innerHTML=fmtClock(disp);$('status').textContent=statusText()}catch(e){}if(S.goalMin&&s>=S.goalMin*60&&!S.run.goalDone)goalReached()}
   else if(S.brk&&!S.brk.rang&&S.brk.endAt<=now){S.brk.rang=true;audio.bell();toast('다시 출항할 시간이에요');renderTimer();save()}},1000);
 
 // ---------- audio ----------
