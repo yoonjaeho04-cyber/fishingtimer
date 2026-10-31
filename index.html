@@ -42,7 +42,7 @@ canvas.scene{display:block;width:100%;aspect-ratio:3/2;max-width:100%;image-rend
 .catchPop{position:absolute;left:59.7%;top:38%;width:39%;display:flex;flex-direction:column;align-items:center;gap:1px;font:10px var(--display);text-shadow:1px 1px 0 #000,-1px 1px 0 #000,1px -1px 0 #000,-1px -1px 0 #000;line-height:1.2}
 .game:not(.compact) .catchPop{font-size:12px}
 .catchPop b{font-weight:400}.catchPop span{color:#bfae88}
-.bubble{position:absolute;left:3%;top:16%;max-width:38%;background:#efe6cf;color:#1a140f;border:2px solid #0b0a0e;box-shadow:2px 2px 0 #000;padding:4px 7px;font-size:11px;line-height:1.35;font-family:var(--body)}
+.bubble{position:absolute;left:3%;top:16%;max-width:29%;background:#efe6cf;color:#1a140f;border:2px solid #0b0a0e;box-shadow:2px 2px 0 #000;padding:4px 7px;font-size:11px;line-height:1.35;font-family:var(--body)}
 .bubble::after{content:"";position:absolute;right:-9px;top:40%;border:5px solid transparent;border-left-color:#0b0a0e;border-right:0}
 .game:not(.compact) .bubble{font-size:13px}
 .bar{width:96px;height:6px;border:1px solid #000;background:#1a1420;box-shadow:0 0 0 1px var(--bronze3);overflow:hidden;margin-top:3px}
@@ -2317,6 +2317,12 @@ function drawDock(g){const p=(x,y,c,w=1,h=1)=>{g.fillStyle=c;g.fillRect(x,y,w,h)
     p(X,Y+3,OUT,T,1);p(X,Y+26,OUT,T,1);p(X,Y+25,C.wd2,T,1);
     if(tx%2===0){p(X+2,Y-4,OUT,8,34);p(X+3,Y-3,C.wd2,6,32);p(X+3,Y-3,C.wd3,2,30);p(X+4,Y-3,C.wd4,1,1);p(X+2,Y+4,C.ir,8,2);p(X+2,Y+20,C.ir,8,2);p(X+3,Y+5,C.ir2,6,1)}}
   p(5*T+31,2*T+3,OUT,1,24);
+  // landing off the dock where the hero stands
+  const LX=96,LY=90,LW=60,LH=24;p(LX,LY+LH,'rgba(0,0,0,0.45)',LW,6);p(LX,LY,C.wd,LW,LH);
+  for(let i=0;i<LW;i+=11)p(LX+i,LY,C.wd2,1,LH);
+  for(let r=0;r<3;r++){const y=LY+r*8;p(LX,y,C.wd3,LW,1);p(LX,y+7,C.wd5,LW,1);for(let i=0;i<LW;i+=4)if(nz(LX+i,y,14+r)>0.55)p(LX+i,y+3+(i%3),C.wd2,2,1)}
+  p(LX-1,LY,OUT,1,LH+1);p(LX+LW,LY-1,OUT,1,LH+2);p(LX,LY+LH,OUT,LW,1);
+  for(const x of [LX+1,LX+LW-9]){p(x,LY+LH-6,OUT,8,16);p(x+1,LY+LH-5,C.wd2,6,14);p(x+1,LY+LH-5,C.wd3,2,13);p(x,LY+LH-2,C.ir,8,2)}
 }
 // props: drawn at 1x and refined to 2x with a bevel pass (lit top-left, shaded bottom-right)
 function refine2x(sp){
@@ -2373,11 +2379,11 @@ const mooringHD={pal:PP,rows:[
 
 const flies=Array.from({length:9},()=>({x:80+Math.random()*200,y:20+Math.random()*160,p:Math.random()*6.28,s:.6+Math.random()*.6}));
 const mist=Array.from({length:5},(_,i)=>({y:30+i*34,o:Math.random()*100,sp:.003+Math.random()*.004}));
-const HX=124,HY=12,BX=208,BY=100;
+const HX=101,HY=36,BX=208,BY=100;
 // where each painted hero's raised hand is (32x64 sprite coords); the rod grip snaps to it. Code-drawn heroes use (29,38).
 const HERO_HAND={rogue:[27,19],mage:[27,26],knight:[28,23],bard:[28,22],druid:[28,24]};
 // the hero stands at the front of the dock, drawn larger than the 32x64 sprite box
-const HS=1.3,HOX=119,HOY=4;
+const HS=1.3,HOX=96,HOY=28;
 const heroOut={};
 // cached scene sprite: pale rim, then a dark outline, then the painting, so the figure separates from any background
 function heroScene(cls){const src=heroCanvas(cls,2);if(heroOut[cls]&&heroOut[cls].src===src)return heroOut[cls].c;
