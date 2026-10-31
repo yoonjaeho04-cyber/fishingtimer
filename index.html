@@ -134,6 +134,7 @@ input[type=number]{width:64px;font-family:var(--display)}
 .newsHead{display:flex;justify-content:space-between;align-items:center;font:14px var(--display);color:var(--gold)}.newsHead b{font-weight:400}.newsHead button{color:var(--muted);font-size:16px;width:22px}
 .newsItem{border-left:3px solid var(--bronze3);padding-left:8px}.newsItem.new{border-left-color:var(--gold)}.newsT{display:flex;justify-content:space-between;gap:8px;font-size:13px}.newsItem.new .newsT span:first-child{color:var(--gold)}
 .newsItem ul{margin:3px 0 0;padding-left:15px;font-size:12px;color:#c4b797;line-height:1.5}
+.haul[hidden]{display:none}
 .tankFold{display:flex;justify-content:space-between;align-items:center;width:100%;margin-top:6px;padding:7px 10px;font:14px var(--display);color:var(--fg);background:#15111b;border:2px solid var(--bronze3)}
 .haul .f.r0,.haul .f.r1,.haul .f.r2,.haul .f.r3,.haul .f.r4{color:var(--fg)}
 .haul .f>.fx{z-index:0}.haul .f>*:not(.fx){position:relative;z-index:1}
@@ -419,21 +420,21 @@ const ITEMS=[
  {id:'rod2',cat:'rod',tier:2,name:'은사 낚싯대',price:900,v:0.25,desc:'손잡이에 은실을 감았다. 손이 시리지 않다.'},
  {id:'rod3',cat:'rod',needMap:1,tier:3,name:'룬 낚싯대',price:3200,v:0.40,desc:'룬이 새겨져 줄이 스스로 감긴다.'},
  {id:'rod4',cat:'rod',needMap:2,tier:3,name:'드워프 강철 낚싯대',price:7000,v:0.52,desc:'산 아래 대장간에서 벼렸다. 무겁지만 휘지 않는다.'},
- {id:'rod5',cat:'rod',needMap:3,tier:4,name:'별빛 낚싯대',price:14000,v:0.65,desc:'별이 진 바다의 유목으로 만들었다.'},
- {id:'rod6',cat:'rod',needMap:4,tier:5,name:'심연의 낚싯대',price:40000,v:0.85,desc:'우물 바닥에서 건져 올린 것. 누가 만들었는지 모른다.'},
- {id:'rod7',cat:'rod',needMap:4,tier:5,name:'세계수 가지',price:90000,v:1.1,desc:'세계수에서 떨어진 가지. 줄을 던지면 물이 먼저 알아챈다.'},
+ {id:'rod5',cat:'rod',needMap:3,tier:4,name:'별빛 낚싯대',price:56000,v:0.65,desc:'별이 진 바다의 유목으로 만들었다.'},
+ {id:'rod6',cat:'rod',needMap:4,tier:5,name:'심연의 낚싯대',price:160000,v:0.85,desc:'우물 바닥에서 건져 올린 것. 누가 만들었는지 모른다.'},
+ {id:'rod7',cat:'rod',needMap:4,tier:5,name:'세계수 가지',price:360000,v:1.1,desc:'세계수에서 떨어진 가지. 줄을 던지면 물이 먼저 알아챈다.'},
  {id:'net0',cat:'net',tier:0,name:'그물 없음',price:0,v:0,desc:''},
  {id:'net1',cat:'net',tier:1,name:'삼베 그물',price:350,v:0.06,desc:'마을 아낙들이 짠 거친 그물.'},
  {id:'net2',cat:'net',tier:2,name:'인어실 그물',price:1400,v:0.13,desc:'인어의 머리카락으로 짰다. 물에 젖지 않는다.'},
  {id:'net3',cat:'net',tier:3,name:'은빛 그물',price:5000,v:0.22,desc:'달빛을 받으면 빛난다.'},
- {id:'net4',cat:'net',tier:4,name:'용비늘 그물',price:16000,v:0.32,desc:'용의 비늘을 엮었다. 불에도 타지 않는다.'},
- {id:'net5',cat:'net',tier:5,name:'유령실 그물',price:45000,v:0.42,desc:'보이지 않는 실로 짜였다. 물고기도 보지 못한다.'},
+ {id:'net4',cat:'net',tier:4,name:'용비늘 그물',price:64000,v:0.32,desc:'용의 비늘을 엮었다. 불에도 타지 않는다.'},
+ {id:'net5',cat:'net',tier:5,name:'유령실 그물',price:180000,v:0.42,desc:'보이지 않는 실로 짜였다. 물고기도 보지 못한다.'},
  {id:'con0',cat:'contract',tier:0,name:'계약 없음',price:0,v:0,desc:''},
  {id:'con1',cat:'contract',tier:1,name:'마을 상인 계약',price:400,v:0.10,desc:'마을 장터에 생선을 댄다.'},
  {id:'con2',cat:'contract',tier:2,name:'고블린 상인 계약',price:1800,v:0.22,desc:'셈이 빠르고 손이 더럽다.'},
  {id:'con3',cat:'contract',tier:3,name:'요정 상단 계약',price:6500,v:0.38,desc:'대금을 꽃잎으로 주려 한다. 거절하면 금화로 준다.'},
- {id:'con4',cat:'contract',tier:4,name:'왕실 어시장 계약',price:22000,v:0.60,desc:'왕의 식탁에 오른다. 인장이 찍혀 있다.'},
- {id:'con5',cat:'contract',tier:5,name:'대성당 공납 계약',price:70000,v:0.85,desc:'성자의 축일에 쓰일 물고기를 댄다. 값을 묻지 않는다.'},
+ {id:'con4',cat:'contract',tier:4,name:'왕실 어시장 계약',price:88000,v:0.60,desc:'왕의 식탁에 오른다. 인장이 찍혀 있다.'},
+ {id:'con5',cat:'contract',tier:5,name:'대성당 공납 계약',price:280000,v:0.85,desc:'성자의 축일에 쓰일 물고기를 댄다. 값을 묻지 않는다.'},
  {id:'bait1',cat:'bait',tier:1,name:'지렁이',price:80,v:0.05,desc:'20마리 묶음. 부두 밑 흙에서 판다.'},
  {id:'bait2',cat:'bait',tier:1,name:'달빛 나방',price:150,v:0.08,desc:'20마리 묶음. 밤 물고기가 좋아한다.'},
  {id:'bait3',cat:'bait',tier:2,name:'반딧불 미끼',price:300,v:0.12,desc:'20개 묶음. 어둠 속에서 깜빡인다.'},
@@ -486,8 +487,8 @@ const ITEMS=[
  {id:'dc4',cat:'deco',tier:4,name:'전리품 판',price:15000,desc:'가장 큰 놈의 머리를 걸어두는 자리.'},
  {id:'map1',cat:'map',tier:2,name:'요정의 샘 지도',price:2500,v:1,desc:'숲 깊은 곳의 샘으로 가는 길.'},
  {id:'map2',cat:'map',tier:3,name:'잉걸불 협곡 지도',price:9000,v:2,desc:'화산 협곡의 뜨거운 물길.'},
- {id:'map3',cat:'map',tier:4,name:'별이 진 바다 해도',price:30000,v:3,desc:'별이 떨어진 바다의 해도.'},
- {id:'map4',cat:'map',tier:5,name:'심연의 우물 지도',price:100000,v:4,desc:'아무도 바닥을 본 적 없는 우물.'},
+ {id:'map3',cat:'map',tier:4,name:'별이 진 바다 해도',price:80000,v:3,desc:'별이 떨어진 바다의 해도.'},
+ {id:'map4',cat:'map',tier:5,name:'심연의 우물 지도',price:400000,v:4,desc:'아무도 바닥을 본 적 없는 우물.'},
 ];
 const item=id=>ITEMS.find(i=>i.id===id);
 const CATS={all:'전체',rod:'낚싯대',net:'그물',bait:'미끼',contract:'계약',charm:'장신구',lantern:'등불',ally:'동료',treasure:'보물지도',tank:'어항',deco:'장식',svc:'전직',map:'지도'};
@@ -839,10 +840,10 @@ function renderPane(){
     const tc=document.createElement('canvas');tc.id='tankCanvas';tc.width=288;tc.height=112;tc.style.cssText='width:100%;aspect-ratio:144/56;image-rendering:pixelated;border:2px solid var(--bronze3);background:#0a1a26;display:block';wrapT.append(tc);
     p.append(wrapT);
     if(!curTank().length){const e=document.createElement('div');e.className='hint';e.textContent='귀항할 때 물고기를 눌러 어항에 넣을 수 있어요. 어항 속 물고기는 매일 조금씩 자라고, 여기서 팔거나 의뢰로 넘길 수 있어요.';p.append(e)}
-    if(curTank().length){const total=curTank().reduce((a,c)=>a+tankSellPrice(c),0),tg=document.createElement('button');tg.className='tankFold';tg.setAttribute('aria-expanded',!!S.tankOpen);tg.innerHTML=`<span>물고기 ${curTank().length}마리</span><span class="hint">전부 팔면 <span class="gold">${total.toLocaleString()} G</span> ${S.tankOpen?'▴':'▾'}</span>`;tg.onclick=()=>{S.tankOpen=!S.tankOpen;save();renderPane()};p.append(tg)}
+    if(curTank().length){const total=curTank().reduce((a,c)=>a+tankSellPrice(c),0),tg=document.createElement('button');tg.className='tankFold';tg.setAttribute('aria-expanded',!!S.tankOpen);tg.innerHTML=`<span>물고기 ${curTank().length}마리</span><span class="hint">합계 <span class="gold">${total.toLocaleString()} G</span> ${S.tankOpen?'▴':'▾'}</span>`;tg.onclick=()=>{S.tankOpen=!S.tankOpen;save();renderPane()};p.append(tg)}
     const list=document.createElement('div');list.className='haul';list.hidden=!S.tankOpen;
     curTank().forEach((c,i)=>{const f=fishById(c.id);const d=document.createElement('div');d.className='f in r'+f.r;d.style.cssText='position:relative;grid-template-columns:96px 1fr auto auto';d.append(Object.assign(document.createElement('i'),{className:'fx'}));const cv=document.createElement('canvas');cv.width=96;cv.height=64;drawFishHD(cv.getContext('2d'),f,0,0,1);
-      const n=document.createElement('span');n.className='r'+f.r;n.textContent=f.name;if(c.big)n.insertAdjacentHTML('beforeend',' <i class="bigStar" title="릴 감기로 끌어올린 큰놈">★</i>');const cm=document.createElement('span');cm.className='hint';cm.textContent=c.cm+'cm · '+new Date(c.at).toLocaleDateString('ko-KR',{month:'numeric',day:'numeric'})+' · '+mktTxt(c.id);
+      const n=document.createElement('span');n.className='r'+f.r;n.textContent=f.name;if(c.big)n.insertAdjacentHTML('beforeend',' <i class="bigStar" title="릴 감기로 끌어올린 큰놈">★</i>');if(c.cm>=f.max)n.insertAdjacentHTML('beforeend',' <i class="bigStar" title="이 어종 최대 크기">♛</i>');const cm=document.createElement('span');cm.className='hint';cm.textContent=c.cm+'cm · '+new Date(c.at).toLocaleDateString('ko-KR',{month:'numeric',day:'numeric'})+' · '+mktTxt(c.id);
       const nm=document.createElement('div');nm.style.cssText='display:flex;flex-direction:column;gap:2px';nm.append(n,cm);
       const acts=document.createElement('div');acts.className='row';acts.style.cssText='gap:4px;justify-content:flex-end';
       const price=tankSellPrice(c);const sb=document.createElement('button');sb.className='btn small';sb.textContent=`팔기 ${price.toLocaleString()}G`;sb.onclick=()=>{S.gold+=price;curTank().splice(i,1);save();toast(`${f.name} +${price.toLocaleString()} G`);renderTop();renderPane()};acts.append(sb);
@@ -1020,7 +1021,7 @@ function showHaul(haul,bonusRate,sec,done,newIds,recs){
   const sum=()=>{const g=sorted.filter(c=>!c.tank&&!c.q).reduce((a,c)=>a+c.price,0);const b=Math.round(g*bonusRate);o.querySelector('#haulGold').textContent='+'+g.toLocaleString()+' G';const hb=o.querySelector('#haulBonus');if(hb)hb.textContent='+'+b.toLocaleString()+' G';return g+b};
   sorted.forEach((c,i)=>{if(c.odd){const od=oddById(c.odd);const d=document.createElement('div');d.className='f';const cv=document.createElement('canvas');cv.width=96;cv.height=64;drawOdd(cv.getContext('2d'),od,24,8,3);const n=document.createElement('span');n.className='r4';n.style.textAlign='left';n.textContent=od.name;const tg=document.createElement('span');tg.className='tag';tg.textContent='이변';d.append(cv,n,document.createElement('span'),tg);list.append(d);setTimeout(()=>{d.classList.add('in');audio.rare()},reduced?0:120+i*200);return}
     const f=fishById(c.id);const d=document.createElement('button');d.className='f r'+f.r;d.type='button';d.append(Object.assign(document.createElement('i'),{className:'fx'}));const cv=document.createElement('canvas');cv.width=96;cv.height=64;drawFishHD(cv.getContext('2d'),f,0,0,1);
-    const n=document.createElement('span');n.className='r'+f.r;n.style.textAlign='left';n.textContent=f.name;const cm=document.createElement('span');cm.className='hint';cm.textContent=c.cm+'cm · '+c.price+'G';const tg=document.createElement('span');tg.className='tag';const base=newIds.includes(c.id)&&!seen.has(c.id)?'NEW':(recs.includes(c.id)&&c.cm===S.codex[c.id].best&&!seen.has('r'+c.id)?'기록':'');seen.add(c.id);if(base==='기록')seen.add('r'+c.id);tg.textContent=base;
+    const n=document.createElement('span');n.className='r'+f.r;n.style.textAlign='left';n.textContent=f.name;const cm=document.createElement('span');cm.className='hint';cm.textContent=c.cm+'cm · '+c.price+'G';const tg=document.createElement('span');tg.className='tag';const base=c.cm>=f.max?'최대어':newIds.includes(c.id)&&!seen.has(c.id)?'NEW':(recs.includes(c.id)&&c.cm===S.codex[c.id].best&&!seen.has('r'+c.id)?'기록':'');seen.add(c.id);if(base==='기록')seen.add('r'+c.id);tg.textContent=base;
     d.append(cv,n,cm,tg);c.el=d;d.onclick=()=>{if(c.q)return;if(!c.tank){const used=curTank().length+sorted.filter(x=>x.tank).length;if(used>=tankCap()){toast('어항이 가득 찼어요');return}}c.tank=!c.tank;d.classList.toggle('tanked',c.tank);tg.textContent=c.tank?'어항':base;sum()};
     list.append(d);setTimeout(()=>{d.classList.add('in');if(f.r>=2)audio.rare()},reduced?0:120+i*200)});
   sum();qHaulDeliver(o,sorted,sum);
@@ -2533,6 +2534,12 @@ function heroScene(cls){const src=heroCanvas(cls,2);if(heroOut[cls]&&heroOut[cls
   const W0=Math.round(32*HS),H0=Math.round(64*HS),P=3;const c=document.createElement('canvas');c.width=W0+P*2;c.height=H0+P*2;const g=c.getContext('2d');g.imageSmoothingEnabled=true;g.imageSmoothingQuality='high';
   const sil=(col,r)=>{const t=document.createElement('canvas');t.width=c.width;t.height=c.height;const x=t.getContext('2d');x.imageSmoothingEnabled=true;for(let dx=-r;dx<=r;dx++)for(let dy=-r;dy<=r;dy++)if(dx*dx+dy*dy<=r*r+1)x.drawImage(src,P+dx,P+dy,W0,H0);x.globalCompositeOperation='source-in';x.fillStyle=col;x.fillRect(0,0,t.width,t.height);g.drawImage(t,0,0)};
   sil('rgba(255,236,200,0.30)',2);sil('rgba(11,10,14,1)',1);g.drawImage(src,P,P,W0,H0);heroOut[cls]={src,c};return c}
+// same treatment for companions: sharp downscale from the large painting with a dark outline and pale rim
+const allyOut={};
+function allyScene(id,h0){const src=allyImg[id+'@2']||allyImg[id];if(allyOut[id]&&allyOut[id].src===src)return allyOut[id].c;
+  const W0=Math.round(src.width*h0/src.height),P=2;const c=document.createElement('canvas');c.width=W0+P*2;c.height=h0+P*2;const g=c.getContext('2d');g.imageSmoothingEnabled=true;g.imageSmoothingQuality='high';
+  const sil=(col,r)=>{const t=document.createElement('canvas');t.width=c.width;t.height=c.height;const x=t.getContext('2d');x.imageSmoothingEnabled=true;x.imageSmoothingQuality='high';for(let dx=-r;dx<=r;dx++)for(let dy=-r;dy<=r;dy++)if(dx*dx+dy*dy<=r*r+1)x.drawImage(src,P+dx,P+dy,W0,h0);x.globalCompositeOperation='source-in';x.fillStyle=col;x.fillRect(0,0,t.width,t.height);g.drawImage(t,0,0)};
+  sil('rgba(255,236,200,0.30)',2);sil('rgba(11,10,14,1)',1);g.drawImage(src,P,P,W0,h0);allyOut[id]={src,c};return c}
 function drawHero(g,y){const c=heroScene(S.char||'rogue');g.imageSmoothingEnabled=false;g.drawImage(c,HOX-3,y-3)}
 const handPos=()=>{const c=S.char||'rogue';return (heroImg&&heroImg[c]&&HERO_HAND[c])||[29,38]};
 function drawScene(g,t){
@@ -2549,7 +2556,7 @@ function drawScene(g,t){
   prop(g,reeds,20,156);prop(g,reeds,44,172);
   if(eqLn){drawSprite(g,{rows:lanternHD.rows.slice(17),pal:PP},72,45);item2(eqLn,66,24)}else drawSprite(g,lanternHD,72,28);
   if(eqCh)item2(eqCh,26,54);
-  const eqAl=item(S.eq.ally);const alIm=eqAl&&(allyImg[eqAl.id]);if(alIm){const ab=Math.sin(t/(eqAl.id==='al2'?700:1400))*(eqAl.id==='al2'?2:0.6);const h=eqAl.id==='al2'?44:30,w=alIm.width*h/alIm.height;g.fillStyle='rgba(0,0,0,0.35)';g.fillRect(HX-26-w/2,HY+72,w*0.8,2);g.imageSmoothingEnabled=true;g.drawImage(alIm,HX-22-w,HY+74-h+ab-(eqAl.id==='al2'?4:0),w,h);g.imageSmoothingEnabled=false;if(allyLv(eqAl.id)>=3&&Math.floor(t/2500)%3===0){const k=(t%2500)/2500;g.fillStyle=`rgba(232,110,150,${1-k})`;const x=HX-30,y=HY+40-k*16;g.fillRect(x,y,2,2);g.fillRect(x+3,y,2,2);g.fillRect(x+1,y+2,3,1);g.fillRect(x+2,y+3,1,1)}}
+  const eqAl=item(S.eq.ally);const alIm=eqAl&&(allyImg[eqAl.id]);const allyC=alIm&&allyScene(eqAl.id,eqAl.id==='al2'?52:40);const paintAlly=()=>{const ab=Math.round(Math.sin(t/(eqAl.id==='al2'?700:1400))*(eqAl.id==='al2'?2:0.6));g.imageSmoothingEnabled=false;g.drawImage(allyC,Math.round(HX-20-allyC.width),HY+78-allyC.height+ab-(eqAl.id==='al2'?4:0))};if(alIm){const w=allyC.width;g.fillStyle='rgba(0,0,0,0.35)';g.fillRect(HX-22-w*0.9,HY+73,w*0.8,2);paintAlly();if(allyLv(eqAl.id)>=3&&Math.floor(t/2500)%3===0){const k=(t%2500)/2500;g.fillStyle=`rgba(232,110,150,${1-k})`;const x=HX-30,y=HY+40-k*16;g.fillRect(x,y,2,2);g.fillRect(x+3,y,2,2);g.fillRect(x+1,y+2,3,1);g.fillRect(x+2,y+3,1,1)}}
   else if(eqAl&&ALLY_ART[eqAl.id]){const ab=(Math.floor(t/900)%2);g.fillStyle='rgba(0,0,0,0.35)';g.fillRect(HX-28,HY+62,16,2);const ac=propCache.get('ally:'+eqAl.id)||(()=>{const c=refine2x(ALLY_ART[eqAl.id]);propCache.set('ally:'+eqAl.id,c);return c})();g.drawImage(ac,HX-34,HY+32+ab)}
   Object.keys(S.regions||{}).forEach(i=>{const c=itemCanvas(item('dr'+i));g.imageSmoothingEnabled=false;if(c)g.drawImage(c,112+i*9,8,16,16)});
   Object.entries(S.deco||{}).forEach(([id,on])=>{if(on&&DECO_AT[id])item2(item(id),DECO_AT[id][0],DECO_AT[id][1])});
@@ -2600,7 +2607,7 @@ function drawScene(g,t){
   if(td==='night'){flies.forEach(f=>{f.p+=0.012*f.s;const x=f.x+Math.sin(f.p)*10,y=f.y+Math.cos(f.p*.7)*6;const a=.25+.75*Math.abs(Math.sin(f.p*2.1));g.fillStyle=`rgba(210,240,120,${a})`;g.fillRect(Math.floor(x),Math.floor(y),2,2);g.fillStyle=`rgba(210,240,120,${a*.25})`;g.fillRect(Math.floor(x)-2,Math.floor(y)-2,6,6)});g.fillStyle='#fff0b0';g.fillRect(80,34,4,4)}
   if(td==='dawn'||td==='night'){mist.forEach(m=>{m.o+=m.sp;const x=((Math.sin(m.o)*.5+.5)*W*1.4)-W*.2;g.fillStyle=td==='dawn'?'rgba(200,210,230,0.16)':'rgba(120,140,180,0.08)';g.fillRect(Math.floor(x),m.y,120,8);g.fillStyle=td==='dawn'?'rgba(200,210,230,0.08)':'rgba(120,140,180,0.04)';g.fillRect(Math.floor(x)-16,m.y-4,152,16)})}
   // keep the hero readable in the dark: redraw over the lighting at partial strength
-  if(td!=='day'){g.globalAlpha=td==='night'?0.62:0.4;drawHero(g,HOY+bob);g.globalAlpha=1}
+  if(td!=='day'){g.globalAlpha=td==='night'?0.62:0.4;drawHero(g,HOY+bob);g.globalAlpha=td==='night'?0.8:0.5;if(alIm)paintAlly();g.globalAlpha=1}
   // focus depth: current streaks on the water, motes rising around the hero, pips in the corner
   const dl=depthLvAt(Date.now());if(dl){g.globalCompositeOperation='screen';for(let i=0;i<dl*16;i++){const sp=40+i%5*14;const x=((i*73+t/1000*sp*(1+dl*0.5))%330)-20;const y=70+(i*37)%120;g.fillStyle=`rgba(150,205,235,${0.10+dl*0.06})`;g.fillRect(Math.round(x),y,10+dl*4,1)}
     const col=['','150,205,235','190,160,240','245,205,110'][dl];for(let i=0;i<dl*7;i++){const ph=(t/2400+i/(dl*7))%1;const a=Math.sin(ph*Math.PI);g.fillStyle=`rgba(${col},${a*0.9})`;g.fillRect(Math.round(HX+6+(i*11)%24+Math.sin(ph*7+i)*3),Math.round(HY+60-ph*58),2,2)}
